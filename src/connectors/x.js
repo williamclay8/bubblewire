@@ -6,7 +6,7 @@ export function startXConnector(hub, env = process.env) {
   const bearerToken = env.X_BEARER_TOKEN;
   if (!bearerToken) {
     hub.setSourceStatus("x", {
-      state: "demo",
+      state: "missing",
       detail: "missing X_BEARER_TOKEN for filtered stream"
     });
     return { stop() {} };

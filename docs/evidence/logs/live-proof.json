@@ -1,0 +1,202 @@
+{
+  "generatedAt": "2026-06-04T21:01:03.140Z",
+  "baseUrl": "http://127.0.0.1:3101",
+  "checks": [
+    {
+      "name": "before runtime is live-only",
+      "status": "pass",
+      "runtime": {
+        "demoEnabled": false,
+        "demoMode": "off",
+        "demoRunning": false,
+        "liveOnly": true
+      },
+      "totalMessages": 0,
+      "demoMessages": 0
+    },
+    {
+      "name": "/demo-spike.json rejects synthetic input",
+      "status": 409,
+      "body": {
+        "ok": false,
+        "error": "demo disabled by DEMO_MODE=off"
+      }
+    },
+    {
+      "name": "/demo-start.json rejects synthetic input",
+      "status": 409,
+      "body": {
+        "ok": false,
+        "error": "demo disabled by DEMO_MODE=off",
+        "running": false
+      }
+    },
+    {
+      "name": "/inject.json rejects synthetic input",
+      "status": 409,
+      "body": {
+        "ok": false,
+        "error": "synthetic feed injection disabled by DEMO_MODE=off"
+      }
+    },
+    {
+      "name": "after runtime is live-only",
+      "status": "pass",
+      "runtime": {
+        "demoEnabled": false,
+        "demoMode": "off",
+        "demoRunning": false,
+        "liveOnly": true
+      },
+      "totalMessages": 0,
+      "demoMessages": 0
+    },
+    {
+      "name": "live-only smoke",
+      "status": "pass"
+    }
+  ],
+  "snapshots": {
+    "healthz": {
+      "ok": true,
+      "service": "bubblewire",
+      "uptimeSeconds": 36,
+      "checkedAt": "2026-06-04T21:01:03.176Z"
+    },
+    "before": {
+      "messages": [],
+      "stats": {
+        "totalMessages": 0,
+        "duplicatesDropped": 0,
+        "startedAt": "2026-06-04T21:00:27.717Z",
+        "sources": {
+          "twitch": {
+            "count": 0,
+            "lastMessageAt": null
+          },
+          "x": {
+            "count": 0,
+            "lastMessageAt": null
+          },
+          "kick": {
+            "count": 0,
+            "lastMessageAt": null
+          }
+        }
+      },
+      "status": {
+        "twitch": {
+          "state": "missing",
+          "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        },
+        "x": {
+          "state": "missing",
+          "detail": "missing X_BEARER_TOKEN for filtered stream",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        },
+        "kick": {
+          "state": "webhook-ready",
+          "detail": "POST Kick chat.message.sent events to /kick.webhook",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        }
+      },
+      "sources": {
+        "twitch": {
+          "label": "Twitch",
+          "color": "#9146ff",
+          "home": "https://www.twitch.tv"
+        },
+        "x": {
+          "label": "X",
+          "color": "#f4f2ea",
+          "home": "https://x.com"
+        },
+        "kick": {
+          "label": "Kick",
+          "color": "#53fc18",
+          "home": "https://kick.com"
+        },
+        "demo": {
+          "label": "Demo",
+          "color": "#d8a84a",
+          "home": ""
+        }
+      },
+      "runtime": {
+        "demoEnabled": false,
+        "demoMode": "off",
+        "demoRunning": false,
+        "liveOnly": true
+      }
+    },
+    "after": {
+      "messages": [],
+      "stats": {
+        "totalMessages": 0,
+        "duplicatesDropped": 0,
+        "startedAt": "2026-06-04T21:00:27.717Z",
+        "sources": {
+          "twitch": {
+            "count": 0,
+            "lastMessageAt": null
+          },
+          "x": {
+            "count": 0,
+            "lastMessageAt": null
+          },
+          "kick": {
+            "count": 0,
+            "lastMessageAt": null
+          }
+        }
+      },
+      "status": {
+        "twitch": {
+          "state": "missing",
+          "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        },
+        "x": {
+          "state": "missing",
+          "detail": "missing X_BEARER_TOKEN for filtered stream",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        },
+        "kick": {
+          "state": "webhook-ready",
+          "detail": "POST Kick chat.message.sent events to /kick.webhook",
+          "updatedAt": "2026-06-04T21:00:27.718Z"
+        }
+      },
+      "sources": {
+        "twitch": {
+          "label": "Twitch",
+          "color": "#9146ff",
+          "home": "https://www.twitch.tv"
+        },
+        "x": {
+          "label": "X",
+          "color": "#f4f2ea",
+          "home": "https://x.com"
+        },
+        "kick": {
+          "label": "Kick",
+          "color": "#53fc18",
+          "home": "https://kick.com"
+        },
+        "demo": {
+          "label": "Demo",
+          "color": "#d8a84a",
+          "home": ""
+        }
+      },
+      "runtime": {
+        "demoEnabled": false,
+        "demoMode": "off",
+        "demoRunning": false,
+        "liveOnly": true
+      }
+    }
+  },
+  "result": "pass"
+}

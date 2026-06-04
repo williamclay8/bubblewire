@@ -30,9 +30,13 @@ X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_T
 
 Kick: Kick sends real-time chat through webhooks. Expose this app with a public tunnel and point Kick to `KICK_WEBHOOK_PUBLIC_URL/kick.webhook`. The server also keeps `/webhooks/kick` for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
 
+Set `DEMO_MODE=off` on Render for a true live-only public feed. When disabled, Bubblewire stops generating demo messages, disables the `Spike` control, and marks missing provider credentials as `missing` instead of pretending they are live.
+
 ## Demo Mode
 
 Demo events are clearly marked as `demo`. Provider status pills do not pretend credentials exist: Twitch and X show demo/missing-credential status until live env vars are present, while Kick shows webhook-ready until the first webhook arrives.
+
+Use `DEMO_MODE=on` locally or for judge-safe demos. Use `DEMO_MODE=off` for production/live-only monitoring.
 
 Useful local controls:
 
@@ -58,11 +62,14 @@ Current local checks:
 npm test
 npm run check
 npm run proof
+npm run proof:live # with DEMO_MODE=off server running
 ```
 
 The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, hub dedupe, source stats, and SSE subscriber behavior.
 
 `npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms `/status.json` responds.
+
+`npm run proof:live` writes `docs/evidence/logs/live-proof.json` and confirms `DEMO_MODE=off` rejects synthetic demo/inject routes without creating demo messages.
 
 ## Deployment
 

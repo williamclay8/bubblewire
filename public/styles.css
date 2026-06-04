@@ -295,6 +295,12 @@ kbd {
   box-shadow: 0 0 6px rgba(216, 168, 74, 0.6);
 }
 
+[data-state="missing"] .status-dot,
+[data-state="idle"] .status-dot {
+  background: var(--muted);
+  box-shadow: none;
+}
+
 [data-state="connecting"] .status-dot,
 [data-state="retry"] .status-dot {
   background: var(--gold);

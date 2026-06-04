@@ -1,6 +1,6 @@
 {
   "command": "render blueprints validate render.yaml --output json",
-  "recordedAt": "2026-06-04T18:43:34Z",
+  "recordedAt": "2026-06-04T21:02:01Z",
   "result": {
     "plan": {
       "services": [

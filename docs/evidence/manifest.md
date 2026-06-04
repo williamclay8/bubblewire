@@ -2,7 +2,7 @@
 
 ## Claim
 
-Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + X + Kick with source labels, demo-safe operation, server-side live adapter paths, and judge-readable evidence.
+Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + X + Kick with source labels, demo-safe operation, a live-only production mode, server-side live adapter paths, and judge-readable evidence.
 
 ## Target
 
@@ -15,9 +15,8 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
 - GitHub repo: `https://github.com/williamclay8/bubblewire`
-- Verified app-code commit: `b7e84d1` (`fix live render routes`)
 - Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
-- Render deploy: `dep-d8gstqernols73b3fmbg`
+- Latest commit/deploy IDs are recorded in the final Lumi closeout for each release run.
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
 - Submitted: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
 - Date: 2026-06-04
@@ -26,12 +25,15 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 7/7 tests | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 8/8 tests | `docs/evidence/logs/proof.json` |
 | `npm run check` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
+| `npm run proof:live` | Pass | `docs/evidence/logs/live-proof.json` |
 | `render blueprints validate render.yaml --output json` | Pass | `docs/evidence/logs/render-blueprint-validation.json` |
 
 `npm run proof` also posts a Kick `chat.message.sent`-shaped webhook payload to `/kick.webhook`, triggers a demo spike, and confirms the local status endpoint responds through `/status.json`.
+
+`npm run proof:live` confirms `DEMO_MODE=off` reports `runtime.liveOnly: true`, rejects `/demo-spike.json`, `/demo-start.json`, and `/inject.json` with HTTP 409, and leaves the feed free of demo messages after those rejected requests.
 
 ## Browser Evidence
 
@@ -49,11 +51,11 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 
 ## Live Adapter Matrix
 
-| Source | Implemented live path | Demo-safe fallback |
+| Source | Implemented live path | Demo-safe/live-only fallback |
 | --- | --- | --- |
-| Twitch | EventSub `channel.chat.message`; IRC fallback parser and connector | Clearly labeled demo feed when Twitch env vars are absent |
-| X | X API v2 filtered stream via server-side bearer token | Clearly labeled demo feed when `X_BEARER_TOKEN` is absent |
-| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Webhook-ready status plus demo feed until a webhook arrives |
+| Twitch | EventSub `channel.chat.message`; IRC fallback parser and connector | Demo mode emits labeled demo messages; live-only mode marks missing credentials as `missing` |
+| X | X API v2 filtered stream via server-side bearer token | Demo mode emits labeled demo messages; live-only mode marks missing `X_BEARER_TOKEN` as `missing` |
+| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Demo mode emits labeled demo messages; live-only mode stays `webhook-ready` until a webhook arrives |
 
 ## Redaction And Secret Boundary
 
@@ -65,12 +67,12 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 
 ## Lumi Hygiene
 
-- Local changes: no after this evidence receipt is committed
-- Committed: yes, verified app-code commit `b7e84d1`
-- Pushed: yes, `origin/main`
-- Deployed/live: yes, Render service `bubblewire-challenge`, deploy `dep-d8gstqernols73b3fmbg`
+- Local changes: tracked in the active release run until committed
+- Committed: tracked in the final Lumi closeout for the release run
+- Pushed: tracked in the final Lumi closeout for the release run
+- Deployed/live: tracked in the final Lumi closeout for the release run; Render service `bubblewire-challenge`
 - Entry submitted: yes, Google Form confirmation recorded 2026-06-04 14:42 CDT
-- Local server: running at `http://127.0.0.1:3000` during local evidence capture
+- Local server: used for demo-mode and live-only evidence capture, then stopped
 
 ## Live Smoke
 
@@ -80,7 +82,8 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 | `https://bubblewire-challenge.onrender.com/status.json` | HTTP 200, unified status and message payload |
 | `https://bubblewire-challenge.onrender.com/overlay.html` | HTTP 200, overlay HTML |
 | `https://bubblewire-challenge.onrender.com/events.stream` | HTTP 200, `text/event-stream` snapshot/messages |
-| `POST https://bubblewire-challenge.onrender.com/demo-spike.json` | HTTP 200, demo spike accepted |
+| `POST https://bubblewire-challenge.onrender.com/demo-spike.json` | Expected HTTP 409 when `DEMO_MODE=off` |
+| `POST https://bubblewire-challenge.onrender.com/inject.json` | Expected HTTP 409 when `DEMO_MODE=off` |
 | `https://bubblewire-challenge.onrender.com/export.ndjson` | HTTP 200, NDJSON export |
 | `POST https://bubblewire-challenge.onrender.com/kick.webhook` | HTTP 200, Kick webhook payload accepted |
 

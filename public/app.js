@@ -14,6 +14,7 @@ const state = {
   status: {},
   stats: { totalMessages: 0, duplicatesDropped: 0, sources: {} },
   sources: {},
+  runtime: { demoEnabled: true, demoMode: "on", demoRunning: false, liveOnly: false },
   filter: "all",
   query: "",
   priorityOnly: false,
@@ -109,8 +110,16 @@ function bindControls() {
 
   els.pauseButton?.addEventListener("click", togglePause);
   els.spikeButton?.addEventListener("click", async () => {
-    await postJson("/demo-spike.json");
-    toast("spike injected ×18");
+    if (state.runtime.demoEnabled === false) {
+      toast("demo disabled — live-only feed", "warn");
+      return;
+    }
+    try {
+      await postJson("/demo-spike.json");
+      toast("spike injected ×18");
+    } catch {
+      toast("demo spike rejected", "err");
+    }
   });
   els.exportButton?.addEventListener("click", () => {
     toast("exporting feed.ndjson");
@@ -264,6 +273,7 @@ function applySnapshot(snapshot) {
   state.status = snapshot.status || {};
   state.stats = snapshot.stats || state.stats;
   state.sources = snapshot.sources || {};
+  state.runtime = snapshot.runtime || state.runtime;
   renderAll();
 }
 
@@ -321,6 +331,7 @@ function renderStats() {
     if (state.filter !== "all") summary += ` · ${state.filter}`;
     if (state.query) summary += ` · "${state.query.slice(0, 14)}"`;
     if (state.paused) summary += " · paused";
+    if (state.runtime.liveOnly) summary += " · live-only";
     els.feedSummary.textContent = summary;
   }
 
@@ -333,6 +344,7 @@ function renderStats() {
       ? `Resume${state.unread ? ` (${state.unread})` : ""}`
       : "Pause";
   }
+  renderDemoControls();
 
   document.querySelectorAll("[data-source-filter]").forEach((button) => {
     const target = button.querySelector("[data-count]");
@@ -343,6 +355,15 @@ function renderStats() {
   });
 
   renderTape(total, visible);
+}
+
+function renderDemoControls() {
+  if (!els.spikeButton) return;
+  const enabled = state.runtime.demoEnabled !== false;
+  els.spikeButton.disabled = !enabled;
+  els.spikeButton.textContent = enabled ? "Spike" : "Live only";
+  els.spikeButton.title = enabled ? "Inject a demo burst" : "Demo disabled by DEMO_MODE=off";
+  els.spikeButton.setAttribute("aria-disabled", String(!enabled));
 }
 
 function renderTape(total, visible) {
@@ -780,11 +801,13 @@ function markMatches(escapedText, query) {
 /* ---------- helpers ---------- */
 
 async function postJson(url, body = {}) {
-  await fetch(url, {
+  const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
+  if (!response.ok) throw new Error(`${url} returned HTTP ${response.status}`);
+  return response.json();
 }
 
 function sourceColor(source) {

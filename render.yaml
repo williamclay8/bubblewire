@@ -11,5 +11,7 @@ services:
         value: 0.0.0.0
       - key: NODE_VERSION
         value: 22
+      - key: DEMO_MODE
+        value: off
       - key: PORT
         sync: false

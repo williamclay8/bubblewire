@@ -14,6 +14,7 @@ const rootDir = normalize(join(__dirname, ".."));
 const publicDir = join(rootDir, "public");
 const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
+const demoEnabled = isDemoModeEnabled(process.env.DEMO_MODE);
 const hub = createFeedHub();
 const demo = createDemoConnector(hub);
 const connectors = [];
@@ -27,7 +28,14 @@ const securityHeaders = {
 
 connectors.push(startTwitchConnector(hub));
 connectors.push(startXConnector(hub));
-demo.start();
+if (demoEnabled) {
+  demo.start();
+} else {
+  hub.setSourceStatus("kick", {
+    state: "webhook-ready",
+    detail: "POST Kick chat.message.sent events to /kick.webhook"
+  });
+}
 
 const server = http.createServer(async (request, response) => {
   try {
@@ -38,7 +46,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "GET" && matches(pathname, "/api/status", "/status.json")) {
-      return sendJson(response, hub.snapshot());
+      return sendJson(response, appSnapshot());
     }
 
     if (request.method === "GET" && pathname === "/healthz") {
@@ -82,6 +90,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && matches(pathname, "/api/inject", "/inject.json")) {
+      if (!demoEnabled) {
+        return sendJson(response, {
+          ok: false,
+          error: "synthetic feed injection disabled by DEMO_MODE=off"
+        }, 409);
+      }
       const payload = await readJsonBody(request);
       const message = createInjectedMessage(payload);
       hub.addMessage(message);
@@ -89,6 +103,13 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && matches(pathname, "/api/demo/start", "/demo-start.json")) {
+      if (!demoEnabled) {
+        return sendJson(response, {
+          ok: false,
+          error: "demo disabled by DEMO_MODE=off",
+          running: false
+        }, 409);
+      }
       demo.start();
       return sendJson(response, { ok: true, running: demo.isRunning() });
     }
@@ -99,6 +120,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && matches(pathname, "/api/demo/spike", "/demo-spike.json")) {
+      if (!demoEnabled) {
+        return sendJson(response, {
+          ok: false,
+          error: "demo disabled by DEMO_MODE=off"
+        }, 409);
+      }
       demo.pushSpike(18);
       return sendJson(response, { ok: true });
     }
@@ -124,7 +151,7 @@ function handleEvents(response) {
     ...securityHeaders
   });
   response.write("retry: 3000\n\n");
-  sendSse(response, "snapshot", hub.snapshot());
+  sendSse(response, "snapshot", appSnapshot());
 
   const unsubscribe = hub.subscribe((event) => {
     sendSse(response, event.type, event);
@@ -161,6 +188,23 @@ async function serveStatic(request, response) {
     response.writeHead(404, securityHeaders);
     response.end("Not found");
   }
+}
+
+function appSnapshot() {
+  return {
+    ...hub.snapshot(),
+    runtime: {
+      demoEnabled,
+      demoMode: demoEnabled ? "on" : "off",
+      demoRunning: demo.isRunning(),
+      liveOnly: !demoEnabled
+    }
+  };
+}
+
+function isDemoModeEnabled(value = "on") {
+  const normalized = String(value || "on").trim().toLowerCase();
+  return !["0", "false", "live", "no", "off"].includes(normalized);
 }
 
 function getPathname(request) {

@@ -9,6 +9,7 @@
     "preview": "node src/server.js",
     "lint": "npm run check",
     "proof": "node scripts/proof.mjs",
+    "proof:live": "node scripts/proof-live.mjs",
     "test": "node --test",
     "check": "node --check src/server.js && node --check public/app.js"
   },

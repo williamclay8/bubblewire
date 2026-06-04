@@ -154,7 +154,7 @@ function startTwitchIrcConnector(hub, env) {
 
   if (!username || !token || channels.length === 0) {
     hub.setSourceStatus("twitch", {
-      state: "demo",
+      state: "missing",
       detail: "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS"
     });
     return { stop() {} };
