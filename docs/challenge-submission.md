@@ -7,6 +7,7 @@ Bubblewire merges Twitch, X, and Kick activity into one reverse-chronological op
 GitHub repository: `https://github.com/williamclay8/bubblewire`
 Public app: `https://bubblewire-challenge.onrender.com`
 Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
+Demo video: `https://youtu.be/gvXG5qOaBTQ`
 
 ## Why It Should Win
 
@@ -18,15 +19,17 @@ Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
 ## Demo Script
 
 1. Open `https://bubblewire-challenge.onrender.com` and show the source status strip.
-3. Click `Spike`; Twitch, X, and Kick messages arrive in one feed with labels.
-4. Filter to one source, search a user, enable priority-only, then pause/resume.
-5. Select a message and show the normalized raw payload.
-6. Pin a message and export NDJSON.
-7. Open `https://bubblewire-challenge.onrender.com/overlay.html`; fire another spike and show readable source chips.
+2. Click `Spike`; Twitch, X, and Kick messages arrive in one feed with labels.
+3. Filter to one source, search a user, enable priority-only, then pause/resume.
+4. Select a message and show the normalized raw payload.
+5. Pin a message and export NDJSON.
+6. Open `https://bubblewire-challenge.onrender.com/overlay.html`; fire another spike and show readable source chips.
 
 ## Video Asset
 
-Use `docs/demo-video-storyboard.md` to record a 60-90 second demo after the public Render URL is live.
+Uploaded YouTube demo: `https://youtu.be/gvXG5qOaBTQ`
+
+Local source video: `docs/evidence/video/bubblewire-demo.webm`
 
 ## Deployment Handoff
 
@@ -38,6 +41,12 @@ curl -sS https://bubblewire-challenge.onrender.com/status.json
 ```
 
 `/events.stream`, `/demo-spike.json`, `/export.ndjson`, and `/overlay.html` are the public-safe live routes used by the browser UI.
+
+Latest verified Render deploy: `dep-d8gstqernols73b3fmbg` for pushed commit `b7e84d1`.
+
+Live smoke passed on 2026-06-04 for `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html`.
+
+Challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT.
 
 ## Live Integration Matrix
 
@@ -55,4 +64,4 @@ curl -sS https://bubblewire-challenge.onrender.com/status.json
 
 ## Lumi Hygiene
 
-As of this file, the app has a Render service and public URL; final live verification should reference the latest pushed commit and deploy receipt.
+Verified app-code commit `b7e84d1` is pushed, Render deploy `dep-d8gstqernols73b3fmbg` is live, demo video `https://youtu.be/gvXG5qOaBTQ` is unlisted/reachable, and the Google Form entry is submitted.

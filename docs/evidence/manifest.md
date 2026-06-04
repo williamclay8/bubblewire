@@ -9,13 +9,17 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Local app: `http://127.0.0.1:3000`
 - Public app: `https://bubblewire-challenge.onrender.com`
 - Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
+- Public demo video: `https://youtu.be/gvXG5qOaBTQ`
 - Public health check: `https://bubblewire-challenge.onrender.com/healthz`
 - Local overlay: `http://127.0.0.1:3000/overlay.html`
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
 - GitHub repo: `https://github.com/williamclay8/bubblewire`
-- Commit: see `git log --oneline -1` for the current pushed evidence commit
+- Verified app-code commit: `b7e84d1` (`fix live render routes`)
 - Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
+- Render deploy: `dep-d8gstqernols73b3fmbg`
+- Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
+- Submitted: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
 - Date: 2026-06-04
 
 ## Verification Commands
@@ -39,7 +43,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 
 ## Demo Recording Plan
 
-The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready to use after the public Render URL is live.
+The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source is `docs/evidence/video/bubblewire-demo.webm`, generated from live Render frames in `docs/evidence/video-frames/`.
 
 ## Live Adapter Matrix
 
@@ -59,11 +63,24 @@ The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready t
 
 ## Lumi Hygiene
 
-- Local changes: yes, route aliases and docs are awaiting commit during this capture
-- Committed: pending this evidence refresh
-- Pushed: pending this evidence refresh; previous pushed repo is `https://github.com/williamclay8/bubblewire`
-- Deployed/live: initial Render deploy verified for `/` and `/healthz`; final alias deploy verification pending
-- Local server: running at `http://127.0.0.1:3000` during this evidence capture
+- Local changes: no after this evidence receipt is committed
+- Committed: yes, verified app-code commit `b7e84d1`
+- Pushed: yes, `origin/main`
+- Deployed/live: yes, Render service `bubblewire-challenge`, deploy `dep-d8gstqernols73b3fmbg`
+- Entry submitted: yes, Google Form confirmation recorded 2026-06-04 14:42 CDT
+- Local server: running at `http://127.0.0.1:3000` during local evidence capture
+
+## Live Smoke
+
+| Public endpoint | Result |
+| --- | --- |
+| `https://bubblewire-challenge.onrender.com/healthz` | HTTP 200, JSON health payload |
+| `https://bubblewire-challenge.onrender.com/status.json` | HTTP 200, unified status and message payload |
+| `https://bubblewire-challenge.onrender.com/overlay.html` | HTTP 200, overlay HTML |
+| `https://bubblewire-challenge.onrender.com/events.stream` | HTTP 200, `text/event-stream` snapshot/messages |
+| `POST https://bubblewire-challenge.onrender.com/demo-spike.json` | HTTP 200, demo spike accepted |
+| `https://bubblewire-challenge.onrender.com/export.ndjson` | HTTP 200, NDJSON export |
+| `POST https://bubblewire-challenge.onrender.com/kick.webhook` | HTTP 200, Kick webhook payload accepted |
 
 ## Deployment Readiness
 
@@ -76,7 +93,4 @@ The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready t
 
 ## Remaining Submission Steps
 
-1. Commit and push the public route-alias fix.
-2. Wait for Render auto-deploy of the new commit.
-3. Live-verify `/healthz`, `/status.json`, `/events.stream`, `/overlay.html`, `/demo-spike.json`, and `/export.ndjson`.
-4. Submit the app URL, repository, and evidence artifacts through the challenge form.
+None. The challenge form response was recorded on 2026-06-04 at 14:42 CDT.

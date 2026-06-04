@@ -1,6 +1,10 @@
 # Bubblewire Demo Video Storyboard
 
-Target length: 60-90 seconds.
+Uploaded demo: `https://youtu.be/gvXG5qOaBTQ`
+
+Actual uploaded length: 0:36.
+
+Initial target length: 60-90 seconds.
 
 ## Shot List
 

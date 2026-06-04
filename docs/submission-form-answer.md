@@ -12,6 +12,16 @@ https://github.com/williamclay8/bubblewire
 
 https://bubblewire-challenge.onrender.com
 
+Verified Render deploy: `dep-d8gstqernols73b3fmbg`
+
+## Submitted X Handle
+
+@williamclay
+
+## Demo Video
+
+https://youtu.be/gvXG5qOaBTQ
+
 ## Overlay
 
 https://bubblewire-challenge.onrender.com/overlay.html
@@ -48,6 +58,9 @@ Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick` and `/kic
 - `npm test`: 7/7 passing
 - `npm run check`: passing
 - `npm run proof`: passing
+- Live smoke: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
+- YouTube demo: uploaded and unlisted at `https://youtu.be/gvXG5qOaBTQ`
+- Challenge form: submitted; Google Forms confirmation said "Your response has been recorded."
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bubblewire demo recorder</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      body {
+        align-items: center;
+        background: #050505;
+        color: #f7f2df;
+        display: grid;
+        gap: 18px;
+        justify-items: center;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      canvas {
+        border: 1px solid #3a3121;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+        width: min(96vw, 1280px);
+      }
+
+      p {
+        color: #b9ad96;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage" width="1280" height="720"></canvas>
+    <p id="status">Preparing Bubblewire demo video...</p>
+    <script>
+      const frames = [
+        {
+          src: "/video-frames/01-live-dashboard.png",
+          title: "Bubblewire: Twitch + X + Kick in one live feed",
+          subtitle: "Deployed on Render with source labels and provider health"
+        },
+        {
+          src: "/video-frames/02-live-spike.png",
+          title: "Real-time spike across all three sources",
+          subtitle: "Messages normalize through the server SSE stream"
+        },
+        {
+          src: "/video-frames/03-filter-search.png",
+          title: "Operator controls for fast triage",
+          subtitle: "Filter by source, search chat, pause, prioritize, and export"
+        },
+        {
+          src: "/video-frames/04-raw-pinned.png",
+          title: "Raw provenance and pinned signals",
+          subtitle: "Every message keeps its normalized payload and source receipt"
+        },
+        {
+          src: "/video-frames/05-overlay.png",
+          title: "Overlay route for OBS and browser sources",
+          subtitle: "Stream-ready view at bubblewire-challenge.onrender.com/overlay.html"
+        }
+      ];
+
+      const canvas = document.querySelector("#stage");
+      const ctx = canvas.getContext("2d");
+      const status = document.querySelector("#status");
+
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      function loadImage(src) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = () => reject(new Error(`Could not load ${src}`));
+          image.src = src;
+        });
+      }
+
+      function drawFrame(frame, image) {
+        ctx.fillStyle = "#050505";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const scale = Math.min(canvas.width / image.width, canvas.height / image.height);
+        const width = image.width * scale;
+        const height = image.height * scale;
+        const x = (canvas.width - width) / 2;
+        const y = (canvas.height - height) / 2;
+        ctx.drawImage(image, x, y, width, height);
+
+        const gradient = ctx.createLinearGradient(0, 560, 0, 720);
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(0.36, "rgba(0,0,0,0.78)");
+        gradient.addColorStop(1, "rgba(0,0,0,0.92)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 520, canvas.width, 200);
+
+        ctx.fillStyle = "#f7f2df";
+        ctx.font = "700 34px Inter, system-ui, sans-serif";
+        ctx.fillText(frame.title, 44, 622);
+        ctx.fillStyle = "#d6b568";
+        ctx.font = "500 22px Inter, system-ui, sans-serif";
+        ctx.fillText(frame.subtitle, 44, 662);
+      }
+
+      async function main() {
+        const images = await Promise.all(frames.map((frame) => loadImage(frame.src)));
+        const chunks = [];
+        const stream = canvas.captureStream(30);
+        const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+          ? "video/webm;codecs=vp9"
+          : "video/webm;codecs=vp8";
+        const recorder = new MediaRecorder(stream, {
+          mimeType,
+          videoBitsPerSecond: 5_000_000
+        });
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) chunks.push(event.data);
+        };
+
+        const stopped = new Promise((resolve) => {
+          recorder.onstop = resolve;
+        });
+        recorder.start(250);
+
+        for (let index = 0; index < frames.length; index += 1) {
+          status.textContent = `Recording frame ${index + 1} / ${frames.length}...`;
+          const start = performance.now();
+          while (performance.now() - start < 7000) {
+            drawFrame(frames[index], images[index]);
+            await sleep(1000 / 30);
+          }
+        }
+
+        recorder.stop();
+        await stopped;
+        const blob = new Blob(chunks, { type: "video/webm" });
+        status.textContent = `Saving ${Math.round(blob.size / 1024)} KB demo video...`;
+        const response = await fetch("/save", {
+          method: "POST",
+          headers: { "content-type": "video/webm" },
+          body: blob
+        });
+        if (!response.ok) {
+          throw new Error(`Save failed: ${response.status}`);
+        }
+        status.textContent = "Saved bubblewire-demo.webm";
+      }
+
+      main().catch((error) => {
+        console.error(error);
+        status.textContent = error.message;
+      });
+    </script>
+  </body>
+</html>

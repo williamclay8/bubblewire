@@ -18,6 +18,8 @@ Live app: `https://bubblewire-challenge.onrender.com`.
 
 Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewire-challenge.onrender.com/overlay.html` live.
 
+Demo video: `https://youtu.be/gvXG5qOaBTQ`.
+
 Health check: `http://localhost:3000/healthz`.
 
 ## Live Provider Paths
@@ -80,3 +82,4 @@ npm start
 - Evidence manifest: `docs/evidence/manifest.md`
 - Submission form copy: `docs/submission-form-answer.md`
 - Demo notes: `docs/challenge-submission.md`
+- Submitted challenge entry: June 4, 2026 at 2:42 PM CDT
