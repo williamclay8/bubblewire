@@ -51,11 +51,11 @@ Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT
 
 X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`.
 
-Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick` and `/kick.webhook`; a public tunnel or deployed URL is required for real Kick chat.
+Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick` and `/kick.webhook`; a public tunnel or deployed URL is required for real Kick chat. Bubblewire can also register the official Kick event subscription at startup when `KICK_AUTO_SUBSCRIBE=1`, `KICK_ACCESS_TOKEN`, and `KICK_BROADCASTER_USER_ID` are set, and can require Kick signature verification with `KICK_REQUIRE_SIGNATURE=1`.
 
 ## Proof Checklist
 
-- `npm test`: 10/10 passing
+- `npm test`: 16/16 passing
 - `npm run check`: passing
 - `npm run proof`: passing
 - Live smoke: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
@@ -68,4 +68,4 @@ Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick` and `/kic
 
 ## Suggested Demo Video Script
 
-“Here is Bubblewire, a unified feed for Twitch, X, and Kick. The source strip shows provider state, and every message carries a source label plus normalized metadata. I’ll click Spike to simulate all three platforms, filter to Twitch, pin a message, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The app is demo-safe without secrets, but the server has live adapter paths for Twitch EventSub, X filtered stream, and Kick webhooks.”
+“Here is Bubblewire, a unified feed for Twitch, X, and Kick. The source strip shows provider state, and every message carries a source label plus normalized metadata. I’ll click Spike to simulate all three platforms, filter to Twitch, pin a message, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The app is demo-safe without secrets, but the server has live adapter paths for Twitch EventSub, X filtered stream, and official Kick Events API webhooks.”

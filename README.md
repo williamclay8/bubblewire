@@ -28,7 +28,9 @@ Twitch: EventSub `channel.chat.message` is preferred. Set `TWITCH_CLIENT_ID`, `T
 
 X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_TOKEN`. Create stream rules in X before starting the app.
 
-Kick: Kick sends real-time chat through webhooks. Expose this app with a public tunnel and point Kick to `KICK_WEBHOOK_PUBLIC_URL/kick.webhook`. The server also keeps `/webhooks/kick` for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
+Kick: Kick's official read-side chat path is the Events API. It delivers `chat.message.sent` events by webhook. Expose this app with a public tunnel or deployed URL and point Kick to `/kick.webhook`; `/webhooks/kick` is kept for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
+
+To let Bubblewire register the official Kick event subscription at startup, set `KICK_AUTO_SUBSCRIBE=1`, `KICK_ACCESS_TOKEN`, and `KICK_BROADCASTER_USER_ID` with a token that has `events:subscribe`. To reject unsigned webhook calls, set `KICK_REQUIRE_SIGNATURE=1`; unsigned local proof events should keep this off.
 
 Set `DEMO_MODE=off` on Render for a true live-only public feed. When disabled, Bubblewire stops generating demo messages, disables the `Spike` control, and marks missing provider credentials as `missing` instead of pretending they are live.
 
@@ -51,7 +53,7 @@ Useful local controls:
 
 - Twitch EventSub is the current preferred chat path; anonymous read-only IRC is the no-secret live fallback for public channels.
 - X filtered stream is near real-time posts, not livestream chat, and may require paid/API access.
-- Kick chat ingestion is webhook-based; localhost needs ngrok, Cloudflare Tunnel, or similar.
+- Kick chat ingestion is official webhook-based `chat.message.sent`; localhost needs ngrok, Cloudflare Tunnel, or similar. No official anonymous/public read-only Kick chat stream was found in current Kick docs.
 - Provider tokens stay server-side. The browser receives only normalized events and status.
 
 ## Verification
@@ -65,7 +67,7 @@ npm run proof
 npm run proof:live # with DEMO_MODE=off server running
 ```
 
-The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, hub dedupe, source stats, and SSE subscriber behavior.
+The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, source stats, and SSE subscriber behavior.
 
 `npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms `/status.json` responds.
 

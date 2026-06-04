@@ -56,13 +56,13 @@ Challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CD
 | --- | --- | --- | --- |
 | Twitch | EventSub `channel.chat.message`; anonymous read-only IRC fallback; authenticated IRC fallback | Demo until Twitch config exists | `TWITCH_CHANNELS`; optional `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, `TWITCH_BROADCASTER_USER_ID`, `TWITCH_USERNAME`, `TWITCH_OAUTH_TOKEN` |
 | X | X API v2 filtered stream | Demo until bearer token exists | `X_BEARER_TOKEN` |
-| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Webhook-ready until payload arrives | `KICK_WEBHOOK_PUBLIC_URL` |
+| Kick | Official Events API `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook`; optional startup subscription; optional signature verification | Webhook-ready until payload arrives | `KICK_WEBHOOK_PUBLIC_URL`; optional `KICK_AUTO_SUBSCRIBE`, `KICK_ACCESS_TOKEN`, `KICK_BROADCASTER_USER_ID`, `KICK_REQUIRE_SIGNATURE` |
 
 ## Source Checks
 
 - Twitch docs: EventSub subscription type `channel.chat.message` and Chat & Chatbots page identify EventSub/API as the preferred chat path.
 - X docs: Filtered Stream provides near real-time posts over `GET /2/tweets/search/stream`.
-- Kick docs: Events API supports webhooks including `chat.message.sent`, and localhost needs a public tunnel.
+- Kick docs: Events API supports webhooks including `chat.message.sent`; subscribing requires `events:subscribe`, and localhost needs a public tunnel.
 
 ## Lumi Hygiene
 

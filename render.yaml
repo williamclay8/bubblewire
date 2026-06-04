@@ -15,5 +15,15 @@ services:
         value: off
       - key: TWITCH_CHANNELS
         value: fazebanks,marketbubble,xqc
+      - key: KICK_WEBHOOK_PUBLIC_URL
+        value: https://bubblewire-challenge.onrender.com
+      - key: KICK_AUTO_SUBSCRIBE
+        value: "0"
+      - key: KICK_ACCESS_TOKEN
+        sync: false
+      - key: KICK_BROADCASTER_USER_ID
+        sync: false
+      - key: KICK_REQUIRE_SIGNATURE
+        value: "0"
       - key: PORT
         sync: false

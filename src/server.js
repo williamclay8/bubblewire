@@ -4,6 +4,7 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createDemoConnector } from "./connectors/demo.js";
+import { shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
 import { startXConnector } from "./connectors/x.js";
 import { createFeedHub } from "./core/hub.js";
@@ -31,10 +32,7 @@ connectors.push(startXConnector(hub));
 if (demoEnabled) {
   demo.start();
 } else {
-  hub.setSourceStatus("kick", {
-    state: "webhook-ready",
-    detail: "POST Kick chat.message.sent events to /kick.webhook"
-  });
+  connectors.push(startKickConnector(hub));
 }
 
 const server = http.createServer(async (request, response) => {
@@ -78,7 +76,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "POST" && matches(pathname, "/webhooks/kick", "/kick.webhook")) {
-      const payload = await readJsonBody(request);
+      const rawBody = await readRawBody(request);
+      if (shouldRequireKickSignature()) {
+        const signature = verifyKickWebhookSignature({ headers: request.headers, rawBody });
+        if (!signature.ok) return sendJson(response, { ok: false, error: signature.reason }, 401);
+      }
+      const payload = parseJsonBody(rawBody);
       const message = normalizeKickWebhook(payload, request.headers);
       if (!message) return sendJson(response, { ok: false, error: "unsupported Kick event" }, 400);
       hub.addMessage(message);
@@ -221,11 +224,19 @@ function sendSse(response, event, payload) {
 }
 
 async function readJsonBody(request) {
+  return parseJsonBody(await readRawBody(request));
+}
+
+async function readRawBody(request) {
   let body = "";
   for await (const chunk of request) {
     body += chunk;
     if (body.length > 1024 * 1024) throw new Error("request body too large");
   }
+  return body;
+}
+
+function parseJsonBody(body) {
   return body ? JSON.parse(body) : {};
 }
 

@@ -25,7 +25,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 10/10 tests | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 16/16 tests | `docs/evidence/logs/proof.json` |
 | `npm run check` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass | `docs/evidence/logs/live-proof.json` |
@@ -55,7 +55,9 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 | --- | --- | --- |
 | Twitch | EventSub `channel.chat.message`; anonymous read-only IRC fallback for public channels; authenticated IRC fallback | Demo mode emits labeled demo messages; live-only mode marks missing `TWITCH_CHANNELS` as `missing` |
 | X | X API v2 filtered stream via server-side bearer token | Demo mode emits labeled demo messages; live-only mode marks missing `X_BEARER_TOKEN` as `missing` |
-| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Demo mode emits labeled demo messages; live-only mode stays `webhook-ready` until a webhook arrives |
+| Kick | Official Events API `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook`; optional startup subscription with `KICK_AUTO_SUBSCRIBE=1`; optional signature verification with `KICK_REQUIRE_SIGNATURE=1` | Demo mode emits labeled demo messages; live-only mode stays `webhook-ready` until a webhook arrives |
+
+Official Kick source check: current Kick docs list `chat.message.sent` as an Events API webhook payload, document event subscriptions at `POST https://api.kick.com/public/v1/events/subscriptions` with `events:subscribe`, and document the Chat API as send/delete chat rather than read-side chat streaming. No official anonymous/public read-only Kick chat stream was found in the current docs.
 
 ## Redaction And Secret Boundary
 
@@ -105,6 +107,7 @@ Latest live source evidence from that proof:
 - Public hosts must bind `HOST=0.0.0.0`.
 - `/healthz` returns JSON health status.
 - Render service URL: `https://bubblewire-challenge.onrender.com`
+- Official Kick subscription requires owner-provided `KICK_ACCESS_TOKEN` with `events:subscribe`, `KICK_BROADCASTER_USER_ID`, and a webhook URL configured in the Kick developer app.
 
 ## Remaining Submission Steps
 
