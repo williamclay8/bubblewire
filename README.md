@@ -38,9 +38,10 @@ Useful local controls:
 
 - `Spike` fires a burst across Twitch, X, and Kick labels.
 - `Pause` locks the feed and increments unread count.
-- `Pin` saves judge-worthy messages in the inspector.
+- `Pin` saves judge-worthy messages in the inspector (persisted across reloads).
 - `Export` downloads the normalized feed as NDJSON.
 - Selecting a message shows its raw normalized payload.
+- Keyboard: `/` focuses search, `p` toggles pause, `Esc` clears search.
 
 ## Provider Reality Notes
 

@@ -3,101 +3,130 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bubblewire</title>
+    <title>Bubblewire — Market Bubble Relay</title>
+    <meta name="description" content="Unified Twitch + X + Kick chat relay: one real-time feed with source labels.">
+    <meta name="theme-color" content="#0a0a09">
+    <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <div class="shell" data-route="app">
+    <div class="shell" id="appShell">
       <header class="topbar">
         <a class="brand" href="/" aria-label="Bubblewire home">
-          <img src="/assets/bubblewire-mark.svg" alt="" width="38" height="38">
-          <span>
-            <strong>Bubblewire</strong>
-            <small>Market Bubble Relay</small>
+          <img src="/assets/bubblewire-mark.svg" alt="" width="34" height="34">
+          <span class="brand-text">
+            <strong>BUBBLEWIRE<span class="cursor">_</span></strong>
+            <small>MARKET BUBBLE RELAY</small>
           </span>
         </a>
         <div class="status-strip" id="statusStrip" aria-label="Source status"></div>
-        <a class="overlay-link" href="/overlay.html" title="Open overlay view">Overlay</a>
+        <div class="topbar-tools">
+          <span class="link-state" id="linkState" data-state="connecting" title="Event stream link">
+            <span class="status-dot"></span><span class="link-label" id="linkLabel">LINK</span>
+          </span>
+          <time class="clock" id="clock">--:--:--</time>
+          <a class="overlay-link" href="/overlay.html" title="OBS-ready overlay view">OVERLAY ↗</a>
+        </div>
       </header>
+
+      <div class="tape" id="tape" aria-hidden="true"></div>
 
       <main class="layout">
         <aside class="rail" aria-label="Feed controls">
-          <div class="control-block">
-            <h2>Sources</h2>
+          <section class="rail-section">
+            <h2>// sources</h2>
             <div class="segmented" role="group" aria-label="Source filter">
-              <button data-source-filter="all" class="active">All</button>
-              <button data-source-filter="twitch">Twitch</button>
-              <button data-source-filter="x">X</button>
-              <button data-source-filter="kick">Kick</button>
+              <button data-source-filter="all" class="active" aria-pressed="true">All</button>
+              <button data-source-filter="twitch" aria-pressed="false">Twitch</button>
+              <button data-source-filter="x" aria-pressed="false">X</button>
+              <button data-source-filter="kick" aria-pressed="false">Kick</button>
             </div>
-          </div>
+          </section>
 
-          <div class="control-block">
-            <label for="searchInput">Search</label>
-            <input id="searchInput" type="search" placeholder="author, channel, text">
-          </div>
+          <section class="rail-section">
+            <h2><label for="searchInput">// search</label></h2>
+            <div class="search-wrap">
+              <input id="searchInput" type="search" placeholder="author, channel, text" autocomplete="off" spellcheck="false">
+              <kbd>/</kbd>
+            </div>
+          </section>
 
-          <div class="switch-row">
-            <input id="priorityOnly" type="checkbox">
-            <label for="priorityOnly">Priority only</label>
-          </div>
+          <section class="rail-section">
+            <h2>// filters</h2>
+            <label class="switch-row" for="priorityOnly">
+              <input id="priorityOnly" type="checkbox">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Priority only <small>heat ≥ 18</small></span>
+            </label>
+          </section>
 
-          <div class="control-grid">
-            <button id="pauseButton" type="button">Pause</button>
-            <button id="spikeButton" type="button">Spike</button>
-            <button id="exportButton" type="button">Export</button>
-            <button id="clearSearchButton" type="button">Clear</button>
-          </div>
+          <section class="rail-section">
+            <h2>// transport</h2>
+            <div class="control-grid">
+              <button id="pauseButton" type="button" aria-pressed="false">Pause</button>
+              <button id="spikeButton" type="button">Spike</button>
+              <button id="exportButton" type="button">Export</button>
+              <button id="clearSearchButton" type="button">Clear</button>
+            </div>
+          </section>
 
-          <div class="mini-stat">
-            <span>Unread</span>
-            <strong id="unreadCount">0</strong>
-          </div>
-          <div class="mini-stat">
-            <span>Dedupe</span>
-            <strong id="duplicateCount">0</strong>
-          </div>
+          <section class="rail-section">
+            <h2>// counters</h2>
+            <dl class="counters">
+              <div><dt>Unread</dt><dd id="unreadCount">0</dd></div>
+              <div><dt>Dedupe</dt><dd id="duplicateCount">0</dd></div>
+              <div><dt>Buffer</dt><dd id="bufferCount">0</dd></div>
+              <div><dt>Uptime</dt><dd id="uptimeValue">—</dd></div>
+            </dl>
+          </section>
+
+          <p class="rail-hint">[/] search · [p] pause · [esc] clear</p>
         </aside>
 
-        <section class="feed-panel" aria-label="Unified feed">
+        <section class="feed-panel" id="feedPanel" aria-label="Unified feed">
           <div class="feed-head">
             <div>
               <h1>Unified Feed</h1>
-              <p id="feedSummary">Waiting for messages</p>
+              <p id="feedSummary">awaiting messages</p>
             </div>
             <div class="live-meter" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span>
             </div>
           </div>
-          <ol class="feed" id="feedList" aria-live="polite"></ol>
+          <ol class="feed" id="feedList"></ol>
         </section>
 
         <aside class="inspector" aria-label="Signal inspector">
           <section class="panel-section">
-            <h2>Source Stack</h2>
+            <h2>// source stack</h2>
             <div id="sourceCards" class="source-cards"></div>
           </section>
 
           <section class="panel-section">
-            <h2>Signal Radar</h2>
-            <canvas id="radarCanvas" width="320" height="150" aria-label="Message activity chart"></canvas>
+            <h2>// signal radar <small>60-sec window</small></h2>
+            <canvas id="radarCanvas" aria-label="Message activity over the last 60 seconds"></canvas>
+            <div class="radar-legend" aria-hidden="true">
+              <span><i style="background:#9146ff"></i>twitch</span>
+              <span><i style="background:#f4f2ea"></i>x</span>
+              <span><i style="background:#53fc18"></i>kick</span>
+            </div>
           </section>
 
           <section class="panel-section">
-            <h2>Pinned</h2>
+            <h2>// pinned <span class="count-chip" id="pinnedCount">0</span></h2>
             <div id="pinnedList" class="pinned-list"></div>
           </section>
 
           <section class="panel-section raw-section">
-            <h2>Raw Payload</h2>
-            <pre id="rawPayload">Select a message</pre>
+            <h2>// raw payload</h2>
+            <pre id="rawPayload">// select a message</pre>
           </section>
         </aside>
       </main>
     </div>
 
     <div class="overlay-root" id="overlayRoot" hidden>
-      <ol class="overlay-feed" id="overlayFeed" aria-live="polite"></ol>
+      <ol class="overlay-feed" id="overlayFeed"></ol>
     </div>
 
     <script type="module" src="/app.js"></script>
