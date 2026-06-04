@@ -7,10 +7,11 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 ## Target
 
 - Local app: `http://127.0.0.1:3000`
-- Public app: `https://bubblewire-challenge.onrender.com`
-- Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
+- Public app: `https://bubblewire.xyz`
+- Public overlay: `https://bubblewire.xyz/overlay.html`
+- Fallback Render URL: `https://bubblewire-challenge.onrender.com`
 - Public demo video: `https://youtu.be/gvXG5qOaBTQ`
-- Public health check: `https://bubblewire-challenge.onrender.com/healthz`
+- Public health check: `https://bubblewire.xyz/healthz`
 - Local overlay: `http://127.0.0.1:3000/overlay.html`
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
@@ -18,7 +19,8 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
 - Latest commit/deploy IDs are recorded in the final Lumi closeout for each release run.
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
-- Submitted: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
+- Initial submission: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
+- Custom-domain resubmission: pending.
 - Date: 2026-06-04
 
 ## Verification Commands
@@ -80,23 +82,23 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 
 | Public endpoint | Result |
 | --- | --- |
-| `https://bubblewire-challenge.onrender.com/healthz` | HTTP 200, JSON health payload |
-| `https://bubblewire-challenge.onrender.com/status.json` | HTTP 200, unified status and message payload |
-| `https://bubblewire-challenge.onrender.com/overlay.html` | HTTP 200, overlay HTML |
-| `https://bubblewire-challenge.onrender.com/events.stream` | HTTP 200, `text/event-stream` snapshot/messages |
-| `POST https://bubblewire-challenge.onrender.com/demo-spike.json` | Expected HTTP 409 when `DEMO_MODE=off` |
-| `POST https://bubblewire-challenge.onrender.com/inject.json` | Expected HTTP 409 when `DEMO_MODE=off` |
-| `https://bubblewire-challenge.onrender.com/export.ndjson` | HTTP 200, NDJSON export |
-| `POST https://bubblewire-challenge.onrender.com/kick.webhook` | HTTP 200, Kick webhook payload accepted |
+| `https://bubblewire.xyz/healthz` | HTTP 200, JSON health payload |
+| `https://bubblewire.xyz/status.json` | HTTP 200, unified status and message payload |
+| `https://bubblewire.xyz/overlay.html` | HTTP 200, overlay HTML |
+| `https://bubblewire.xyz/events.stream` | HTTP 200, `text/event-stream` snapshot/messages |
+| `POST https://bubblewire.xyz/demo-spike.json` | Expected HTTP 409 when `DEMO_MODE=off` |
+| `POST https://bubblewire.xyz/inject.json` | Expected HTTP 409 when `DEMO_MODE=off` |
+| `https://bubblewire.xyz/export.ndjson` | HTTP 200, NDJSON export |
+| `POST https://bubblewire.xyz/kick.webhook` | HTTP 200, Kick webhook payload accepted |
 
-Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:32:11.131Z against `https://bubblewire-challenge.onrender.com`, passed with expected sources `twitch,x,kick`.
+Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:53:10.306Z against `https://bubblewire.xyz`, passed with expected sources `twitch,x,kick`.
 
 Latest live source evidence from that proof:
 
 | Source | Status | Count |
 | --- | --- | --- |
-| Twitch | `connected`, `watching 3 channels anonymously` | 73 |
-| X | `connected`, `filtered stream online` | 1 |
+| Twitch | `connected`, `watching 3 channels anonymously` | 1046 |
+| X | `connected`, `filtered stream online` | 42 |
 | Kick | `connected`, `last webhook accepted` | 2 |
 
 ## Deployment Readiness
@@ -106,9 +108,10 @@ Latest live source evidence from that proof:
 - `Procfile` is present for generic process hosts.
 - Public hosts must bind `HOST=0.0.0.0`.
 - `/healthz` returns JSON health status.
-- Render service URL: `https://bubblewire-challenge.onrender.com`
+- Primary service URL: `https://bubblewire.xyz`
+- Render fallback URL: `https://bubblewire-challenge.onrender.com`
 - Official Kick subscription requires owner-provided `KICK_ACCESS_TOKEN` with `events:subscribe`, `KICK_BROADCASTER_USER_ID`, and a webhook URL configured in the Kick developer app.
 
 ## Remaining Submission Steps
 
-None. The challenge form response was recorded on 2026-06-04 at 14:42 CDT.
+Resubmit the challenge form with `https://bubblewire.xyz` as the primary live URL.

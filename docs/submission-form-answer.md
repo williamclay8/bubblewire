@@ -10,9 +10,11 @@ https://github.com/williamclay8/bubblewire
 
 ## Live App
 
-https://bubblewire-challenge.onrender.com
+https://bubblewire.xyz
 
-Verified Render deploy: `dep-d8gvp099rddc73eqmap0`
+Fallback Render URL: `https://bubblewire-challenge.onrender.com`
+
+Verified Render deploy: `dep-d8gvqge8bjmc73cumgd0`
 
 ## Submitted X Handle
 
@@ -24,7 +26,7 @@ https://youtu.be/gvXG5qOaBTQ
 
 ## Overlay
 
-https://bubblewire-challenge.onrender.com/overlay.html
+https://bubblewire.xyz/overlay.html
 
 ## Short Description
 
@@ -33,9 +35,10 @@ Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges
 ## What To Try First
 
 1. Open the app.
-2. Click `Spike` to fire Twitch, X, and Kick demo events.
+2. Watch the live feed populate from Twitch and X, with Kick marked connected after webhook proof.
 3. Filter by source, pause the feed, pin a message, and select a message to inspect its normalized payload.
 4. Open `/overlay.html` to see the stream-ready view.
+5. Demo routes remain disabled on the public live app; local/demo-mode proof is recorded in the evidence manifest.
 
 ## Why It Wins
 
@@ -58,10 +61,10 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 - `npm test`: 16/16 passing
 - `npm run check`: passing
 - `npm run proof`: passing
-- Live smoke: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
-- Public live proof: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
+- Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
+- Public live proof on `https://bubblewire.xyz`: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
 - YouTube demo: uploaded and unlisted at `https://youtu.be/gvXG5qOaBTQ`
-- Challenge form: submitted; Google Forms confirmation said "Your response has been recorded."
+- Challenge form: ready for custom-domain resubmission.
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`

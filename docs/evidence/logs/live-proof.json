@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-04T22:32:11.131Z",
-  "baseUrl": "https://bubblewire-challenge.onrender.com",
+  "generatedAt": "2026-06-04T22:53:10.306Z",
+  "baseUrl": "https://bubblewire.xyz",
   "checks": [
     {
       "name": "overlay HTML",
@@ -10,7 +10,7 @@
     {
       "name": "NDJSON export",
       "status": 200,
-      "bytes": 64682
+      "bytes": 227708
     },
     {
       "name": "SSE stream opens",
@@ -27,7 +27,7 @@
         "demoRunning": false,
         "liveOnly": true
       },
-      "totalMessages": 74,
+      "totalMessages": 1087,
       "demoMessages": 0
     },
     {
@@ -60,7 +60,7 @@
       "status": 200,
       "body": {
         "ok": true,
-        "id": "kick:live-proof-1780612334344"
+        "id": "kick:live-proof-1780613594339"
       }
     },
     {
@@ -72,7 +72,7 @@
         "demoRunning": false,
         "liveOnly": true
       },
-      "totalMessages": 76,
+      "totalMessages": 1090,
       "demoMessages": 0
     },
     {
@@ -87,22 +87,22 @@
         "twitch": {
           "state": "connected",
           "detail": "watching 3 channels anonymously",
-          "updatedAt": "2026-06-04T22:30:48.901Z"
+          "updatedAt": "2026-06-04T22:34:56.988Z"
         },
         "x": {
           "state": "connected",
           "detail": "filtered stream online",
-          "updatedAt": "2026-06-04T22:31:12.460Z"
+          "updatedAt": "2026-06-04T22:35:20.451Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-04T22:32:14.548Z"
+          "updatedAt": "2026-06-04T22:53:14.553Z"
         }
       },
       "sourceCounts": {
-        "twitch": 73,
-        "x": 1,
+        "twitch": 1046,
+        "x": 42,
         "kick": 2
       }
     },
@@ -115,8 +115,8 @@
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 84,
-      "checkedAt": "2026-06-04T22:32:11.704Z"
+      "uptimeSeconds": 1095,
+      "checkedAt": "2026-06-04T22:53:11.065Z"
     },
     "before": {
       "runtime": {
@@ -129,113 +129,47 @@
         "twitch": {
           "state": "connected",
           "detail": "watching 3 channels anonymously",
-          "updatedAt": "2026-06-04T22:30:48.901Z"
+          "updatedAt": "2026-06-04T22:34:56.988Z"
         },
         "x": {
           "state": "connected",
           "detail": "filtered stream online",
-          "updatedAt": "2026-06-04T22:31:12.460Z"
+          "updatedAt": "2026-06-04T22:35:20.451Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-04T22:31:38.595Z"
+          "updatedAt": "2026-06-04T22:36:10.141Z"
         }
       },
       "stats": {
-        "totalMessages": 74,
+        "totalMessages": 1087,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T22:30:48.694Z",
+        "startedAt": "2026-06-04T22:34:56.779Z",
         "sources": {
           "twitch": {
-            "count": 72,
-            "lastMessageAt": "2026-06-04T22:32:10.510Z"
+            "count": 1044,
+            "lastMessageAt": "2026-06-04T22:53:12.619Z"
           },
           "x": {
-            "count": 1,
-            "lastMessageAt": "2026-06-04T22:31:06.000Z"
+            "count": 42,
+            "lastMessageAt": "2026-06-04T22:52:25.000Z"
           },
           "kick": {
             "count": 1,
-            "lastMessageAt": "2026-06-04T22:31:38.391Z"
+            "lastMessageAt": "2026-06-04T22:36:09.389Z"
           }
         }
       },
       "sampleMessages": [
         {
-          "id": "twitch:b183c708-38d2-432d-bb5f-a2cf8308b664",
+          "id": "twitch:79b5432a-cc4b-4015-baf0-ff655b7c8fae",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 18,
+          "contentLength": 71,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:10.510Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/12",
-            "bloom-badge/4"
-          ]
-        },
-        {
-          "id": "twitch:d6c148b3-79c0-4f74-9a54-61023bbcdbfc",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 5,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.830Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "nasa-artemis-ii/1"
-          ]
-        },
-        {
-          "id": "twitch:344686ac-8784-4521-acb1-d01205924af8",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 23,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.740Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/12",
-            "bits/100"
-          ]
-        },
-        {
-          "id": "twitch:81127001-83b0-4359-a913-7d0e90cc51d8",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 5,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.582Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/24",
-            "nasa-artemis-ii/1"
-          ]
-        },
-        {
-          "id": "twitch:ca840b25-2353-4784-ada3-d1868b3051fe",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "fazebanks",
-          "contentLength": 6,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.900Z",
-          "url": "https://www.twitch.tv/fazebanks",
-          "badges": []
-        },
-        {
-          "id": "twitch:d7184621-1f0c-4638-bc6a-2115e39ebb36",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 61,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.779Z",
+          "receivedAt": "2026-06-04T22:53:12.619Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
             "moderator/1",
@@ -244,82 +178,144 @@
           ]
         },
         {
-          "id": "twitch:af59f427-1060-4fc8-9efd-d546e455da54",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 17,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.750Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/6"
-          ]
-        },
-        {
-          "id": "twitch:7c37afc8-bcf1-48f4-90ce-f90ab5135e80",
+          "id": "twitch:e068d139-40e5-4541-84f1-ef262570806f",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
           "contentLength": 3,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.578Z",
+          "receivedAt": "2026-06-04T22:53:12.241Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "winston-overwatch/1"
+            "glitchcon2020/1"
           ]
         },
         {
-          "id": "twitch:068faed8-2088-4193-b776-6aae091928ed",
+          "id": "twitch:cf214446-2dc4-4718-92ff-e93bc24e4c66",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 16,
+          "contentLength": 5,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:07.571Z",
+          "receivedAt": "2026-06-04T22:53:11.799Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "subscriber/12",
-            "bloom-badge/4"
+            "together-for-good-25---good-badge/1"
           ]
         },
         {
-          "id": "twitch:045c1810-d609-47a0-b452-c91451e1e231",
+          "id": "twitch:bec7e9b3-4784-4eb0-b070-1e99176c8b1e",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 6,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:08.519Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:879aeeea-5735-47bb-ae3b-fcc7eceb170b",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 37,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:08.471Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:2536f1d6-1542-4c58-94d5-5f6b2c287827",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 43,
+          "contentLength": 82,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:06.960Z",
+          "receivedAt": "2026-06-04T22:53:07.255Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "twitch-recap-2025/1"
+            "moderator/1"
           ]
         },
         {
-          "id": "twitch:3210df87-2bf0-467f-a97c-905b2eb70b07",
+          "id": "twitch:ae780a71-ff7a-49d5-b0f6-63deba991295",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 13,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.991Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "glitchcon2020/1"
+          ]
+        },
+        {
+          "id": "twitch:9b026345-6d23-45c4-8700-b3e5ddcfbcb2",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 7,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.638Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/66",
+            "gamerduo/1"
+          ]
+        },
+        {
+          "id": "twitch:dda73966-81b2-4ee7-8d7d-900ed73f3492",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 80,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.076Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": [
+            "streamer-awards-tux/1"
+          ]
+        },
+        {
+          "id": "twitch:152c0e2a-4cc8-4f62-b96a-06c6a7b7979e",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
           "contentLength": 17,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:05.603Z",
+          "receivedAt": "2026-06-04T22:53:05.816Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "first-stand-2026-viewer/1"
+            "moments/2"
           ]
         },
         {
-          "id": "twitch:0477e2f4-86e9-4a5a-a4a3-41523a0dd446",
+          "id": "twitch:b0610d54-0ba9-4dce-b8f9-3b6f27140809",
           "source": "twitch",
           "sourceLabel": "Twitch",
-          "channel": "fazebanks",
-          "contentLength": 40,
+          "channel": "xqc",
+          "contentLength": 21,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:05.527Z",
-          "url": "https://www.twitch.tv/fazebanks",
+          "receivedAt": "2026-06-04T22:53:02.827Z",
+          "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "premium/1"
+            "subscriber/30",
+            "glitchcon2020/1"
+          ]
+        },
+        {
+          "id": "twitch:722978c7-f3d0-43c0-b2d7-aa885856d12f",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 7,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:00.964Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "together-for-good-25---good-badge/1"
           ]
         }
       ]
@@ -335,137 +331,88 @@
         "twitch": {
           "state": "connected",
           "detail": "watching 3 channels anonymously",
-          "updatedAt": "2026-06-04T22:30:48.901Z"
+          "updatedAt": "2026-06-04T22:34:56.988Z"
         },
         "x": {
           "state": "connected",
           "detail": "filtered stream online",
-          "updatedAt": "2026-06-04T22:31:12.460Z"
+          "updatedAt": "2026-06-04T22:35:20.451Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-04T22:32:14.548Z"
+          "updatedAt": "2026-06-04T22:53:14.553Z"
         }
       },
       "stats": {
-        "totalMessages": 76,
+        "totalMessages": 1090,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T22:30:48.694Z",
+        "startedAt": "2026-06-04T22:34:56.779Z",
         "sources": {
           "twitch": {
-            "count": 73,
-            "lastMessageAt": "2026-06-04T22:32:14.414Z"
+            "count": 1046,
+            "lastMessageAt": "2026-06-04T22:53:14.032Z"
           },
           "x": {
-            "count": 1,
-            "lastMessageAt": "2026-06-04T22:31:06.000Z"
+            "count": 42,
+            "lastMessageAt": "2026-06-04T22:52:25.000Z"
           },
           "kick": {
             "count": 2,
-            "lastMessageAt": "2026-06-04T22:32:14.344Z"
+            "lastMessageAt": "2026-06-04T22:53:14.339Z"
           }
         }
       },
       "sampleMessages": [
         {
-          "id": "kick:live-proof-1780612334344",
+          "id": "kick:live-proof-1780613594339",
           "source": "kick",
           "sourceLabel": "Kick",
           "channel": "marketbubble",
           "contentLength": 29,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:14.344Z",
+          "receivedAt": "2026-06-04T22:53:14.339Z",
           "url": "https://kick.com/marketbubble",
           "badges": [
             "Reviewer"
           ]
         },
         {
-          "id": "twitch:7cee8389-9248-40e1-bee3-7f79bcc235ed",
+          "id": "twitch:f7a27d2f-ff6e-4a46-a912-f6232e4d89da",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 9,
+          "contentLength": 14,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:14.414Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": []
-        },
-        {
-          "id": "twitch:b183c708-38d2-432d-bb5f-a2cf8308b664",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 18,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:10.510Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/12",
-            "bloom-badge/4"
-          ]
-        },
-        {
-          "id": "twitch:d6c148b3-79c0-4f74-9a54-61023bbcdbfc",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 5,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.830Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "nasa-artemis-ii/1"
-          ]
-        },
-        {
-          "id": "twitch:344686ac-8784-4521-acb1-d01205924af8",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 23,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.740Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/12",
-            "bits/100"
-          ]
-        },
-        {
-          "id": "twitch:81127001-83b0-4359-a913-7d0e90cc51d8",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 5,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:09.582Z",
+          "receivedAt": "2026-06-04T22:53:14.032Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
             "subscriber/24",
-            "nasa-artemis-ii/1"
+            "arc-raiders-launch-2025/1"
           ]
         },
         {
-          "id": "twitch:ca840b25-2353-4784-ada3-d1868b3051fe",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "fazebanks",
-          "contentLength": 6,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.900Z",
-          "url": "https://www.twitch.tv/fazebanks",
-          "badges": []
-        },
-        {
-          "id": "twitch:d7184621-1f0c-4638-bc6a-2115e39ebb36",
+          "id": "twitch:c648f408-62bd-4d65-8261-245c55b2c49d",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 61,
+          "contentLength": 29,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.779Z",
+          "receivedAt": "2026-06-04T22:53:13.776Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/0",
+            "arcane-season-2-premiere/1"
+          ]
+        },
+        {
+          "id": "twitch:79b5432a-cc4b-4015-baf0-ff655b7c8fae",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 71,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:12.619Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
             "moderator/1",
@@ -474,56 +421,104 @@
           ]
         },
         {
-          "id": "twitch:af59f427-1060-4fc8-9efd-d546e455da54",
-          "source": "twitch",
-          "sourceLabel": "Twitch",
-          "channel": "xqc",
-          "contentLength": 17,
-          "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.750Z",
-          "url": "https://www.twitch.tv/xqc",
-          "badges": [
-            "subscriber/6"
-          ]
-        },
-        {
-          "id": "twitch:7c37afc8-bcf1-48f4-90ce-f90ab5135e80",
+          "id": "twitch:e068d139-40e5-4541-84f1-ef262570806f",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
           "contentLength": 3,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:08.578Z",
+          "receivedAt": "2026-06-04T22:53:12.241Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "winston-overwatch/1"
+            "glitchcon2020/1"
           ]
         },
         {
-          "id": "twitch:068faed8-2088-4193-b776-6aae091928ed",
+          "id": "twitch:cf214446-2dc4-4718-92ff-e93bc24e4c66",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 16,
+          "contentLength": 5,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:07.571Z",
+          "receivedAt": "2026-06-04T22:53:11.799Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "subscriber/12",
-            "bloom-badge/4"
+            "together-for-good-25---good-badge/1"
           ]
         },
         {
-          "id": "twitch:045c1810-d609-47a0-b452-c91451e1e231",
+          "id": "twitch:bec7e9b3-4784-4eb0-b070-1e99176c8b1e",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 6,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:08.519Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:879aeeea-5735-47bb-ae3b-fcc7eceb170b",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 37,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:08.471Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:2536f1d6-1542-4c58-94d5-5f6b2c287827",
           "source": "twitch",
           "sourceLabel": "Twitch",
           "channel": "xqc",
-          "contentLength": 43,
+          "contentLength": 82,
           "mode": "live",
-          "receivedAt": "2026-06-04T22:32:06.960Z",
+          "receivedAt": "2026-06-04T22:53:07.255Z",
           "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "twitch-recap-2025/1"
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:ae780a71-ff7a-49d5-b0f6-63deba991295",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 13,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.991Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "glitchcon2020/1"
+          ]
+        },
+        {
+          "id": "twitch:9b026345-6d23-45c4-8700-b3e5ddcfbcb2",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 7,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.638Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/66",
+            "gamerduo/1"
+          ]
+        },
+        {
+          "id": "twitch:dda73966-81b2-4ee7-8d7d-900ed73f3492",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "contentLength": 80,
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:53:06.076Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": [
+            "streamer-awards-tux/1"
           ]
         }
       ]
