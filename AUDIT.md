@@ -45,6 +45,20 @@ Backend: clean, zero-dependency, well-tested (7/7 passing). Frontend: functional
 - `npm test` 7/7, `npm run check` clean.
 - Served locally; screenshotted at 1440×900, 390×844, and overlay at 1280×720 in headless Chromium. Zero console errors. `document.scrollWidth === innerWidth` on mobile.
 
+## Polish pass v2 (same day)
+
+A second, deeper UI/UX pass on top of the redesign:
+
+- **Typography**: IBM Plex Mono (4 weights) + Inter variable, self-hosted in `public/assets/fonts/` (~88 KB total) — no external requests, CSP stays `'self'`, works offline, system-font fallbacks intact.
+- **App-shell feed**: the feed is now its own scroll container (page chrome never scrolls on desktop). New messages prepend with scroll-position compensation — reading mid-feed is never yanked — and a gold "▲ N new" jump pill appears instead.
+- **Action feedback**: toast system (bottom-right, mono, tone-coded) for spike, export, pin/unpin, pause/resume, priority toggle, copy, and SSE link loss/recovery.
+- **Search**: debounced, with `<mark>` highlighting of matches; summary line shows active query/filter context; empty state adapts ("no matches — [esc] to clear").
+- **Data-mapped emphasis**: heat color ramp (gold → amber ≥50 → red ≥75 with glow), filter buttons show live per-source counts, tape gained a msgs/min rate, per-source sparklines in the source stack, radar got axis labels + peak readout.
+- **Content enrichment**: $cashtags (gold), @mentions (source-colored), URLs shown protocol-stripped and truncated.
+- **Craft details**: author colors contrast-clamped for legibility (dark Twitch handle colors lifted), paused banner with buffered count, boot-time panel stagger, film-grain noise texture, counter tick-flash on change, keyboard 1–4 source filters, copy-raw button, handle/channel ellipsis truncation.
+
+Verified again: 7/7 tests, fonts confirmed loading via `document.fonts.check`, zero console errors (CSP clean), no mobile overflow, all interaction states screenshot-tested (search marks, jump pill, paused banner, toasts, enriched content).
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.

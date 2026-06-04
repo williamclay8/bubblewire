@@ -19,7 +19,10 @@ const state = {
   priorityOnly: false,
   paused: false,
   unread: 0,
+  newWhileAway: 0,
   selectedId: null,
+  linkSeen: false,
+  linkState: "connecting",
   pinned: loadPins()
 };
 
@@ -28,6 +31,7 @@ const els = {
   overlayRoot: document.querySelector("#overlayRoot"),
   statusStrip: document.querySelector("#statusStrip"),
   linkState: document.querySelector("#linkState"),
+  linkLabel: document.querySelector("#linkLabel"),
   clock: document.querySelector("#clock"),
   tape: document.querySelector("#tape"),
   sourceCards: document.querySelector("#sourceCards"),
@@ -46,9 +50,16 @@ const els = {
   bufferCount: document.querySelector("#bufferCount"),
   uptimeValue: document.querySelector("#uptimeValue"),
   rawPayload: document.querySelector("#rawPayload"),
+  copyRawButton: document.querySelector("#copyRawButton"),
   pinnedList: document.querySelector("#pinnedList"),
   pinnedCount: document.querySelector("#pinnedCount"),
-  radarCanvas: document.querySelector("#radarCanvas")
+  radarCanvas: document.querySelector("#radarCanvas"),
+  radarPeak: document.querySelector("#radarPeak"),
+  jumpPill: document.querySelector("#jumpPill"),
+  jumpCount: document.querySelector("#jumpCount"),
+  pausedBanner: document.querySelector("#pausedBanner"),
+  pausedBannerCount: document.querySelector("#pausedBannerCount"),
+  toastRoot: document.querySelector("#toastRoot")
 };
 
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -57,6 +68,8 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   second: "2-digit",
   hour12: false
 });
+
+let searchTimer = null;
 
 if (isOverlay) {
   els.shell.hidden = true;
@@ -75,36 +88,52 @@ function bindControls() {
   if (isOverlay) return;
 
   document.querySelectorAll("[data-source-filter]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.filter = button.dataset.sourceFilter;
-      document.querySelectorAll("[data-source-filter]").forEach((item) => {
-        const active = item === button;
-        item.classList.toggle("active", active);
-        item.setAttribute("aria-pressed", String(active));
-      });
-      renderFeed();
-      renderStats();
-    });
+    button.addEventListener("click", () => setFilter(button.dataset.sourceFilter));
   });
 
   els.searchInput?.addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();
-    renderFeed();
-    renderStats();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      renderFeed();
+      renderStats();
+    }, 90);
   });
 
   els.priorityOnly?.addEventListener("change", (event) => {
     state.priorityOnly = event.target.checked;
     renderFeed();
     renderStats();
+    toast(state.priorityOnly ? `priority only — heat ≥ ${PRIORITY_HEAT}` : "showing all heat levels");
   });
 
   els.pauseButton?.addEventListener("click", togglePause);
-  els.spikeButton?.addEventListener("click", () => postJson("/demo-spike.json"));
+  els.spikeButton?.addEventListener("click", async () => {
+    await postJson("/demo-spike.json");
+    toast("spike injected ×18");
+  });
   els.exportButton?.addEventListener("click", () => {
+    toast("exporting feed.ndjson");
     location.href = "/export.ndjson";
   });
-  els.clearSearchButton?.addEventListener("click", clearSearch);
+  els.clearSearchButton?.addEventListener("click", () => {
+    clearSearch();
+    els.searchInput?.focus();
+  });
+
+  els.copyRawButton?.addEventListener("click", async () => {
+    const text = els.rawPayload?.textContent || "";
+    if (!text || text.startsWith("//")) {
+      toast("select a message first", "warn");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("raw payload copied");
+    } catch {
+      toast("clipboard unavailable", "err");
+    }
+  });
 
   // One delegated listener for the whole feed instead of per-row bindings.
   els.feedList?.addEventListener("click", (event) => {
@@ -123,29 +152,58 @@ function bindControls() {
     if (unpin) togglePin(unpin.dataset.unpinId);
   });
 
+  els.feedList?.addEventListener("scroll", () => {
+    if (els.feedList.scrollTop < 40) hideJumpPill();
+  }, { passive: true });
+
+  els.jumpPill?.addEventListener("click", () => {
+    els.feedList?.scrollTo({ top: 0, behavior: "smooth" });
+    hideJumpPill();
+  });
+
   document.addEventListener("keydown", (event) => {
     const typing = /^(input|textarea|select)$/i.test(event.target.tagName);
-    if (event.key === "/" && !typing) {
+    if (typing) {
+      if (event.key === "Escape") {
+        clearSearch();
+        event.target.blur();
+      }
+      return;
+    }
+    if (event.key === "/") {
       event.preventDefault();
       els.searchInput?.focus();
-    } else if ((event.key === "p" || event.key === "P") && !typing) {
+    } else if (event.key === "p" || event.key === "P") {
       togglePause();
-    } else if (event.key === "Escape" && typing) {
-      clearSearch();
-      event.target.blur();
+    } else if (["1", "2", "3", "4"].includes(event.key)) {
+      setFilter(["all", ...SOURCE_ORDER][Number(event.key) - 1]);
     }
   });
 }
 
+function setFilter(filter) {
+  if (state.filter === filter) return;
+  state.filter = filter;
+  document.querySelectorAll("[data-source-filter]").forEach((item) => {
+    const active = item.dataset.sourceFilter === filter;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+  });
+  renderFeed();
+  renderStats();
+}
+
 function togglePause() {
   state.paused = !state.paused;
-  if (els.pauseButton) {
-    els.pauseButton.setAttribute("aria-pressed", String(state.paused));
-  }
+  els.pauseButton?.setAttribute("aria-pressed", String(state.paused));
   els.feedPanel?.classList.toggle("paused", state.paused);
+  if (els.pausedBanner) els.pausedBanner.hidden = !state.paused;
   if (!state.paused) {
     state.unread = 0;
     renderFeed();
+    toast("feed resumed");
+  } else {
+    toast("feed paused — buffering", "warn");
   }
   renderStats();
 }
@@ -191,9 +249,14 @@ function connectEvents() {
 }
 
 function setLinkState(value) {
+  const changed = state.linkState !== value;
+  state.linkState = value;
   els.linkState?.setAttribute("data-state", value);
-  const label = document.querySelector("#linkLabel");
-  if (label) label.textContent = value === "live" ? "LINK LIVE" : "LINK RETRY";
+  if (els.linkLabel) els.linkLabel.textContent = value === "live" ? "LINK LIVE" : "LINK RETRY";
+  if (!isOverlay && changed && state.linkSeen) {
+    toast(value === "live" ? "event stream restored" : "event stream lost — retrying", value === "live" ? "ok" : "err");
+  }
+  if (value === "live") state.linkSeen = true;
 }
 
 function applySnapshot(snapshot) {
@@ -254,29 +317,45 @@ function renderStats() {
   const visible = filteredMessages().length;
 
   if (els.feedSummary) {
-    els.feedSummary.textContent = `${visible} visible / ${total} captured${state.paused ? " — paused" : ""}`;
+    let summary = `${visible} visible / ${total} captured`;
+    if (state.filter !== "all") summary += ` · ${state.filter}`;
+    if (state.query) summary += ` · "${state.query.slice(0, 14)}"`;
+    if (state.paused) summary += " · paused";
+    els.feedSummary.textContent = summary;
   }
-  if (els.unreadCount) els.unreadCount.textContent = String(state.unread);
-  if (els.duplicateCount) els.duplicateCount.textContent = String(state.stats.duplicatesDropped || 0);
-  if (els.bufferCount) els.bufferCount.textContent = String(state.messages.length);
+
+  setNum(els.unreadCount, state.unread, true);
+  setNum(els.duplicateCount, state.stats.duplicatesDropped || 0, true);
+  setNum(els.bufferCount, state.messages.length, false);
+  if (els.pausedBannerCount) els.pausedBannerCount.textContent = String(state.unread);
   if (els.pauseButton) {
     els.pauseButton.textContent = state.paused
       ? `Resume${state.unread ? ` (${state.unread})` : ""}`
       : "Pause";
   }
+
+  document.querySelectorAll("[data-source-filter]").forEach((button) => {
+    const target = button.querySelector("[data-count]");
+    if (!target) return;
+    const source = button.dataset.sourceFilter;
+    const count = source === "all" ? total : state.stats.sources?.[source]?.count || 0;
+    target.textContent = String(count);
+  });
+
   renderTape(total, visible);
 }
 
 function renderTape(total, visible) {
   if (!els.tape) return;
+  const rate = messageRate();
   const sourceSegments = SOURCE_ORDER.map((source) => {
     const count = state.stats.sources?.[source]?.count || 0;
-    const color = sourceColor(source);
-    return `<span class="src" style="--src:${escapeAttr(color)}">${escapeHtml(source)} <b>${pad(count)}</b></span>`;
+    return `<span class="src" style="--src:${escapeAttr(sourceColor(source))}">${escapeHtml(source)} <b>${pad(count)}</b></span>`;
   }).join("");
   els.tape.innerHTML = `
     <span>captured <b>${pad(total)}</b></span>
     <span>visible <b>${pad(visible)}</b></span>
+    <span>rate <b>${rate}/min</b></span>
     <span>dedupe <b>${pad(state.stats.duplicatesDropped || 0)}</b></span>
     <span>unread <b>${pad(state.unread)}</b></span>
     ${sourceSegments}
@@ -297,6 +376,7 @@ function renderSourceCards() {
         <article class="source-card" style="--src:${escapeAttr(sourceColor(source))}" data-state="${escapeAttr(status.state || "idle")}">
           <div class="source-card-head">
             <strong>${escapeHtml(meta.label || source)}</strong>
+            <canvas class="spark" data-spark="${escapeAttr(source)}" aria-hidden="true"></canvas>
             <span class="metric-value">${sourceStats.count || 0}</span>
           </div>
           <p>${escapeHtml(status.detail || "idle")}</p>
@@ -305,15 +385,18 @@ function renderSourceCards() {
       `;
     })
     .join("");
+  drawSparks();
 }
 
 function renderFeed() {
   const target = isOverlay ? els.overlayFeed : els.feedList;
   if (!target) return;
 
+  hideJumpPill();
   const messages = filteredMessages();
   if (messages.length === 0) {
-    target.innerHTML = `<li class="empty-state">awaiting signal</li>`;
+    const copy = state.query ? "no matches — [esc] to clear" : "awaiting signal";
+    target.innerHTML = `<li class="empty-state">${copy}</li>`;
     return;
   }
 
@@ -321,6 +404,7 @@ function renderFeed() {
     .slice(0, isOverlay ? OVERLAY_RENDERED : MAX_RENDERED)
     .map((message) => (isOverlay ? overlayMarkup(message) : messageMarkup(message)))
     .join("");
+  if (!isOverlay) target.scrollTop = 0;
 }
 
 function prependMessage(message) {
@@ -331,8 +415,19 @@ function prependMessage(message) {
   const empty = target.querySelector(".empty-state");
   if (empty) empty.remove();
 
+  const atTop = isOverlay || target.scrollTop < 40;
   target.insertAdjacentHTML("afterbegin", isOverlay ? overlayMarkup(message) : messageMarkup(message));
-  target.firstElementChild?.classList.add("msg-enter");
+  const node = target.firstElementChild;
+  node?.classList.add("msg-enter");
+
+  if (!atTop && node) {
+    // Keep the viewport stable and offer a jump pill instead of yanking the scroll.
+    const styles = getComputedStyle(target);
+    const gap = parseFloat(styles.rowGap || "0") || 0;
+    target.scrollTop += node.getBoundingClientRect().height + gap;
+    state.newWhileAway += 1;
+    showJumpPill();
+  }
 
   const cap = isOverlay ? OVERLAY_RENDERED : MAX_RENDERED;
   while (target.children.length > cap) {
@@ -340,10 +435,27 @@ function prependMessage(message) {
   }
 }
 
+function showJumpPill() {
+  if (!els.jumpPill) return;
+  els.jumpPill.hidden = false;
+  if (els.jumpCount) els.jumpCount.textContent = String(state.newWhileAway);
+}
+
+function hideJumpPill() {
+  if (!els.jumpPill || els.jumpPill.hidden) {
+    state.newWhileAway = 0;
+    return;
+  }
+  state.newWhileAway = 0;
+  els.jumpPill.hidden = true;
+}
+
 function messageMarkup(message) {
   const selected = state.selectedId === message.id ? " selected" : "";
   const pinnedState = state.pinned.has(message.id);
-  const heatLevel = Math.min(4, Math.ceil((message.heat || 0) / 25));
+  const heat = message.heat || 0;
+  const tier = heat >= 75 ? 3 : heat >= 50 ? 2 : heat >= PRIORITY_HEAT ? 1 : 0;
+  const heatLevel = Math.min(4, Math.ceil(heat / 25));
   const heatBars = [1, 2, 3, 4]
     .map((step) => `<i${step <= heatLevel ? ' class="on"' : ""}></i>`)
     .join("");
@@ -357,17 +469,17 @@ function messageMarkup(message) {
     <li class="message${selected}${pinnedState ? " pinned-state" : ""}" data-message-id="${escapeAttr(message.id)}" style="--src:${escapeAttr(message.sourceColor)}">
       <div class="msg-head">
         <span class="src-tag">${escapeHtml(message.sourceLabel)}</span>
-        <span class="author" style="color:${escapeAttr(message.author.color || message.sourceColor)}">${escapeHtml(message.author.name)}</span>
+        <span class="author" style="color:${escapeAttr(visibleColor(message.author.color || message.sourceColor))}">${escapeHtml(message.author.name)}</span>
         ${verified}
         <span class="handle">${escapeHtml(formatHandle(message.author.handle))}</span>
         ${channel}
         ${mode}
         <span class="msg-spacer"></span>
-        <span class="heat" title="Heat ${message.heat || 0}"><span class="heat-bar">${heatBars}</span>${message.heat || 0}</span>
+        <span class="heat" data-tier="${tier}" title="Heat ${heat}"><span class="heat-bar">${heatBars}</span>${heat}</span>
         <time class="msg-time">${escapeHtml(formatTime(message.receivedAt))}</time>
         <button type="button" class="pin-btn" data-pin-id="${escapeAttr(message.id)}">${pinnedState ? "Unpin" : "Pin"}</button>
       </div>
-      <p class="msg-content">${linkify(message.content)}</p>
+      <p class="msg-content">${enrichContent(message.content, state.query)}</p>
     </li>
   `;
 }
@@ -377,8 +489,8 @@ function overlayMarkup(message) {
     <li class="overlay-item" style="--src:${escapeAttr(message.sourceColor)}">
       <span class="src-tag">${escapeHtml(message.sourceLabel)}</span>
       <div>
-        <strong style="color:${escapeAttr(message.author.color || message.sourceColor)}">${escapeHtml(message.author.name)}</strong>
-        <p class="msg-content">${linkify(message.content)}</p>
+        <strong style="color:${escapeAttr(visibleColor(message.author.color || message.sourceColor))}">${escapeHtml(message.author.name)}</strong>
+        <p class="msg-content">${enrichContent(message.content, "")}</p>
       </div>
     </li>
   `;
@@ -391,7 +503,6 @@ function selectMessage(id) {
   if (els.rawPayload && message) {
     els.rawPayload.textContent = JSON.stringify(message, null, 2);
   }
-  // Toggle classes in place — no feed rebuild.
   if (previous) {
     els.feedList?.querySelector(`[data-message-id="${cssEscape(previous)}"]`)?.classList.remove("selected");
   }
@@ -401,14 +512,15 @@ function selectMessage(id) {
 function togglePin(id) {
   const message = state.pinned.get(id) || state.messages.find((item) => item.id === id);
   if (!message) return;
-  if (state.pinned.has(id)) state.pinned.delete(id);
-  else state.pinned.set(id, message);
+  const pinnedNow = !state.pinned.has(id);
+  if (pinnedNow) state.pinned.set(id, message);
+  else state.pinned.delete(id);
   savePins();
   renderPinned();
+  toast(pinnedNow ? "pinned" : "unpinned");
 
   const row = els.feedList?.querySelector(`[data-message-id="${cssEscape(id)}"]`);
   if (row) {
-    const pinnedNow = state.pinned.has(id);
     row.classList.toggle("pinned-state", pinnedNow);
     const button = row.querySelector("[data-pin-id]");
     if (button) button.textContent = pinnedNow ? "Unpin" : "Pin";
@@ -434,6 +546,22 @@ function renderPinned() {
     .join("");
 }
 
+/* ---------- toasts ---------- */
+
+function toast(text, tone = "ok") {
+  if (!els.toastRoot) return;
+  const node = document.createElement("div");
+  node.className = "toast";
+  node.dataset.tone = tone;
+  node.textContent = text;
+  els.toastRoot.append(node);
+  while (els.toastRoot.children.length > 4) {
+    els.toastRoot.firstElementChild.remove();
+  }
+  setTimeout(() => node.classList.add("out"), 2200);
+  setTimeout(() => node.remove(), 2600);
+}
+
 /* ---------- filtering ---------- */
 
 function passesFilter(message) {
@@ -456,7 +584,7 @@ function filteredMessages() {
   return state.messages.filter(passesFilter);
 }
 
-/* ---------- ticker: clock, uptime, radar ---------- */
+/* ---------- ticker: clock, uptime, radar, sparks ---------- */
 
 function startTicker() {
   if (isOverlay) return;
@@ -474,6 +602,18 @@ function tick() {
     els.uptimeValue.textContent = formatDuration(Date.now() - new Date(state.stats.startedAt).getTime());
   }
   drawRadar();
+  drawSparks();
+}
+
+function bucketize(messages, buckets, bucketMs) {
+  const counts = new Array(buckets).fill(0);
+  const now = Date.now();
+  for (const message of messages) {
+    const age = Math.max(0, now - new Date(message.receivedAt).getTime());
+    const bucket = Math.floor(age / bucketMs);
+    if (bucket < buckets) counts[buckets - 1 - bucket] += 1;
+  }
+  return counts;
 }
 
 function drawRadar() {
@@ -492,7 +632,6 @@ function drawRadar() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssWidth, cssHeight);
 
-  // Background grid.
   ctx.strokeStyle = "rgba(236, 233, 223, 0.06)";
   ctx.lineWidth = 1;
   for (let i = 1; i < 4; i += 1) {
@@ -503,20 +642,16 @@ function drawRadar() {
     ctx.stroke();
   }
 
-  // Bucket counts per source over the radar window.
-  const counts = Object.fromEntries(SOURCE_ORDER.map((source) => [source, new Array(RADAR_BUCKETS).fill(0)]));
-  const now = Date.now();
-  for (const message of state.messages) {
-    const age = Math.max(0, now - new Date(message.receivedAt).getTime());
-    const bucket = Math.floor(age / RADAR_BUCKET_MS);
-    if (bucket >= RADAR_BUCKETS) continue;
-    const index = RADAR_BUCKETS - 1 - bucket;
-    if (counts[message.source]) counts[message.source][index] += 1;
-  }
+  const perSource = Object.fromEntries(
+    SOURCE_ORDER.map((source) => [
+      source,
+      bucketize(state.messages.filter((m) => m.source === source), RADAR_BUCKETS, RADAR_BUCKET_MS)
+    ])
+  );
 
   const totals = new Array(RADAR_BUCKETS).fill(0);
   for (const source of SOURCE_ORDER) {
-    counts[source].forEach((value, index) => {
+    perSource[source].forEach((value, index) => {
       totals[index] += value;
     });
   }
@@ -528,7 +663,7 @@ function drawRadar() {
   for (let index = 0; index < RADAR_BUCKETS; index += 1) {
     let y = floor;
     for (const source of SOURCE_ORDER) {
-      const value = counts[source][index];
+      const value = perSource[source][index];
       if (!value) continue;
       const barHeight = (value / max) * (cssHeight - 14);
       ctx.fillStyle = sourceColor(source);
@@ -536,6 +671,58 @@ function drawRadar() {
       y -= barHeight;
     }
   }
+
+  if (els.radarPeak) {
+    const peak = Math.max(0, ...totals);
+    els.radarPeak.textContent = peak > 0 ? `peak ${peak}` : "";
+  }
+}
+
+function drawSparks() {
+  document.querySelectorAll("[data-spark]").forEach((canvas) => {
+    const source = canvas.dataset.spark;
+    if (!canvas.clientWidth) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const cssWidth = canvas.clientWidth;
+    const cssHeight = canvas.clientHeight;
+    if (canvas.width !== Math.round(cssWidth * dpr)) {
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+    }
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const counts = bucketize(state.messages.filter((m) => m.source === source), 20, 3000);
+    const max = Math.max(1, ...counts);
+    const step = cssWidth / (counts.length - 1);
+    const color = sourceColor(source);
+
+    ctx.beginPath();
+    counts.forEach((value, index) => {
+      const x = index * step;
+      const y = cssHeight - 2 - (value / max) * (cssHeight - 5);
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    ctx.lineTo(cssWidth, cssHeight);
+    ctx.lineTo(0, cssHeight);
+    ctx.closePath();
+    ctx.globalAlpha = 0.14;
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+}
+
+function messageRate() {
+  const cutoff = Date.now() - 60000;
+  return state.messages.filter((m) => new Date(m.receivedAt).getTime() >= cutoff).length;
 }
 
 /* ---------- persistence ---------- */
@@ -559,6 +746,37 @@ function savePins() {
   }
 }
 
+/* ---------- content enrichment ---------- */
+
+function enrichContent(content, query) {
+  const parts = String(content).split(/(https?:\/\/[^\s]+)/g);
+  return parts
+    .map((part, index) => {
+      if (index % 2 === 1) {
+        const href = escapeAttr(part);
+        let label = part.replace(/^https?:\/\//, "");
+        if (label.length > 42) label = `${label.slice(0, 40)}…`;
+        return `<a href="${href}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>`;
+      }
+      let html = escapeHtml(part);
+      if (query) html = markMatches(html, query);
+      html = html.replace(/\$([A-Za-z]{2,8})\b/g, `<span class="cashtag">$$$1</span>`);
+      html = html.replace(/@(\w{2,30})\b/g, `<span class="mention">@$1</span>`);
+      return html;
+    })
+    .join("");
+}
+
+function markMatches(escapedText, query) {
+  const escapedQuery = escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (!escapedQuery) return escapedText;
+  try {
+    return escapedText.replace(new RegExp(`(${escapedQuery})`, "gi"), "<mark>$1</mark>");
+  } catch {
+    return escapedText;
+  }
+}
+
 /* ---------- helpers ---------- */
 
 async function postJson(url, body = {}) {
@@ -571,6 +789,48 @@ async function postJson(url, body = {}) {
 
 function sourceColor(source) {
   return state.sources[source]?.color || FALLBACK_COLORS[source] || "#888";
+}
+
+function visibleColor(value) {
+  // Clamp dark author colors (e.g. navy Twitch handles) to stay legible on the dark theme.
+  const rgb = parseColor(value);
+  if (!rgb) return value;
+  const luminance = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+  if (luminance >= 0.45) return value;
+  const lift = (channel) => Math.round(channel + (255 - channel) * 0.55);
+  return `rgb(${lift(rgb.r)}, ${lift(rgb.g)}, ${lift(rgb.b)})`;
+}
+
+function parseColor(value) {
+  const hex = String(value || "").trim();
+  const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(hex);
+  if (short) {
+    return {
+      r: parseInt(short[1] + short[1], 16),
+      g: parseInt(short[2] + short[2], 16),
+      b: parseInt(short[3] + short[3], 16)
+    };
+  }
+  const long = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (long) {
+    return {
+      r: parseInt(long[1], 16),
+      g: parseInt(long[2], 16),
+      b: parseInt(long[3], 16)
+    };
+  }
+  return null;
+}
+
+function setNum(el, value, flash) {
+  if (!el) return;
+  const next = String(value);
+  if (el.textContent === next) return;
+  el.textContent = next;
+  if (!flash) return;
+  el.classList.remove("tick");
+  void el.offsetWidth;
+  el.classList.add("tick");
 }
 
 function pad(value) {
@@ -596,13 +856,6 @@ function formatHandle(handle) {
 
 function cssEscape(value) {
   return window.CSS?.escape ? CSS.escape(value) : value.replace(/["\\]/g, "\\$&");
-}
-
-function linkify(text) {
-  return escapeHtml(text).replace(
-    /(https?:\/\/[^\s]+)/g,
-    '<a href="$1" target="_blank" rel="noreferrer">$1</a>'
-  );
 }
 
 function escapeHtml(value) {

@@ -7,6 +7,9 @@
     <meta name="description" content="Unified Twitch + X + Kick chat relay: one real-time feed with source labels.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
+    <link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
@@ -36,10 +39,10 @@
           <section class="rail-section">
             <h2>// sources</h2>
             <div class="segmented" role="group" aria-label="Source filter">
-              <button data-source-filter="all" class="active" aria-pressed="true">All</button>
-              <button data-source-filter="twitch" aria-pressed="false">Twitch</button>
-              <button data-source-filter="x" aria-pressed="false">X</button>
-              <button data-source-filter="kick" aria-pressed="false">Kick</button>
+              <button data-source-filter="all" class="active" aria-pressed="true" title="Show all sources [1]">All <small data-count>0</small></button>
+              <button data-source-filter="twitch" aria-pressed="false" title="Twitch only [2]">Twitch <small data-count>0</small></button>
+              <button data-source-filter="x" aria-pressed="false" title="X only [3]">X <small data-count>0</small></button>
+              <button data-source-filter="kick" aria-pressed="false" title="Kick only [4]">Kick <small data-count>0</small></button>
             </div>
           </section>
 
@@ -63,10 +66,10 @@
           <section class="rail-section">
             <h2>// transport</h2>
             <div class="control-grid">
-              <button id="pauseButton" type="button" aria-pressed="false">Pause</button>
-              <button id="spikeButton" type="button">Spike</button>
-              <button id="exportButton" type="button">Export</button>
-              <button id="clearSearchButton" type="button">Clear</button>
+              <button id="pauseButton" type="button" aria-pressed="false" title="Pause the feed [p]">Pause</button>
+              <button id="spikeButton" type="button" title="Inject a demo burst">Spike</button>
+              <button id="exportButton" type="button" title="Download feed as NDJSON">Export</button>
+              <button id="clearSearchButton" type="button" title="Clear search [esc]">Clear</button>
             </div>
           </section>
 
@@ -80,7 +83,7 @@
             </dl>
           </section>
 
-          <p class="rail-hint">[/] search · [p] pause · [esc] clear</p>
+          <p class="rail-hint">[/] search · [p] pause · [1-4] filter · [esc] clear</p>
         </aside>
 
         <section class="feed-panel" id="feedPanel" aria-label="Unified feed">
@@ -93,7 +96,15 @@
               <span></span><span></span><span></span><span></span><span></span>
             </div>
           </div>
-          <ol class="feed" id="feedList"></ol>
+          <div class="paused-banner" id="pausedBanner" hidden>
+            feed paused — <b id="pausedBannerCount">0</b> buffered
+          </div>
+          <div class="feed-scroll-zone">
+            <button class="jump-pill" id="jumpPill" type="button" hidden>
+              ▲ <b id="jumpCount">0</b> new
+            </button>
+            <ol class="feed" id="feedList"></ol>
+          </div>
         </section>
 
         <aside class="inspector" aria-label="Signal inspector">
@@ -103,8 +114,13 @@
           </section>
 
           <section class="panel-section">
-            <h2>// signal radar <small>60-sec window</small></h2>
+            <h2>// signal radar</h2>
             <canvas id="radarCanvas" aria-label="Message activity over the last 60 seconds"></canvas>
+            <div class="radar-axis" aria-hidden="true">
+              <span>−60s</span>
+              <span id="radarPeak"></span>
+              <span>now</span>
+            </div>
             <div class="radar-legend" aria-hidden="true">
               <span><i style="background:#9146ff"></i>twitch</span>
               <span><i style="background:#f4f2ea"></i>x</span>
@@ -118,7 +134,7 @@
           </section>
 
           <section class="panel-section raw-section">
-            <h2>// raw payload</h2>
+            <h2>// raw payload <button id="copyRawButton" type="button" class="mini-btn" title="Copy raw JSON">Copy</button></h2>
             <pre id="rawPayload">// select a message</pre>
           </section>
         </aside>
@@ -128,6 +144,8 @@
     <div class="overlay-root" id="overlayRoot" hidden>
       <ol class="overlay-feed" id="overlayFeed"></ol>
     </div>
+
+    <div class="toast-root" id="toastRoot" aria-live="polite"></div>
 
     <script type="module" src="/app.js"></script>
   </body>
