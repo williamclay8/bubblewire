@@ -20,7 +20,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Latest commit/deploy IDs are recorded in the final Lumi closeout for each release run.
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
 - Initial submission: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
-- Custom-domain resubmission: pending.
+- Custom-domain resubmission: recorded 2026-06-04 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
 - Date: 2026-06-04
 
 ## Verification Commands
@@ -112,6 +112,6 @@ Latest live source evidence from that proof:
 - Render fallback URL: `https://bubblewire-challenge.onrender.com`
 - Official Kick subscription requires owner-provided `KICK_ACCESS_TOKEN` with `events:subscribe`, `KICK_BROADCASTER_USER_ID`, and a webhook URL configured in the Kick developer app.
 
-## Remaining Submission Steps
+## Submission Closeout
 
-Resubmit the challenge form with `https://bubblewire.xyz` as the primary live URL.
+No remaining form steps. The custom-domain resubmission was recorded by Google Forms on 2026-06-04 at 18:17 CDT.

@@ -51,7 +51,7 @@ Live smoke passed on 2026-06-04 for `https://bubblewire.xyz` routes: `/healthz`,
 
 Latest public live proof verified `twitch,x,kick` expected sources: Twitch `connected` with 1046 messages, X `connected` with 42 messages, and Kick `connected` with 2 webhook proof events in `docs/evidence/logs/live-proof.json`.
 
-Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT. Custom-domain resubmission is pending.
+Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT. Custom-domain resubmission was recorded by Google Forms on 2026-06-04 at 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
 
 ## Live Integration Matrix
 
@@ -69,4 +69,4 @@ Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 
 
 ## Lumi Hygiene
 
-Verified app-code commit `9f4f8e8` is pushed, Render deploy `dep-d8gvqge8bjmc73cumgd0` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, demo video `https://youtu.be/MGEKOfs4yn0` is unlisted/reachable, and the Google Form entry is ready for custom-domain resubmission.
+Verified app-code commit `9f4f8e8` is pushed, Render deploy `dep-d8gvqge8bjmc73cumgd0` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, video/docs commit `49145a8` is pushed, demo video `https://youtu.be/MGEKOfs4yn0` is unlisted/reachable, and the Google Form custom-domain resubmission is recorded.

@@ -64,7 +64,7 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 - Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
 - Public live proof on `https://bubblewire.xyz`: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
 - YouTube demo: uploaded and unlisted at `https://youtu.be/MGEKOfs4yn0`
-- Challenge form: ready for custom-domain resubmission.
+- Challenge form: custom-domain resubmission recorded by Google Forms on 2026-06-04 at 18:17 CDT.
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`

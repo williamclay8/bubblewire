@@ -95,4 +95,4 @@ npm start
 - Submission form copy: `docs/submission-form-answer.md`
 - Demo notes: `docs/challenge-submission.md`
 - Initial challenge entry: June 4, 2026 at 2:42 PM CDT
-- Custom-domain resubmission: pending
+- Custom-domain resubmission: recorded June 4, 2026 at 18:17 CDT
