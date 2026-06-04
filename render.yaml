@@ -13,5 +13,7 @@ services:
         value: 22
       - key: DEMO_MODE
         value: off
+      - key: TWITCH_CHANNELS
+        value: fazebanks,marketbubble,xqc
       - key: PORT
         sync: false

@@ -2,7 +2,7 @@
 
 Bubblewire is a submission-grade unified chat relay for the Market Bubble Vibe Code Challenge: Twitch + X + Kick in one real-time feed with source labels.
 
-It runs with no package install, starts demo mode automatically, and upgrades to live provider adapters when server-side credentials are present.
+It runs with no package install, starts demo mode automatically, and upgrades to live provider adapters when server-side credentials or public channel config are present.
 
 ## Run
 
@@ -24,7 +24,7 @@ Health check: `http://localhost:3000/healthz`.
 
 ## Live Provider Paths
 
-Twitch: EventSub `channel.chat.message` is preferred. Set `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID`. IRC remains available as a fallback with `TWITCH_USERNAME`, `TWITCH_OAUTH_TOKEN`, and `TWITCH_CHANNELS`.
+Twitch: EventSub `channel.chat.message` is preferred. Set `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID`. IRC remains available as a fallback: set only `TWITCH_CHANNELS` for anonymous read-only public chat, or add `TWITCH_USERNAME` and `TWITCH_OAUTH_TOKEN` for authenticated IRC.
 
 X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_TOKEN`. Create stream rules in X before starting the app.
 
@@ -34,7 +34,7 @@ Set `DEMO_MODE=off` on Render for a true live-only public feed. When disabled, B
 
 ## Demo Mode
 
-Demo events are clearly marked as `demo`. Provider status pills do not pretend credentials exist: Twitch and X show demo/missing-credential status until live env vars are present, while Kick shows webhook-ready until the first webhook arrives.
+Demo events are clearly marked as `demo`. Provider status pills do not pretend credentials exist: Twitch and X show demo/missing-credential status until live config is present, while Kick shows webhook-ready until the first webhook arrives.
 
 Use `DEMO_MODE=on` locally or for judge-safe demos. Use `DEMO_MODE=off` for production/live-only monitoring.
 
@@ -49,7 +49,7 @@ Useful local controls:
 
 ## Provider Reality Notes
 
-- Twitch EventSub is the current preferred chat path; IRC is legacy-compatible fallback.
+- Twitch EventSub is the current preferred chat path; anonymous read-only IRC is the no-secret live fallback for public channels.
 - X filtered stream is near real-time posts, not livestream chat, and may require paid/API access.
 - Kick chat ingestion is webhook-based; localhost needs ngrok, Cloudflare Tunnel, or similar.
 - Provider tokens stay server-side. The browser receives only normalized events and status.
@@ -69,7 +69,7 @@ The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, h
 
 `npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms `/status.json` responds.
 
-`npm run proof:live` writes `docs/evidence/logs/live-proof.json` and confirms `DEMO_MODE=off` rejects synthetic demo/inject routes without creating demo messages.
+`npm run proof:live` writes `docs/evidence/logs/live-proof.json` and confirms `DEMO_MODE=off` rejects synthetic demo/inject routes without creating demo messages. Set `BUBBLEWIRE_EXPECT_SOURCES=twitch,x,kick` against the deployed app to prove all three live source paths are present with source-labeled messages.
 
 ## Deployment
 

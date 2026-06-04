@@ -148,14 +148,20 @@ function startTwitchEventSubConnector(hub, env) {
 }
 
 function startTwitchIrcConnector(hub, env) {
-  const username = env.TWITCH_USERNAME;
-  const token = env.TWITCH_OAUTH_TOKEN;
-  const channels = parseList(env.TWITCH_CHANNELS);
+  const config = resolveTwitchIrcConfig(env);
 
-  if (!username || !token || channels.length === 0) {
+  if (!config) {
     hub.setSourceStatus("twitch", {
       state: "missing",
-      detail: "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS"
+      detail: "missing TWITCH_CHANNELS"
+    });
+    return { stop() {} };
+  }
+
+  if (config.error) {
+    hub.setSourceStatus("twitch", {
+      state: "missing",
+      detail: config.error
     });
     return { stop() {} };
   }
@@ -169,7 +175,7 @@ function startTwitchIrcConnector(hub, env) {
     if (stopped) return;
     hub.setSourceStatus("twitch", {
       state: "connecting",
-      detail: `joining ${channels.join(", ")}`
+      detail: `joining ${config.channels.join(", ")}${config.mode === "anonymous" ? " anonymously" : ""}`
     });
 
     socket = tls.connect(
@@ -180,13 +186,13 @@ function startTwitchIrcConnector(hub, env) {
       },
       () => {
         reconnectMs = 1000;
-        socket.write(`PASS oauth:${token.replace(/^oauth:/, "")}\r\n`);
-        socket.write(`NICK ${username.toLowerCase()}\r\n`);
+        socket.write(`PASS ${ircPassword(config)}\r\n`);
+        socket.write(`NICK ${config.username.toLowerCase()}\r\n`);
         socket.write("CAP REQ :twitch.tv/tags twitch.tv/commands\r\n");
-        socket.write(`JOIN ${channels.map((channel) => `#${channel}`).join(",")}\r\n`);
+        socket.write(`JOIN ${config.channels.map((channel) => `#${channel}`).join(",")}\r\n`);
         hub.setSourceStatus("twitch", {
           state: "connected",
-          detail: `watching ${channels.length} channel${channels.length === 1 ? "" : "s"}`
+          detail: `watching ${config.channels.length} channel${config.channels.length === 1 ? "" : "s"}${config.mode === "anonymous" ? " anonymously" : ""}`
         });
       }
     );
@@ -242,6 +248,41 @@ function startTwitchIrcConnector(hub, env) {
       });
     }
   };
+}
+
+export function resolveTwitchIrcConfig(env = process.env) {
+  const channels = parseList(env.TWITCH_CHANNELS);
+  if (channels.length === 0) return null;
+
+  const username = env.TWITCH_USERNAME?.trim();
+  const token = env.TWITCH_OAUTH_TOKEN?.trim();
+
+  if (username && token) {
+    return {
+      mode: "authenticated",
+      username,
+      token,
+      channels
+    };
+  }
+
+  if (username || token) {
+    return {
+      error: "missing TWITCH_USERNAME or TWITCH_OAUTH_TOKEN for authenticated IRC"
+    };
+  }
+
+  return {
+    mode: "anonymous",
+    username: `justinfan${Math.floor(Math.random() * 90000 + 10000)}`,
+    token: "SCHMOOPIIE",
+    channels
+  };
+}
+
+function ircPassword(config) {
+  if (config.mode === "anonymous") return config.token;
+  return `oauth:${config.token.replace(/^oauth:/, "")}`;
 }
 
 function hasEventSubConfig(env) {
