@@ -1,0 +1,44 @@
+# Bubblewire Submission Form Copy
+
+## Project Name
+
+Bubblewire
+
+## Short Description
+
+Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges all three sources into one fast dashboard with unmistakable source labels, per-provider health, demo-safe events, raw payload provenance, and an OBS/browser-source overlay.
+
+## What To Try First
+
+1. Open the app.
+2. Click `Spike` to fire Twitch, X, and Kick demo events.
+3. Filter by source, pause the feed, pin a message, and select a message to inspect its normalized payload.
+4. Open `/overlay` to see the stream-ready view.
+
+## Why It Wins
+
+- It is not just a scrolling mock feed; it is a streamer command surface.
+- It is honest about provider reality: Twitch is EventSub-first, X is filtered-stream posts, and Kick is webhook-based.
+- It is judgeable with no secrets because demo mode is clearly labeled.
+- It has live-capable server-side adapter paths and keeps credentials out of the browser.
+- It includes proof artifacts: tests, local smoke proof, desktop screenshot, mobile screenshot, overlay screenshot, and an evidence manifest.
+
+## Live Adapter Notes
+
+Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID` are present. IRC remains available as a fallback.
+
+X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`.
+
+Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick`; a public tunnel or deployed URL is required for real Kick chat.
+
+## Proof Checklist
+
+- `npm test`: 7/7 passing
+- `npm run check`: passing
+- `npm run proof`: passing
+- Evidence manifest: `docs/evidence/manifest.md`
+- Screenshots: `docs/evidence/screenshots/`
+
+## Suggested Demo Video Script
+
+“Here is Bubblewire, a unified feed for Twitch, X, and Kick. The source strip shows provider state, and every message carries a source label plus normalized metadata. I’ll click Spike to simulate all three platforms, filter to Twitch, pin a message, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The app is demo-safe without secrets, but the server has live adapter paths for Twitch EventSub, X filtered stream, and Kick webhooks.”

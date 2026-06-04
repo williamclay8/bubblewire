@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bubblewire</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="shell" data-route="app">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Bubblewire home">
+          <img src="/assets/bubblewire-mark.svg" alt="" width="38" height="38">
+          <span>
+            <strong>Bubblewire</strong>
+            <small>Market Bubble Relay</small>
+          </span>
+        </a>
+        <div class="status-strip" id="statusStrip" aria-label="Source status"></div>
+        <a class="overlay-link" href="/overlay" title="Open overlay view">Overlay</a>
+      </header>
+
+      <main class="layout">
+        <aside class="rail" aria-label="Feed controls">
+          <div class="control-block">
+            <h2>Sources</h2>
+            <div class="segmented" role="group" aria-label="Source filter">
+              <button data-source-filter="all" class="active">All</button>
+              <button data-source-filter="twitch">Twitch</button>
+              <button data-source-filter="x">X</button>
+              <button data-source-filter="kick">Kick</button>
+            </div>
+          </div>
+
+          <div class="control-block">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="search" placeholder="author, channel, text">
+          </div>
+
+          <div class="switch-row">
+            <input id="priorityOnly" type="checkbox">
+            <label for="priorityOnly">Priority only</label>
+          </div>
+
+          <div class="control-grid">
+            <button id="pauseButton" type="button">Pause</button>
+            <button id="spikeButton" type="button">Spike</button>
+            <button id="exportButton" type="button">Export</button>
+            <button id="clearSearchButton" type="button">Clear</button>
+          </div>
+
+          <div class="mini-stat">
+            <span>Unread</span>
+            <strong id="unreadCount">0</strong>
+          </div>
+          <div class="mini-stat">
+            <span>Dedupe</span>
+            <strong id="duplicateCount">0</strong>
+          </div>
+        </aside>
+
+        <section class="feed-panel" aria-label="Unified feed">
+          <div class="feed-head">
+            <div>
+              <h1>Unified Feed</h1>
+              <p id="feedSummary">Waiting for messages</p>
+            </div>
+            <div class="live-meter" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <ol class="feed" id="feedList" aria-live="polite"></ol>
+        </section>
+
+        <aside class="inspector" aria-label="Signal inspector">
+          <section class="panel-section">
+            <h2>Source Stack</h2>
+            <div id="sourceCards" class="source-cards"></div>
+          </section>
+
+          <section class="panel-section">
+            <h2>Signal Radar</h2>
+            <canvas id="radarCanvas" width="320" height="150" aria-label="Message activity chart"></canvas>
+          </section>
+
+          <section class="panel-section">
+            <h2>Pinned</h2>
+            <div id="pinnedList" class="pinned-list"></div>
+          </section>
+
+          <section class="panel-section raw-section">
+            <h2>Raw Payload</h2>
+            <pre id="rawPayload">Select a message</pre>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div class="overlay-root" id="overlayRoot" hidden>
+      <ol class="overlay-feed" id="overlayFeed" aria-live="polite"></ol>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

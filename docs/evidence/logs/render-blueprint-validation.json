@@ -1,0 +1,13 @@
+{
+  "command": "render blueprints validate render.yaml --output json",
+  "recordedAt": "2026-06-04T18:43:34Z",
+  "result": {
+    "plan": {
+      "services": [
+        "bubblewire"
+      ],
+      "totalActions": 1
+    },
+    "valid": true
+  }
+}
