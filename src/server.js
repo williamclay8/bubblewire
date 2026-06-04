@@ -18,6 +18,13 @@ const hub = createFeedHub();
 const demo = createDemoConnector(hub);
 const connectors = [];
 
+const securityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy":
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+};
+
 connectors.push(startTwitchConnector(hub));
 connectors.push(startXConnector(hub));
 demo.start();
@@ -56,7 +63,8 @@ const server = http.createServer(async (request, response) => {
         .join("\n");
       response.writeHead(200, {
         "Content-Type": "application/x-ndjson",
-        "Content-Disposition": "attachment; filename=bubblewire-feed.ndjson"
+        "Content-Disposition": "attachment; filename=bubblewire-feed.ndjson",
+        ...securityHeaders
       });
       return response.end(`${ndjson}\n`);
     }
@@ -112,8 +120,10 @@ function handleEvents(response) {
   response.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
-    Connection: "keep-alive"
+    Connection: "keep-alive",
+    ...securityHeaders
   });
+  response.write("retry: 3000\n\n");
   sendSse(response, "snapshot", hub.snapshot());
 
   const unsubscribe = hub.subscribe((event) => {
@@ -136,18 +146,19 @@ async function serveStatic(request, response) {
   const filePath = normalize(join(publicDir, requestedPath));
 
   if (!filePath.startsWith(publicDir)) {
-    response.writeHead(403);
+    response.writeHead(403, securityHeaders);
     return response.end("Forbidden");
   }
 
   try {
     const file = await readFile(filePath);
     response.writeHead(200, {
-      "Content-Type": mimeType(filePath)
+      "Content-Type": mimeType(filePath),
+      ...securityHeaders
     });
     response.end(file);
   } catch {
-    response.writeHead(404);
+    response.writeHead(404, securityHeaders);
     response.end("Not found");
   }
 }
@@ -176,7 +187,8 @@ async function readJsonBody(request) {
 
 function sendJson(response, payload, status = 200) {
   response.writeHead(status, {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    ...securityHeaders
   });
   response.end(JSON.stringify(payload, null, 2));
 }

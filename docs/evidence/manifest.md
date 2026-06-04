@@ -41,6 +41,8 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 | `docs/evidence/screenshots/overlay-desktop.png` | 1280 x 720 | OBS/browser-source style overlay without dashboard chrome |
 | `docs/evidence/screenshots/dashboard-mobile-390.png` | 390 x 844 | Mobile layout, no horizontal overflow, controls remain usable |
 
+Note: screenshots and video frames were re-captured locally on 2026-06-04 (post-submission) after the front-end terminal redesign and security-header hardening. Viewports unchanged. The published YouTube demo video still shows the pre-redesign UI.
+
 ## Demo Recording Plan
 
 The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source is `docs/evidence/video/bubblewire-demo.webm`, generated from live Render frames in `docs/evidence/video-frames/`.
