@@ -184,18 +184,13 @@ function summarizeSnapshot(snapshot) {
       source: message.source,
       sourceLabel: message.sourceLabel,
       channel: message.channel,
-      content: truncate(message.content, 160),
+      contentLength: String(message.content || "").length,
       mode: message.mode,
       receivedAt: message.receivedAt,
       url: message.url,
       badges: message.badges || []
     }))
   };
-}
-
-function truncate(value = "", maxLength) {
-  const text = String(value);
-  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}…`;
 }
 
 async function waitForExpectedSources() {

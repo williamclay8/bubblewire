@@ -89,14 +89,14 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 | `https://bubblewire-challenge.onrender.com/export.ndjson` | HTTP 200, NDJSON export |
 | `POST https://bubblewire-challenge.onrender.com/kick.webhook` | HTTP 200, Kick webhook payload accepted |
 
-Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:11:51.751Z against `https://bubblewire-challenge.onrender.com`, passed with expected sources `twitch,x,kick`.
+Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:32:11.131Z against `https://bubblewire-challenge.onrender.com`, passed with expected sources `twitch,x,kick`.
 
 Latest live source evidence from that proof:
 
 | Source | Status | Count |
 | --- | --- | --- |
-| Twitch | `connected`, `watching 3 channels anonymously` | 243 |
-| X | `connected`, `filtered stream online` | 12 |
+| Twitch | `connected`, `watching 3 channels anonymously` | 73 |
+| X | `connected`, `filtered stream online` | 1 |
 | Kick | `connected`, `last webhook accepted` | 2 |
 
 ## Deployment Readiness

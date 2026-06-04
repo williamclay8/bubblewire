@@ -42,11 +42,11 @@ curl -sS https://bubblewire-challenge.onrender.com/status.json
 
 `/events.stream`, `/demo-spike.json`, `/export.ndjson`, and `/overlay.html` are the public-safe live routes used by the browser UI.
 
-Latest verified Render deploy: `dep-d8gvdv6k1jcs739a4lj0` for pushed commit `ddd1435`.
+Latest verified Render deploy: `dep-d8gvp099rddc73eqmap0` for pushed commit `889b4cc`.
 
 Live smoke passed on 2026-06-04 for `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html`.
 
-Latest public live proof verified `twitch,x,kick` expected sources: Twitch `connected` with 243 messages, X `connected` with 12 messages, and Kick `connected` with 2 webhook proof events in `docs/evidence/logs/live-proof.json`.
+Latest public live proof verified `twitch,x,kick` expected sources: Twitch `connected` with 73 messages, X `connected` with 1 message, and Kick `connected` with 2 webhook proof events in `docs/evidence/logs/live-proof.json`.
 
 Challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT.
 
@@ -66,4 +66,4 @@ Challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CD
 
 ## Lumi Hygiene
 
-Verified app-code commit `ddd1435` is pushed, Render deploy `dep-d8gvdv6k1jcs739a4lj0` is live, demo video `https://youtu.be/gvXG5qOaBTQ` is unlisted/reachable, and the Google Form entry is submitted.
+Verified app-code commit `889b4cc` is pushed, Render deploy `dep-d8gvp099rddc73eqmap0` is live, demo video `https://youtu.be/gvXG5qOaBTQ` is unlisted/reachable, and the Google Form entry is submitted.
