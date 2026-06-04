@@ -12,7 +12,7 @@ https://github.com/williamclay8/bubblewire
 
 https://bubblewire-challenge.onrender.com
 
-Verified Render deploy: `dep-d8gstqernols73b3fmbg`
+Verified Render deploy: `dep-d8gvdv6k1jcs739a4lj0`
 
 ## Submitted X Handle
 
@@ -47,7 +47,7 @@ Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges
 
 ## Live Adapter Notes
 
-Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID` are present. IRC remains available as a fallback.
+Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID` are present. For no-secret live monitoring, `TWITCH_CHANNELS` alone enables anonymous read-only IRC for public Twitch channels; authenticated IRC remains available with `TWITCH_USERNAME` and `TWITCH_OAUTH_TOKEN`.
 
 X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`.
 
@@ -55,10 +55,11 @@ Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick` and `/kic
 
 ## Proof Checklist
 
-- `npm test`: 7/7 passing
+- `npm test`: 10/10 passing
 - `npm run check`: passing
 - `npm run proof`: passing
-- Live smoke: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
+- Live smoke: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
+- Public live proof: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
 - YouTube demo: uploaded and unlisted at `https://youtu.be/gvXG5qOaBTQ`
 - Challenge form: submitted; Google Forms confirmation said "Your response has been recorded."
 - Evidence manifest: `docs/evidence/manifest.md`

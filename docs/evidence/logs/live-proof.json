@@ -1,7 +1,23 @@
 {
-  "generatedAt": "2026-06-04T21:10:14.129Z",
+  "generatedAt": "2026-06-04T22:11:51.751Z",
   "baseUrl": "https://bubblewire-challenge.onrender.com",
   "checks": [
+    {
+      "name": "overlay HTML",
+      "status": 200,
+      "bytes": 6927
+    },
+    {
+      "name": "NDJSON export",
+      "status": 200,
+      "bytes": 216892
+    },
+    {
+      "name": "SSE stream opens",
+      "status": 200,
+      "contentType": "text/event-stream",
+      "firstChunkBytes": 1363
+    },
     {
       "name": "before runtime is live-only",
       "status": "pass",
@@ -11,7 +27,7 @@
         "demoRunning": false,
         "liveOnly": true
       },
-      "totalMessages": 0,
+      "totalMessages": 256,
       "demoMessages": 0
     },
     {
@@ -40,6 +56,14 @@
       }
     },
     {
+      "name": "/kick.webhook accepts live webhook-shaped input",
+      "status": 200,
+      "body": {
+        "ok": true,
+        "id": "kick:live-proof-1780611116096"
+      }
+    },
+    {
       "name": "after runtime is live-only",
       "status": "pass",
       "runtime": {
@@ -48,8 +72,39 @@
         "demoRunning": false,
         "liveOnly": true
       },
-      "totalMessages": 0,
+      "totalMessages": 257,
       "demoMessages": 0
+    },
+    {
+      "name": "expected live sources are present",
+      "status": "pass",
+      "expectedSources": [
+        "twitch",
+        "x",
+        "kick"
+      ],
+      "sourceStatus": {
+        "twitch": {
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-04T22:07:22.203Z"
+        },
+        "x": {
+          "state": "connected",
+          "detail": "filtered stream online",
+          "updatedAt": "2026-06-04T22:07:46.219Z"
+        },
+        "kick": {
+          "state": "connected",
+          "detail": "last webhook accepted",
+          "updatedAt": "2026-06-04T22:11:56.303Z"
+        }
+      },
+      "sourceCounts": {
+        "twitch": 243,
+        "x": 12,
+        "kick": 2
+      }
     },
     {
       "name": "live-only smoke",
@@ -60,142 +115,400 @@
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 40,
-      "checkedAt": "2026-06-04T21:10:14.842Z"
+      "uptimeSeconds": 271,
+      "checkedAt": "2026-06-04T22:11:52.589Z"
     },
     "before": {
-      "messages": [],
-      "stats": {
-        "totalMessages": 0,
-        "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T21:09:35.041Z",
-        "sources": {
-          "twitch": {
-            "count": 0,
-            "lastMessageAt": null
-          },
-          "x": {
-            "count": 0,
-            "lastMessageAt": null
-          },
-          "kick": {
-            "count": 0,
-            "lastMessageAt": null
-          }
-        }
-      },
-      "status": {
-        "twitch": {
-          "state": "missing",
-          "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        },
-        "x": {
-          "state": "missing",
-          "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        },
-        "kick": {
-          "state": "webhook-ready",
-          "detail": "POST Kick chat.message.sent events to /kick.webhook",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        }
-      },
-      "sources": {
-        "twitch": {
-          "label": "Twitch",
-          "color": "#9146ff",
-          "home": "https://www.twitch.tv"
-        },
-        "x": {
-          "label": "X",
-          "color": "#f4f2ea",
-          "home": "https://x.com"
-        },
-        "kick": {
-          "label": "Kick",
-          "color": "#53fc18",
-          "home": "https://kick.com"
-        },
-        "demo": {
-          "label": "Demo",
-          "color": "#d8a84a",
-          "home": ""
-        }
-      },
       "runtime": {
         "demoEnabled": false,
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true
-      }
+      },
+      "status": {
+        "twitch": {
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-04T22:07:22.203Z"
+        },
+        "x": {
+          "state": "connected",
+          "detail": "filtered stream online",
+          "updatedAt": "2026-06-04T22:07:46.219Z"
+        },
+        "kick": {
+          "state": "connected",
+          "detail": "last webhook accepted",
+          "updatedAt": "2026-06-04T22:08:03.923Z"
+        }
+      },
+      "stats": {
+        "totalMessages": 256,
+        "duplicatesDropped": 0,
+        "startedAt": "2026-06-04T22:07:21.990Z",
+        "sources": {
+          "twitch": {
+            "count": 243,
+            "lastMessageAt": "2026-06-04T22:11:51.090Z"
+          },
+          "x": {
+            "count": 12,
+            "lastMessageAt": "2026-06-04T22:10:42.000Z"
+          },
+          "kick": {
+            "count": 1,
+            "lastMessageAt": "2026-06-04T22:08:03.719Z"
+          }
+        }
+      },
+      "sampleMessages": [
+        {
+          "id": "twitch:82efd715-4598-4fd8-8ce7-78b9fe5a7e71",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "ACTION AOXNER won 100 points in roulette and now has 10000706 points! FeelsGoodMan",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:51.090Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:5ec33ebe-dd76-4d52-beec-2719730a7df4",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!roulette  100",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:50.817Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/30",
+            "premium/1"
+          ]
+        },
+        {
+          "id": "twitch:0d01a772-dc4b-488d-99f9-22e5a2a2ad56",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "israel knicks in 4 and my life is yours",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:48.501Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/18",
+            "nasa-artemis-ii/1"
+          ]
+        },
+        {
+          "id": "twitch:c7ebb572-72ea-4a9d-a65d-1bd184830981",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "content": "if you can’t beat em, join em boys",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:46.681Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:20ef3a9f-69a8-43a4-8367-a817f63c7100",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "PLEASE knicks in 4",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:43.599Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "destiny-2-final-shape-raid-race/1"
+          ]
+        },
+        {
+          "id": "twitch:7cd9b03c-0cde-45ac-8f44-16811870f7fb",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "AKBuss, xQc was last seen 16 hours and 15 minutes ago, and last active 22 hours and 54 minutes ago.",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:41.206Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:6d3dfcb6-b976-4ff6-acfb-e347aaeebcec",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!lastseen xqc",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:41.078Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/2",
+            "bits/100"
+          ]
+        },
+        {
+          "id": "twitch:3f2d5c4f-1d43-40e6-9644-e5c455f5c99c",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!lastseen xqc",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:40.933Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        },
+        {
+          "id": "twitch:03e1ae72-a4c9-4e94-8461-2df8919ca106",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "content": "there will be new jobs",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:40.852Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:a5ddc573-3052-47c1-ab50-7b88fe9890c9",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "ACTION dm_me_your_clankussy lost 32 points in roulette and now has 0 points! xqcSmash",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:39.204Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:0eff954f-1414-4ec4-9c80-705b322e4def",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!roulette all",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:38.941Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        },
+        {
+          "id": "twitch:cb339b2c-0d57-4948-8c63-9ccca1455a0f",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "OOOO TITLE HOLYYYY SHIT",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:37.167Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        }
+      ]
     },
     "after": {
-      "messages": [],
-      "stats": {
-        "totalMessages": 0,
-        "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T21:09:35.041Z",
-        "sources": {
-          "twitch": {
-            "count": 0,
-            "lastMessageAt": null
-          },
-          "x": {
-            "count": 0,
-            "lastMessageAt": null
-          },
-          "kick": {
-            "count": 0,
-            "lastMessageAt": null
-          }
-        }
-      },
-      "status": {
-        "twitch": {
-          "state": "missing",
-          "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        },
-        "x": {
-          "state": "missing",
-          "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        },
-        "kick": {
-          "state": "webhook-ready",
-          "detail": "POST Kick chat.message.sent events to /kick.webhook",
-          "updatedAt": "2026-06-04T21:09:35.042Z"
-        }
-      },
-      "sources": {
-        "twitch": {
-          "label": "Twitch",
-          "color": "#9146ff",
-          "home": "https://www.twitch.tv"
-        },
-        "x": {
-          "label": "X",
-          "color": "#f4f2ea",
-          "home": "https://x.com"
-        },
-        "kick": {
-          "label": "Kick",
-          "color": "#53fc18",
-          "home": "https://kick.com"
-        },
-        "demo": {
-          "label": "Demo",
-          "color": "#d8a84a",
-          "home": ""
-        }
-      },
       "runtime": {
         "demoEnabled": false,
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true
-      }
+      },
+      "status": {
+        "twitch": {
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-04T22:07:22.203Z"
+        },
+        "x": {
+          "state": "connected",
+          "detail": "filtered stream online",
+          "updatedAt": "2026-06-04T22:07:46.219Z"
+        },
+        "kick": {
+          "state": "connected",
+          "detail": "last webhook accepted",
+          "updatedAt": "2026-06-04T22:11:56.303Z"
+        }
+      },
+      "stats": {
+        "totalMessages": 257,
+        "duplicatesDropped": 0,
+        "startedAt": "2026-06-04T22:07:21.990Z",
+        "sources": {
+          "twitch": {
+            "count": 243,
+            "lastMessageAt": "2026-06-04T22:11:51.090Z"
+          },
+          "x": {
+            "count": 12,
+            "lastMessageAt": "2026-06-04T22:10:42.000Z"
+          },
+          "kick": {
+            "count": 2,
+            "lastMessageAt": "2026-06-04T22:11:56.096Z"
+          }
+        }
+      },
+      "sampleMessages": [
+        {
+          "id": "kick:live-proof-1780611116096",
+          "source": "kick",
+          "sourceLabel": "Kick",
+          "channel": "marketbubble",
+          "content": "Kick webhook live proof event",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:56.096Z",
+          "url": "https://kick.com/marketbubble",
+          "badges": [
+            "Reviewer"
+          ]
+        },
+        {
+          "id": "twitch:82efd715-4598-4fd8-8ce7-78b9fe5a7e71",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "ACTION AOXNER won 100 points in roulette and now has 10000706 points! FeelsGoodMan",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:51.090Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:5ec33ebe-dd76-4d52-beec-2719730a7df4",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!roulette  100",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:50.817Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/30",
+            "premium/1"
+          ]
+        },
+        {
+          "id": "twitch:0d01a772-dc4b-488d-99f9-22e5a2a2ad56",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "israel knicks in 4 and my life is yours",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:48.501Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/18",
+            "nasa-artemis-ii/1"
+          ]
+        },
+        {
+          "id": "twitch:c7ebb572-72ea-4a9d-a65d-1bd184830981",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "content": "if you can’t beat em, join em boys",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:46.681Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:20ef3a9f-69a8-43a4-8367-a817f63c7100",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "PLEASE knicks in 4",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:43.599Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "destiny-2-final-shape-raid-race/1"
+          ]
+        },
+        {
+          "id": "twitch:7cd9b03c-0cde-45ac-8f44-16811870f7fb",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "AKBuss, xQc was last seen 16 hours and 15 minutes ago, and last active 22 hours and 54 minutes ago.",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:41.206Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:6d3dfcb6-b976-4ff6-acfb-e347aaeebcec",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!lastseen xqc",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:41.078Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/2",
+            "bits/100"
+          ]
+        },
+        {
+          "id": "twitch:3f2d5c4f-1d43-40e6-9644-e5c455f5c99c",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!lastseen xqc",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:40.933Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        },
+        {
+          "id": "twitch:03e1ae72-a4c9-4e94-8461-2df8919ca106",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "fazebanks",
+          "content": "there will be new jobs",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:40.852Z",
+          "url": "https://www.twitch.tv/fazebanks",
+          "badges": []
+        },
+        {
+          "id": "twitch:a5ddc573-3052-47c1-ab50-7b88fe9890c9",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "ACTION dm_me_your_clankussy lost 32 points in roulette and now has 0 points! xqcSmash",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:39.204Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moderator/1"
+          ]
+        },
+        {
+          "id": "twitch:0eff954f-1414-4ec4-9c80-705b322e4def",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "content": "!roulette all",
+          "mode": "live",
+          "receivedAt": "2026-06-04T22:11:38.941Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        }
+      ]
     }
   },
   "result": "pass"

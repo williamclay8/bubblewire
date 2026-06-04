@@ -22,8 +22,9 @@ try {
   await checkTextRoute("/export.ndjson", "NDJSON export");
   await checkSseRoute("/events.stream");
 
-  proof.snapshots.before = await getJson("/status.json");
-  checkRuntime(proof.snapshots.before, "before");
+  const beforeSnapshot = await getJson("/status.json");
+  proof.snapshots.before = summarizeSnapshot(beforeSnapshot);
+  checkRuntime(beforeSnapshot, "before");
 
   await expectRejectedPost("/demo-spike.json", {});
   await expectRejectedPost("/demo-start.json", {});
@@ -35,11 +36,12 @@ try {
 
   if (postKickProof) await postKickWebhook();
 
-  proof.snapshots.after = expectedSources.length
+  const afterSnapshot = expectedSources.length
     ? await waitForExpectedSources()
     : await getJson("/status.json");
-  checkRuntime(proof.snapshots.after, "after");
-  checkExpectedSources(proof.snapshots.after);
+  proof.snapshots.after = summarizeSnapshot(afterSnapshot);
+  checkRuntime(afterSnapshot, "after");
+  checkExpectedSources(afterSnapshot);
   pass("live-only smoke");
   proof.result = "pass";
 } catch (error) {
@@ -170,6 +172,30 @@ function checkRuntime(snapshot, label) {
   });
 
   if (failures.length) throw new Error(`${label}: ${failures.join("; ")}`);
+}
+
+function summarizeSnapshot(snapshot) {
+  return {
+    runtime: snapshot.runtime,
+    status: snapshot.status,
+    stats: snapshot.stats,
+    sampleMessages: (snapshot.messages || []).slice(0, 12).map((message) => ({
+      id: message.id,
+      source: message.source,
+      sourceLabel: message.sourceLabel,
+      channel: message.channel,
+      content: truncate(message.content, 160),
+      mode: message.mode,
+      receivedAt: message.receivedAt,
+      url: message.url,
+      badges: message.badges || []
+    }))
+  };
+}
+
+function truncate(value = "", maxLength) {
+  const text = String(value);
+  return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}…`;
 }
 
 async function waitForExpectedSources() {

@@ -25,7 +25,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 8/8 tests | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 10/10 tests | `docs/evidence/logs/proof.json` |
 | `npm run check` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass | `docs/evidence/logs/live-proof.json` |
@@ -33,7 +33,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 
 `npm run proof` also posts a Kick `chat.message.sent`-shaped webhook payload to `/kick.webhook`, triggers a demo spike, and confirms the local status endpoint responds through `/status.json`.
 
-`npm run proof:live` confirms `DEMO_MODE=off` reports `runtime.liveOnly: true`, rejects `/demo-spike.json`, `/demo-start.json`, and `/inject.json` with HTTP 409, and leaves the feed free of demo messages after those rejected requests.
+`npm run proof:live` confirms `DEMO_MODE=off` reports `runtime.liveOnly: true`, rejects `/demo-spike.json`, `/demo-start.json`, and `/inject.json` with HTTP 409, proves `/events.stream`, `/export.ndjson`, and `/overlay.html`, posts one Kick webhook-shaped event, and verifies expected live sources when `BUBBLEWIRE_EXPECT_SOURCES` is set.
 
 ## Browser Evidence
 
@@ -53,7 +53,7 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 
 | Source | Implemented live path | Demo-safe/live-only fallback |
 | --- | --- | --- |
-| Twitch | EventSub `channel.chat.message`; IRC fallback parser and connector | Demo mode emits labeled demo messages; live-only mode marks missing credentials as `missing` |
+| Twitch | EventSub `channel.chat.message`; anonymous read-only IRC fallback for public channels; authenticated IRC fallback | Demo mode emits labeled demo messages; live-only mode marks missing `TWITCH_CHANNELS` as `missing` |
 | X | X API v2 filtered stream via server-side bearer token | Demo mode emits labeled demo messages; live-only mode marks missing `X_BEARER_TOKEN` as `missing` |
 | Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Demo mode emits labeled demo messages; live-only mode stays `webhook-ready` until a webhook arrives |
 
@@ -62,7 +62,7 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 - No secret values were captured.
 - `.env` and `.env.*` are ignored.
 - `.env.example` lists env var names only.
-- Browser screenshots show demo/local status only.
+- Browser screenshots avoid secrets and private dashboards.
 - The demo recording plan explicitly forbids showing secrets, `.env` files, tokens, or private dashboards.
 
 ## Lumi Hygiene
@@ -86,6 +86,16 @@ The uploaded demo video is `https://youtu.be/gvXG5qOaBTQ`. The local WebM source
 | `POST https://bubblewire-challenge.onrender.com/inject.json` | Expected HTTP 409 when `DEMO_MODE=off` |
 | `https://bubblewire-challenge.onrender.com/export.ndjson` | HTTP 200, NDJSON export |
 | `POST https://bubblewire-challenge.onrender.com/kick.webhook` | HTTP 200, Kick webhook payload accepted |
+
+Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:11:51.751Z against `https://bubblewire-challenge.onrender.com`, passed with expected sources `twitch,x,kick`.
+
+Latest live source evidence from that proof:
+
+| Source | Status | Count |
+| --- | --- | --- |
+| Twitch | `connected`, `watching 3 channels anonymously` | 243 |
+| X | `connected`, `filtered stream online` | 12 |
+| Kick | `connected`, `last webhook accepted` | 2 |
 
 ## Deployment Readiness
 
