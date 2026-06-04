@@ -2,16 +2,20 @@
 
 ## Claim
 
-Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X + Kick with source labels, demo-safe operation, server-side live adapter paths, and judge-readable evidence.
+Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + X + Kick with source labels, demo-safe operation, server-side live adapter paths, and judge-readable evidence.
 
 ## Target
 
 - Local app: `http://127.0.0.1:3000`
-- Overlay: `http://127.0.0.1:3000/overlay`
+- Public app: `https://bubblewire-challenge.onrender.com`
+- Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
+- Public health check: `https://bubblewire-challenge.onrender.com/healthz`
+- Local overlay: `http://127.0.0.1:3000/overlay.html`
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
 - GitHub repo: `https://github.com/williamclay8/bubblewire`
 - Commit: see `git log --oneline -1` for the current pushed evidence commit
+- Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
 - Date: 2026-06-04
 
 ## Verification Commands
@@ -23,7 +27,7 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
 | `render blueprints validate render.yaml --output json` | Pass | `docs/evidence/logs/render-blueprint-validation.json` |
 
-`npm run proof` also posts a Kick `chat.message.sent`-shaped webhook payload to `/webhooks/kick`, triggers a demo spike, and confirms the local status endpoint responds.
+`npm run proof` also posts a Kick `chat.message.sent`-shaped webhook payload to `/kick.webhook`, triggers a demo spike, and confirms the local status endpoint responds through `/status.json`.
 
 ## Browser Evidence
 
@@ -43,7 +47,7 @@ The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready t
 | --- | --- | --- |
 | Twitch | EventSub `channel.chat.message`; IRC fallback parser and connector | Clearly labeled demo feed when Twitch env vars are absent |
 | X | X API v2 filtered stream via server-side bearer token | Clearly labeled demo feed when `X_BEARER_TOKEN` is absent |
-| Kick | `chat.message.sent` webhook to `/webhooks/kick` | Webhook-ready status plus demo feed until a webhook arrives |
+| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Webhook-ready status plus demo feed until a webhook arrives |
 
 ## Redaction And Secret Boundary
 
@@ -55,10 +59,10 @@ The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready t
 
 ## Lumi Hygiene
 
-- Local changes: yes
-- Committed: yes
-- Pushed: yes, `https://github.com/williamclay8/bubblewire`
-- Deployed/live: no public deployment verified
+- Local changes: yes, route aliases and docs are awaiting commit during this capture
+- Committed: pending this evidence refresh
+- Pushed: pending this evidence refresh; previous pushed repo is `https://github.com/williamclay8/bubblewire`
+- Deployed/live: initial Render deploy verified for `/` and `/healthz`; final alias deploy verification pending
 - Local server: running at `http://127.0.0.1:3000` during this evidence capture
 
 ## Deployment Readiness
@@ -68,10 +72,11 @@ The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready t
 - `Procfile` is present for generic process hosts.
 - Public hosts must bind `HOST=0.0.0.0`.
 - `/healthz` returns JSON health status.
+- Render service URL: `https://bubblewire-challenge.onrender.com`
 
 ## Remaining Submission Steps
 
-1. Select the Render workspace for MCP service creation, or create the service from the Render Dashboard using `render.yaml`.
-2. Deploy and live-verify the public URL.
-3. Record a 60-90 second demo using the script in `docs/challenge-submission.md`.
+1. Commit and push the public route-alias fix.
+2. Wait for Render auto-deploy of the new commit.
+3. Live-verify `/healthz`, `/status.json`, `/events.stream`, `/overlay.html`, `/demo-spike.json`, and `/export.ndjson`.
 4. Submit the app URL, repository, and evidence artifacts through the challenge form.

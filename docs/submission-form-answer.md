@@ -8,6 +8,14 @@ Bubblewire
 
 https://github.com/williamclay8/bubblewire
 
+## Live App
+
+https://bubblewire-challenge.onrender.com
+
+## Overlay
+
+https://bubblewire-challenge.onrender.com/overlay.html
+
 ## Short Description
 
 Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges all three sources into one fast dashboard with unmistakable source labels, per-provider health, demo-safe events, raw payload provenance, and an OBS/browser-source overlay.
@@ -17,7 +25,7 @@ Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges
 1. Open the app.
 2. Click `Spike` to fire Twitch, X, and Kick demo events.
 3. Filter by source, pause the feed, pin a message, and select a message to inspect its normalized payload.
-4. Open `/overlay` to see the stream-ready view.
+4. Open `/overlay.html` to see the stream-ready view.
 
 ## Why It Wins
 
@@ -33,7 +41,7 @@ Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT
 
 X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`.
 
-Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick`; a public tunnel or deployed URL is required for real Kick chat.
+Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick` and `/kick.webhook`; a public tunnel or deployed URL is required for real Kick chat.
 
 ## Proof Checklist
 

@@ -19,7 +19,7 @@ Target length: 60-90 seconds.
 5. Pin a message and pause/resume the feed.
    Voiceover: "This is a streamer command surface: pause, unread count, pinning, search, and priority filtering."
 
-6. Open `/overlay`.
+6. Open `/overlay.html`.
    Voiceover: "The overlay route is ready for OBS or any browser source."
 
 7. End on `docs/evidence/manifest.md`.

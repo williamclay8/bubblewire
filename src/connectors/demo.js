@@ -35,7 +35,7 @@ export function createDemoConnector(hub, options = {}) {
     });
     hub.setSourceStatus("kick", {
       state: "webhook-ready",
-      detail: "POST Kick chat.message.sent events to /webhooks/kick"
+      detail: "POST Kick chat.message.sent events to /kick.webhook"
     });
     timer = setInterval(pushNext, intervalMs);
     pushSpike(5);

@@ -1,4 +1,4 @@
-const isOverlay = location.pathname === "/overlay";
+const isOverlay = location.pathname === "/overlay" || location.pathname === "/overlay.html";
 
 const state = {
   messages: [],
@@ -76,9 +76,9 @@ function bindControls() {
     renderStats();
   });
 
-  els.spikeButton?.addEventListener("click", () => postJson("/api/demo/spike"));
+  els.spikeButton?.addEventListener("click", () => postJson("/demo-spike.json"));
   els.exportButton?.addEventListener("click", () => {
-    location.href = "/api/export.ndjson";
+    location.href = "/export.ndjson";
   });
   els.clearSearchButton?.addEventListener("click", () => {
     state.query = "";
@@ -88,12 +88,12 @@ function bindControls() {
 }
 
 async function loadSnapshot() {
-  const response = await fetch("/api/status");
+  const response = await fetch("/status.json");
   applySnapshot(await response.json());
 }
 
 function connectEvents() {
-  const events = new EventSource("/events");
+  const events = new EventSource("/events.stream");
   events.addEventListener("snapshot", (event) => applySnapshot(JSON.parse(event.data)));
   events.addEventListener("message", (event) => {
     const payload = JSON.parse(event.data);

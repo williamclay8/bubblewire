@@ -18,11 +18,11 @@ await mkdir(outputDir, { recursive: true });
 proof.commands.push(await runCommand("npm", ["test"]));
 proof.commands.push(await runCommand("npm", ["run", "check"]));
 
-const before = await getJson("/api/status");
+const before = await getJson("/status.json");
 proof.smoke.before = summarizeStatus(before);
 proof.smoke.healthz = await getJson("/healthz");
 
-const kickWebhook = await postJson("/webhooks/kick", {
+const kickWebhook = await postJson("/kick.webhook", {
   message_id: `proof-${Date.now()}`,
   broadcaster: {
     username: "marketbubble",
@@ -41,8 +41,8 @@ const kickWebhook = await postJson("/webhooks/kick", {
   created_at: new Date().toISOString()
 });
 
-await postJson("/api/demo/spike", {});
-const after = await getJson("/api/status");
+await postJson("/demo-spike.json", {});
+const after = await getJson("/status.json");
 
 proof.smoke.kickWebhook = kickWebhook;
 proof.smoke.after = summarizeStatus(after);

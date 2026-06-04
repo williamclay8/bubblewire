@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-04T18:38:49.860Z",
+  "generatedAt": "2026-06-04T19:15:20.693Z",
   "baseUrl": "http://127.0.0.1:3000",
   "commands": [
     {
       "command": "npm test",
       "exitCode": 0,
-      "stdout": "\n> bubblewire@0.1.0 test\n> node --test\n\n✔ createFeedHub stores each message once and updates source stats (1.811458ms)\n✔ createFeedHub broadcasts messages and status updates to subscribers (0.125875ms)\n✔ parseIrcTags decodes Twitch IRC tag escapes (1.106542ms)\n✔ normalizeTwitchLine maps a PRIVMSG into the unified message contract (0.77475ms)\n✔ normalizeTwitchEventSubNotification maps channel.chat.message notifications (0.164541ms)\n✔ normalizeKickWebhook maps chat.message.sent webhook payloads (0.177209ms)\n✔ normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels (0.158625ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 79.353375\n",
+      "stdout": "\n> bubblewire@0.1.0 test\n> node --test\n\n✔ createFeedHub stores each message once and updates source stats (2.13475ms)\n✔ createFeedHub broadcasts messages and status updates to subscribers (0.131208ms)\n✔ parseIrcTags decodes Twitch IRC tag escapes (1.447542ms)\n✔ normalizeTwitchLine maps a PRIVMSG into the unified message contract (0.860041ms)\n✔ normalizeTwitchEventSubNotification maps channel.chat.message notifications (0.56075ms)\n✔ normalizeKickWebhook maps chat.message.sent webhook payloads (0.1765ms)\n✔ normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels (0.149292ms)\nℹ tests 7\nℹ suites 0\nℹ pass 7\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 75.668708\n",
       "stderr": "npm warn Unknown env config \"minimum-release-age\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown user config \"minimum-release-age\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
     },
     {
@@ -17,69 +17,69 @@
   ],
   "smoke": {
     "before": {
-      "totalMessages": 233,
+      "totalMessages": 117,
       "duplicatesDropped": 0,
       "status": {
         "twitch": {
           "state": "demo",
           "detail": "demo feed active; set Twitch EventSub env vars for live chat",
-          "updatedAt": "2026-06-04T18:34:41.822Z"
+          "updatedAt": "2026-06-04T19:13:19.929Z"
         },
         "x": {
           "state": "demo",
           "detail": "demo feed active; set X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T18:34:41.822Z"
+          "updatedAt": "2026-06-04T19:13:19.929Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-04T18:35:04.264Z"
+          "updatedAt": "2026-06-04T19:13:27.458Z"
         }
       },
       "sourceCounts": {
-        "twitch": 77,
-        "x": 77,
-        "kick": 79
+        "twitch": 39,
+        "x": 39,
+        "kick": 39
       }
     },
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 249,
-      "checkedAt": "2026-06-04T18:38:50.301Z"
+      "uptimeSeconds": 121,
+      "checkedAt": "2026-06-04T19:15:21.129Z"
     },
     "kickWebhook": {
       "ok": true,
-      "id": "kick:proof-1780598330301"
+      "id": "kick:proof-1780600521129"
     },
     "after": {
-      "totalMessages": 234,
+      "totalMessages": 118,
       "duplicatesDropped": 0,
       "status": {
         "twitch": {
           "state": "demo",
           "detail": "demo feed active; set Twitch EventSub env vars for live chat",
-          "updatedAt": "2026-06-04T18:34:41.822Z"
+          "updatedAt": "2026-06-04T19:13:19.929Z"
         },
         "x": {
           "state": "demo",
           "detail": "demo feed active; set X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T18:34:41.822Z"
+          "updatedAt": "2026-06-04T19:13:19.929Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-04T18:38:50.302Z"
+          "updatedAt": "2026-06-04T19:15:21.130Z"
         }
       },
       "sourceCounts": {
-        "twitch": 77,
-        "x": 77,
-        "kick": 80
+        "twitch": 39,
+        "x": 39,
+        "kick": 40
       }
     },
     "latestMessage": {
-      "id": "kick:proof-1780598330301",
+      "id": "kick:proof-1780600521129",
       "source": "kick",
       "sourceLabel": "Kick",
       "sourceColor": "#53fc18",
@@ -94,7 +94,7 @@
       },
       "channel": "marketbubble",
       "content": "Kick webhook proof event",
-      "receivedAt": "2026-06-04T18:38:50.301Z",
+      "receivedAt": "2026-06-04T19:15:21.129Z",
       "url": "https://kick.com/marketbubble",
       "badges": [
         "Reviewer"

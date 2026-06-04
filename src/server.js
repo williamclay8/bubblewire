@@ -24,15 +24,17 @@ demo.start();
 
 const server = http.createServer(async (request, response) => {
   try {
-    if (request.method === "GET" && request.url === "/events") {
+    const pathname = getPathname(request);
+
+    if (request.method === "GET" && matches(pathname, "/events", "/events.stream")) {
       return handleEvents(response);
     }
 
-    if (request.method === "GET" && request.url === "/api/status") {
+    if (request.method === "GET" && matches(pathname, "/api/status", "/status.json")) {
       return sendJson(response, hub.snapshot());
     }
 
-    if (request.method === "GET" && request.url === "/healthz") {
+    if (request.method === "GET" && pathname === "/healthz") {
       return sendJson(response, {
         ok: true,
         service: "bubblewire",
@@ -41,11 +43,11 @@ const server = http.createServer(async (request, response) => {
       });
     }
 
-    if (request.method === "GET" && request.url === "/api/messages") {
+    if (request.method === "GET" && matches(pathname, "/api/messages", "/messages.json")) {
       return sendJson(response, { messages: hub.snapshot().messages });
     }
 
-    if (request.method === "GET" && request.url === "/api/export.ndjson") {
+    if (request.method === "GET" && matches(pathname, "/api/export.ndjson", "/export.ndjson")) {
       const ndjson = hub
         .snapshot()
         .messages.slice()
@@ -59,7 +61,7 @@ const server = http.createServer(async (request, response) => {
       return response.end(`${ndjson}\n`);
     }
 
-    if (request.method === "POST" && request.url === "/webhooks/kick") {
+    if (request.method === "POST" && matches(pathname, "/webhooks/kick", "/kick.webhook")) {
       const payload = await readJsonBody(request);
       const message = normalizeKickWebhook(payload, request.headers);
       if (!message) return sendJson(response, { ok: false, error: "unsupported Kick event" }, 400);
@@ -71,24 +73,24 @@ const server = http.createServer(async (request, response) => {
       return sendJson(response, { ok: true, id: message.id });
     }
 
-    if (request.method === "POST" && request.url === "/api/inject") {
+    if (request.method === "POST" && matches(pathname, "/api/inject", "/inject.json")) {
       const payload = await readJsonBody(request);
       const message = createInjectedMessage(payload);
       hub.addMessage(message);
       return sendJson(response, { ok: true, message });
     }
 
-    if (request.method === "POST" && request.url === "/api/demo/start") {
+    if (request.method === "POST" && matches(pathname, "/api/demo/start", "/demo-start.json")) {
       demo.start();
       return sendJson(response, { ok: true, running: demo.isRunning() });
     }
 
-    if (request.method === "POST" && request.url === "/api/demo/stop") {
+    if (request.method === "POST" && matches(pathname, "/api/demo/stop", "/demo-stop.json")) {
       demo.stop();
       return sendJson(response, { ok: true, running: demo.isRunning() });
     }
 
-    if (request.method === "POST" && request.url === "/api/demo/spike") {
+    if (request.method === "POST" && matches(pathname, "/api/demo/spike", "/demo-spike.json")) {
       demo.pushSpike(18);
       return sendJson(response, { ok: true });
     }
@@ -130,7 +132,7 @@ function handleEvents(response) {
 
 async function serveStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
-  const requestedPath = url.pathname === "/" || url.pathname === "/overlay" ? "/index.html" : url.pathname;
+  const requestedPath = matches(url.pathname, "/", "/overlay", "/overlay.html") ? "/index.html" : url.pathname;
   const filePath = normalize(join(publicDir, requestedPath));
 
   if (!filePath.startsWith(publicDir)) {
@@ -148,6 +150,14 @@ async function serveStatic(request, response) {
     response.writeHead(404);
     response.end("Not found");
   }
+}
+
+function getPathname(request) {
+  return new URL(request.url, `http://${request.headers.host}`).pathname;
+}
+
+function matches(value, ...candidates) {
+  return candidates.includes(value);
 }
 
 function sendSse(response, event, payload) {

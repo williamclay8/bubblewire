@@ -14,7 +14,9 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Overlay view: `http://localhost:3000/overlay`.
+Live app: `https://bubblewire-challenge.onrender.com`.
+
+Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewire-challenge.onrender.com/overlay.html` live.
 
 Health check: `http://localhost:3000/healthz`.
 
@@ -24,7 +26,7 @@ Twitch: EventSub `channel.chat.message` is preferred. Set `TWITCH_CLIENT_ID`, `T
 
 X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_TOKEN`. Create stream rules in X before starting the app.
 
-Kick: Kick sends real-time chat through webhooks. Expose this app with a public tunnel and point Kick to `KICK_WEBHOOK_PUBLIC_URL/webhooks/kick`. The local endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
+Kick: Kick sends real-time chat through webhooks. Expose this app with a public tunnel and point Kick to `KICK_WEBHOOK_PUBLIC_URL/kick.webhook`. The server also keeps `/webhooks/kick` for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
 
 ## Demo Mode
 
@@ -57,7 +59,7 @@ npm run proof
 
 The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, hub dedupe, source stats, and SSE subscriber behavior.
 
-`npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms the status endpoint responds.
+`npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms `/status.json` responds.
 
 ## Deployment
 

@@ -5,6 +5,8 @@
 Bubblewire merges Twitch, X, and Kick activity into one reverse-chronological operator feed with platform labels, per-provider status, source filtering, priority filtering, pinned messages, raw payload inspection, demo spikes, and an OBS-friendly overlay route.
 
 GitHub repository: `https://github.com/williamclay8/bubblewire`
+Public app: `https://bubblewire-challenge.onrender.com`
+Public overlay: `https://bubblewire-challenge.onrender.com/overlay.html`
 
 ## Why It Should Win
 
@@ -15,13 +17,12 @@ GitHub repository: `https://github.com/williamclay8/bubblewire`
 
 ## Demo Script
 
-1. Start the app with `npm run dev`.
-2. Open `http://localhost:3000` and show the source status strip.
+1. Open `https://bubblewire-challenge.onrender.com` and show the source status strip.
 3. Click `Spike`; Twitch, X, and Kick messages arrive in one feed with labels.
 4. Filter to one source, search a user, enable priority-only, then pause/resume.
 5. Select a message and show the normalized raw payload.
 6. Pin a message and export NDJSON.
-7. Open `http://localhost:3000/overlay`; fire another spike and show readable source chips.
+7. Open `https://bubblewire-challenge.onrender.com/overlay.html`; fire another spike and show readable source chips.
 
 ## Video Asset
 
@@ -29,14 +30,14 @@ Use `docs/demo-video-storyboard.md` to record a 60-90 second demo after the publ
 
 ## Deployment Handoff
 
-The project is ready for a Render Blueprint deploy through `render.yaml`. After deployment, verify:
+The project is deployed on Render as `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`). Verify:
 
 ```bash
-curl -sS https://<live-url>/healthz
-curl -sS https://<live-url>/api/status
+curl -sS https://bubblewire-challenge.onrender.com/healthz
+curl -sS https://bubblewire-challenge.onrender.com/status.json
 ```
 
-Then update this file and `docs/evidence/manifest.md` with the live URL.
+`/events.stream`, `/demo-spike.json`, `/export.ndjson`, and `/overlay.html` are the public-safe live routes used by the browser UI.
 
 ## Live Integration Matrix
 
@@ -44,7 +45,7 @@ Then update this file and `docs/evidence/manifest.md` with the live URL.
 | --- | --- | --- | --- |
 | Twitch | EventSub `channel.chat.message`; IRC fallback | Demo until Twitch vars exist | `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, `TWITCH_BROADCASTER_USER_ID` |
 | X | X API v2 filtered stream | Demo until bearer token exists | `X_BEARER_TOKEN` |
-| Kick | `chat.message.sent` webhook to `/webhooks/kick` | Webhook-ready until payload arrives | `KICK_WEBHOOK_PUBLIC_URL` |
+| Kick | `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook` | Webhook-ready until payload arrives | `KICK_WEBHOOK_PUBLIC_URL` |
 
 ## Source Checks
 
@@ -54,4 +55,4 @@ Then update this file and `docs/evidence/manifest.md` with the live URL.
 
 ## Lumi Hygiene
 
-As of this file, work is local only unless a later commit/push/deploy receipt says otherwise.
+As of this file, the app has a Render service and public URL; final live verification should reference the latest pushed commit and deploy receipt.
