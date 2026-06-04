@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-04T21:01:03.140Z",
-  "baseUrl": "http://127.0.0.1:3101",
+  "generatedAt": "2026-06-04T21:10:14.129Z",
+  "baseUrl": "https://bubblewire-challenge.onrender.com",
   "checks": [
     {
       "name": "before runtime is live-only",
@@ -60,15 +60,15 @@
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 36,
-      "checkedAt": "2026-06-04T21:01:03.176Z"
+      "uptimeSeconds": 40,
+      "checkedAt": "2026-06-04T21:10:14.842Z"
     },
     "before": {
       "messages": [],
       "stats": {
         "totalMessages": 0,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T21:00:27.717Z",
+        "startedAt": "2026-06-04T21:09:35.041Z",
         "sources": {
           "twitch": {
             "count": 0,
@@ -88,17 +88,17 @@
         "twitch": {
           "state": "missing",
           "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         },
         "x": {
           "state": "missing",
           "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         },
         "kick": {
           "state": "webhook-ready",
           "detail": "POST Kick chat.message.sent events to /kick.webhook",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         }
       },
       "sources": {
@@ -135,7 +135,7 @@
       "stats": {
         "totalMessages": 0,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-04T21:00:27.717Z",
+        "startedAt": "2026-06-04T21:09:35.041Z",
         "sources": {
           "twitch": {
             "count": 0,
@@ -155,17 +155,17 @@
         "twitch": {
           "state": "missing",
           "detail": "missing TWITCH_USERNAME, TWITCH_OAUTH_TOKEN, or TWITCH_CHANNELS",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         },
         "x": {
           "state": "missing",
           "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         },
         "kick": {
           "state": "webhook-ready",
           "detail": "POST Kick chat.message.sent events to /kick.webhook",
-          "updatedAt": "2026-06-04T21:00:27.718Z"
+          "updatedAt": "2026-06-04T21:09:35.042Z"
         }
       },
       "sources": {
