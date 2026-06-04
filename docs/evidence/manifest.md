@@ -33,6 +33,10 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 | `docs/evidence/screenshots/overlay-desktop.png` | 1280 x 720 | OBS/browser-source style overlay without dashboard chrome |
 | `docs/evidence/screenshots/dashboard-mobile-390.png` | 390 x 844 | Mobile layout, no horizontal overflow, controls remain usable |
 
+## Demo Recording Plan
+
+The recording storyboard lives at `docs/demo-video-storyboard.md`. It is ready to use after the public Render URL is live.
+
 ## Live Adapter Matrix
 
 | Source | Implemented live path | Demo-safe fallback |
@@ -47,6 +51,7 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 - `.env` and `.env.*` are ignored.
 - `.env.example` lists env var names only.
 - Browser screenshots show demo/local status only.
+- The demo recording plan explicitly forbids showing secrets, `.env` files, tokens, or private dashboards.
 
 ## Lumi Hygiene
 

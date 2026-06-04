@@ -42,6 +42,7 @@ Kick accepts official `chat.message.sent` webhooks at `/webhooks/kick`; a public
 - `npm run proof`: passing
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
+- Demo storyboard: `docs/demo-video-storyboard.md`
 
 ## Suggested Demo Video Script
 

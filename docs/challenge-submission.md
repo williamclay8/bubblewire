@@ -23,6 +23,10 @@ GitHub repository: `https://github.com/williamclay8/bubblewire`
 6. Pin a message and export NDJSON.
 7. Open `http://localhost:3000/overlay`; fire another spike and show readable source chips.
 
+## Video Asset
+
+Use `docs/demo-video-storyboard.md` to record a 60-90 second demo after the public Render URL is live.
+
 ## Deployment Handoff
 
 The project is ready for a Render Blueprint deploy through `render.yaml`. After deployment, verify:
