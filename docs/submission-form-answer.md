@@ -22,7 +22,7 @@ Verified Render deploy: `dep-d8gvqge8bjmc73cumgd0`
 
 ## Demo Video
 
-https://youtu.be/gvXG5qOaBTQ
+https://youtu.be/MGEKOfs4yn0
 
 ## Overlay
 
@@ -63,7 +63,7 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 - `npm run proof`: passing
 - Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
 - Public live proof on `https://bubblewire.xyz`: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
-- YouTube demo: uploaded and unlisted at `https://youtu.be/gvXG5qOaBTQ`
+- YouTube demo: uploaded and unlisted at `https://youtu.be/MGEKOfs4yn0`
 - Challenge form: ready for custom-domain resubmission.
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
@@ -71,4 +71,4 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 
 ## Suggested Demo Video Script
 
-“Here is Bubblewire, a unified feed for Twitch, X, and Kick. The source strip shows provider state, and every message carries a source label plus normalized metadata. I’ll click Spike to simulate all three platforms, filter to Twitch, pin a message, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The app is demo-safe without secrets, but the server has live adapter paths for Twitch EventSub, X filtered stream, and official Kick Events API webhooks.”
+“Here is Bubblewire live on bubblewire.xyz, a unified feed for Twitch, X, and Kick. The source strip shows Twitch and X connected automatically, and Kick connected from an official webhook proof event. Every message carries a source label plus normalized metadata. I’ll filter by source, search the feed, pin the Kick proof, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The public app is live-only, and demo routes are disabled.”

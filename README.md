@@ -14,11 +14,13 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-Live app: `https://bubblewire-challenge.onrender.com`.
+Live app: `https://bubblewire.xyz`.
 
-Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewire-challenge.onrender.com/overlay.html` live.
+Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewire.xyz/overlay.html` live.
 
-Demo video: `https://youtu.be/gvXG5qOaBTQ`.
+Fallback Render URL: `https://bubblewire-challenge.onrender.com`.
+
+Demo video: `https://youtu.be/MGEKOfs4yn0`.
 
 Health check: `http://localhost:3000/healthz`.
 
@@ -92,4 +94,5 @@ npm start
 - Evidence manifest: `docs/evidence/manifest.md`
 - Submission form copy: `docs/submission-form-answer.md`
 - Demo notes: `docs/challenge-submission.md`
-- Submitted challenge entry: June 4, 2026 at 2:42 PM CDT
+- Initial challenge entry: June 4, 2026 at 2:42 PM CDT
+- Custom-domain resubmission: pending

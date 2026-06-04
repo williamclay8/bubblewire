@@ -8,7 +8,7 @@ GitHub repository: `https://github.com/williamclay8/bubblewire`
 Public app: `https://bubblewire.xyz`
 Public overlay: `https://bubblewire.xyz/overlay.html`
 Fallback Render URL: `https://bubblewire-challenge.onrender.com`
-Demo video: `https://youtu.be/gvXG5qOaBTQ`
+Demo video: `https://youtu.be/MGEKOfs4yn0`
 
 ## Why It Should Win
 
@@ -24,13 +24,15 @@ Demo video: `https://youtu.be/gvXG5qOaBTQ`
 3. Filter to one source, search a user, enable priority-only, then pause/resume.
 4. Select a message and show the normalized raw payload.
 5. Pin a message and export NDJSON.
-6. Open `https://bubblewire.xyz/overlay.html`; fire another spike and show readable source chips.
+6. Open `https://bubblewire.xyz/overlay.html` and show readable source chips in the OBS/browser-source view.
 
 ## Video Asset
 
-Uploaded YouTube demo: `https://youtu.be/gvXG5qOaBTQ`
+Uploaded YouTube demo: `https://youtu.be/MGEKOfs4yn0`
 
 Local source video: `docs/evidence/video/bubblewire-demo.webm`
+
+The refreshed upload was recorded from `https://bubblewire.xyz` with production live-only mode, source filters, raw provenance, pinned Kick webhook proof, and the overlay route.
 
 ## Deployment Handoff
 
@@ -67,4 +69,4 @@ Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 
 
 ## Lumi Hygiene
 
-Verified app-code commit `9f4f8e8` is pushed, Render deploy `dep-d8gvqge8bjmc73cumgd0` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, demo video `https://youtu.be/gvXG5qOaBTQ` is unlisted/reachable, and the Google Form entry is ready for custom-domain resubmission.
+Verified app-code commit `9f4f8e8` is pushed, Render deploy `dep-d8gvqge8bjmc73cumgd0` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, demo video `https://youtu.be/MGEKOfs4yn0` is unlisted/reachable, and the Google Form entry is ready for custom-domain resubmission.
