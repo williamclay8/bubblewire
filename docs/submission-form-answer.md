@@ -4,6 +4,10 @@
 
 Bubblewire
 
+## Repository
+
+https://github.com/williamclay8/bubblewire
+
 ## Short Description
 
 Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges all three sources into one fast dashboard with unmistakable source labels, per-provider health, demo-safe events, raw payload provenance, and an OBS/browser-source overlay.

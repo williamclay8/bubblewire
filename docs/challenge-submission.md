@@ -4,6 +4,8 @@
 
 Bubblewire merges Twitch, X, and Kick activity into one reverse-chronological operator feed with platform labels, per-provider status, source filtering, priority filtering, pinned messages, raw payload inspection, demo spikes, and an OBS-friendly overlay route.
 
+GitHub repository: `https://github.com/williamclay8/bubblewire`
+
 ## Why It Should Win
 
 - It is honest about platform reality: X is labeled as matched posts, Kick is webhook-based, Twitch is EventSub-first.

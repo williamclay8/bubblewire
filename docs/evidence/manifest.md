@@ -10,7 +10,8 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 - Overlay: `http://127.0.0.1:3000/overlay`
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
-- Commit: none yet; repo has no commits
+- GitHub repo: `https://github.com/williamclay8/bubblewire`
+- Commit: see `git log --oneline -1` for the current pushed evidence commit
 - Date: 2026-06-04
 
 ## Verification Commands
@@ -50,8 +51,8 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 ## Lumi Hygiene
 
 - Local changes: yes
-- Committed: no
-- Pushed: no
+- Committed: yes
+- Pushed: yes, `https://github.com/williamclay8/bubblewire`
 - Deployed/live: no public deployment verified
 - Local server: running at `http://127.0.0.1:3000` during this evidence capture
 
@@ -65,7 +66,7 @@ Bubblewire is a local, submission-ready unified chat aggregator for Twitch + X +
 
 ## Remaining Submission Steps
 
-1. Commit the work when Clay is ready to keep this tree.
-2. Deploy to a public URL if the challenge form expects a live link.
+1. Select the Render workspace for MCP service creation, or create the service from the Render Dashboard using `render.yaml`.
+2. Deploy and live-verify the public URL.
 3. Record a 60-90 second demo using the script in `docs/challenge-submission.md`.
 4. Submit the app URL, repository, and evidence artifacts through the challenge form.
