@@ -11,6 +11,7 @@
     "proof": "node scripts/proof.mjs",
     "proof:live": "node scripts/proof-live.mjs",
     "test": "node --test",
+    "test:ui": "node scripts/ui-smoke.mjs",
     "check": "node --check src/server.js && node --check public/app.js"
   },
   "engines": {

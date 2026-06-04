@@ -7,6 +7,8 @@
     <meta name="description" content="Unified Twitch + X + Kick chat relay: one real-time feed with source labels.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
     <link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
@@ -28,6 +30,7 @@
             <span class="status-dot"></span><span class="link-label" id="linkLabel">LINK</span>
           </span>
           <time class="clock" id="clock">--:--:--</time>
+          <button class="setup-button" id="setupButton" type="button" title="Source setup &amp; credentials status [s]" aria-haspopup="dialog">Setup</button>
           <a class="overlay-link" href="/overlay.html" title="OBS-ready overlay view">OVERLAY ↗</a>
         </div>
       </header>
@@ -60,6 +63,20 @@
               <input id="priorityOnly" type="checkbox">
               <span class="switch" aria-hidden="true"></span>
               <span class="switch-label">Priority only <small>heat ≥ 18</small></span>
+            </label>
+          </section>
+
+          <section class="rail-section">
+            <h2><label for="watchInput">// watchlist</label></h2>
+            <div class="watch-add">
+              <input id="watchInput" type="text" placeholder="keyword or $ticker" autocomplete="off" spellcheck="false" maxlength="32">
+              <button id="watchAddButton" type="button" title="Add watchlist keyword">Add</button>
+            </div>
+            <div class="watch-chips" id="watchChips"></div>
+            <label class="switch-row" for="watchSound">
+              <input id="watchSound" type="checkbox">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Alert sound</span>
             </label>
           </section>
 
@@ -105,6 +122,9 @@
             </button>
             <ol class="feed" id="feedList"></ol>
           </div>
+          <div class="feed-foot">
+            <button id="loadOlderButton" type="button" title="Load older messages from history">Load older ⌄</button>
+          </div>
         </section>
 
         <aside class="inspector" aria-label="Signal inspector">
@@ -144,6 +164,20 @@
     <div class="overlay-root" id="overlayRoot" hidden>
       <ol class="overlay-feed" id="overlayFeed"></ol>
     </div>
+
+    <div class="setup-backdrop" id="setupBackdrop" hidden></div>
+    <aside class="setup-drawer" id="setupDrawer" role="dialog" aria-label="Source setup" hidden>
+      <header class="setup-head">
+        <h2>// source setup</h2>
+        <button id="setupClose" type="button" class="mini-btn" title="Close [esc]">Close</button>
+      </header>
+      <div class="setup-body" id="setupBody">
+        <p class="setup-loading">loading…</p>
+      </div>
+      <footer class="setup-foot">
+        <a href="/overlay-setup.html" class="setup-foot-link">overlay configurator →</a>
+      </footer>
+    </aside>
 
     <div class="toast-root" id="toastRoot" aria-live="polite"></div>
 

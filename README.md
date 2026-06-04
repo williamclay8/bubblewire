@@ -49,7 +49,28 @@ Useful local controls:
 - `Pin` saves judge-worthy messages in the inspector (persisted across reloads).
 - `Export` downloads the normalized feed as NDJSON.
 - Selecting a message shows its raw normalized payload.
-- Keyboard: `/` focuses search, `p` toggles pause, `Esc` clears search.
+- Keyboard: `/` focuses search, `p` toggles pause, `s` opens setup, `1–4` switch source filters, `Esc` clears/closes.
+
+## Mod Tools
+
+- **Watchlist**: add keywords or `$tickers` in the rail. Hits get flagged rows, a toast, and an optional alert beep. Stored locally, capped at 12 terms.
+- **Author drill-down**: click any author name to filter the feed to them; `Esc` clears.
+- **Spam collapse**: consecutive identical messages from the same source collapse into one row with a `×N` badge.
+- **History**: the server appends every message to an NDJSON log (`data/feed.ndjson`, 5 MB rotation). `Load older` pages backwards through it; survives restarts. Disable with `HISTORY=off`.
+
+## Setup Panel
+
+Press `s` (or the `Setup` button) for a per-source credential checklist — it shows which env vars are set (names only, never values), the active Twitch path (EventSub/IRC/none), and a copyable Kick webhook URL.
+
+In IRC mode, Twitch channels can be joined or left at runtime from the panel — anonymous read-only IRC needs no credentials. Runtime channels persist to `data/twitch-channels.json` and merge with `TWITCH_CHANNELS` on boot. Set `ADMIN_TOKEN` to require an `x-admin-token` header for channel mutations.
+
+## Overlay Configurator
+
+`/overlay-setup.html` builds OBS browser-source URLs with a live transparent-background preview. The overlay accepts `?max=1-12`, `fade=<seconds>`, `scale=0.6-2`, `align=top|bottom`, and `sources=twitch,x,kick`.
+
+## PWA
+
+Bubblewire installs as a PWA (manifest + service worker). The service worker caches only the static shell — live streams, status, and history are always network-fetched — so deploys propagate immediately.
 
 ## Provider Reality Notes
 
@@ -67,6 +88,7 @@ npm test
 npm run check
 npm run proof
 npm run proof:live # with DEMO_MODE=off server running
+npm run test:ui    # browser smoke test; needs playwright-core + Chromium, skips otherwise
 ```
 
 The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, source stats, and SSE subscriber behavior.
@@ -88,6 +110,8 @@ HOST=0.0.0.0
 PORT=<provider port>
 npm start
 ```
+
+Render free-tier services cold-start after idle. For a snappy judge demo, ping `/healthz` every few minutes (uptime monitor or cron) or upgrade the instance. Note that the history log and runtime channel list live on local disk — on ephemeral filesystems they reset per deploy unless you attach a persistent disk.
 
 ## Submission Packet
 

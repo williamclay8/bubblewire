@@ -59,6 +59,18 @@ A second, deeper UI/UX pass on top of the redesign:
 
 Verified again: 7/7 tests, fonts confirmed loading via `document.fonts.check`, zero console errors (CSP clean), no mobile overflow, all interaction states screenshot-tested (search marks, jump pill, paused banner, toasts, enriched content).
 
+## Capability pass v3 (same day)
+
+From polish to product — every roadmap item implemented:
+
+- **History**: zero-dependency NDJSON append log (`src/core/history.js`, 5 MB rotation, write-queue, dedupe) + `/history.json?before=&limit=` pagination + "Load older" in the feed. Survives restarts. `HISTORY=off` to disable. 3 new unit tests.
+- **Setup panel**: `s` opens a drawer showing per-source credential status from `/setup.json` (env-var *names and booleans only* — values never leave the server), active Twitch path, copyable Kick webhook URL, and runtime info (DEMO_MODE, HISTORY, ADMIN_TOKEN lock).
+- **Runtime Twitch channels**: join/leave IRC channels from the setup panel without redeploying (`POST /api/twitch/channels`, validated, capped at 20, persisted to `data/twitch-channels.json`, connector restarts in place). Anonymous read-only IRC means this works with zero credentials. Optional `ADMIN_TOKEN` gate.
+- **Mod tools**: keyword/$ticker watchlist (flagged rows + throttled toasts + optional WebAudio beep, localStorage), click-author-to-filter, consecutive-spam collapse with ×N badges (live-path and rebuild-path both).
+- **Overlay configurator**: `/overlay-setup.html` with sliders/toggles, debounced live preview over a transparency checkerboard, copy-URL. Overlay honors `max`, `fade` (timed fade-out), `scale`, `align=bottom` (chat-style append), `sources`.
+- **PWA**: manifest + generated icons (incl. maskable) + service worker (network-first documents, stale-while-revalidate statics, never caches streams/APIs).
+- **UI smoke tests**: `npm run test:ui` boots the server and runs 12 browser checks (fonts, pause freeze, search marks, watchlist, drawer, history, overlay params, configurator, PWA, console errors). Gracefully skips when playwright-core/Chromium is absent, so `npm test` stays zero-dependency.
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.

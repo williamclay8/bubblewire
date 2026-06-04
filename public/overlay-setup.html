@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bubblewire — Overlay Configurator</title>
+    <meta name="description" content="Configure the Bubblewire OBS overlay: size, fade, sources, and alignment.">
+    <meta name="theme-color" content="#0a0a09">
+    <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="config-page">
+    <div class="config-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Back to dashboard">
+          <img src="/assets/bubblewire-mark.svg" alt="" width="34" height="34">
+          <span class="brand-text">
+            <strong>BUBBLEWIRE<span class="cursor">_</span></strong>
+            <small>OVERLAY CONFIGURATOR</small>
+          </span>
+        </a>
+        <span></span>
+        <div class="topbar-tools">
+          <a class="overlay-link" href="/">← Dashboard</a>
+        </div>
+      </header>
+
+      <main class="config-layout">
+        <aside class="rail config-rail" aria-label="Overlay options">
+          <section class="rail-section">
+            <h2><label for="cfgMax">// max messages</label></h2>
+            <div class="cfg-slider-row">
+              <input id="cfgMax" type="range" min="1" max="12" step="1" value="6">
+              <output id="cfgMaxOut" for="cfgMax">6</output>
+            </div>
+          </section>
+
+          <section class="rail-section">
+            <h2><label for="cfgFade">// fade out</label></h2>
+            <div class="cfg-slider-row">
+              <input id="cfgFade" type="range" min="0" max="120" step="5" value="0">
+              <output id="cfgFadeOut" for="cfgFade">never</output>
+            </div>
+          </section>
+
+          <section class="rail-section">
+            <h2><label for="cfgScale">// scale</label></h2>
+            <div class="cfg-slider-row">
+              <input id="cfgScale" type="range" min="0.6" max="2" step="0.1" value="1">
+              <output id="cfgScaleOut" for="cfgScale">1.0×</output>
+            </div>
+          </section>
+
+          <section class="rail-section">
+            <h2>// sources</h2>
+            <label class="switch-row" for="cfgTwitch">
+              <input id="cfgTwitch" type="checkbox" checked data-cfg-source="twitch">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Twitch</span>
+            </label>
+            <label class="switch-row" for="cfgX">
+              <input id="cfgX" type="checkbox" checked data-cfg-source="x">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">X</span>
+            </label>
+            <label class="switch-row" for="cfgKick">
+              <input id="cfgKick" type="checkbox" checked data-cfg-source="kick">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Kick</span>
+            </label>
+          </section>
+
+          <section class="rail-section">
+            <h2>// align</h2>
+            <div class="segmented">
+              <button type="button" data-cfg-align="top" class="active" aria-pressed="true">Top</button>
+              <button type="button" data-cfg-align="bottom" aria-pressed="false">Bottom</button>
+            </div>
+          </section>
+
+          <section class="rail-section">
+            <h2>// overlay url</h2>
+            <div class="webhook-row cfg-url-row">
+              <code id="cfgUrl">/overlay.html</code>
+              <button type="button" class="mini-btn" id="cfgCopy">Copy</button>
+            </div>
+            <p class="setup-note">Paste this URL into an OBS browser source. The background stays transparent.</p>
+          </section>
+        </aside>
+
+        <section class="config-preview-panel" aria-label="Live preview">
+          <div class="feed-head">
+            <div>
+              <h1>Live Preview</h1>
+              <p>checkerboard = transparent in OBS</p>
+            </div>
+          </div>
+          <div class="config-preview">
+            <iframe id="cfgPreview" src="/overlay.html" title="Overlay live preview"></iframe>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-root" id="toastRoot" aria-live="polite"></div>
+    <script type="module" src="/overlay-setup.js"></script>
+  </body>
+</html>
