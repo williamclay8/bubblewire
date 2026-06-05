@@ -32,6 +32,42 @@ test("createFeedHub stores each message once and updates source stats", () => {
   assert.equal(snapshot.stats.sources.kick.count, 2);
 });
 
+test("createFeedHub exposes per-source proof receipts from the latest accepted message", () => {
+  const hub = createFeedHub();
+  const twitchMessage = {
+    id: "twitch:proof-1",
+    source: "twitch",
+    sourceLabel: "Twitch",
+    content: "live twitch proof",
+    rawType: "PRIVMSG",
+    receivedAt: "2026-06-04T17:00:00.000Z",
+    mode: "live"
+  };
+  const kickMessage = {
+    id: "kick:proof-1",
+    source: "kick",
+    sourceLabel: "Kick",
+    content: "signed kick proof",
+    rawType: "chat.message.sent",
+    receivedAt: "2026-06-04T17:01:00.000Z",
+    mode: "live",
+    evidenceLevel: "signed"
+  };
+
+  hub.addMessage(twitchMessage);
+  hub.addMessage(kickMessage);
+
+  const snapshot = hub.snapshot();
+
+  assert.equal(snapshot.proof.sources.twitch.count, 1);
+  assert.equal(snapshot.proof.sources.twitch.evidenceLevel, "live");
+  assert.equal(snapshot.proof.sources.twitch.lastMessageId, "twitch:proof-1");
+  assert.equal(snapshot.proof.sources.twitch.rawType, "PRIVMSG");
+  assert.equal(snapshot.proof.sources.kick.evidenceLevel, "signed");
+  assert.equal(snapshot.proof.sources.kick.lastMessageAt, "2026-06-04T17:01:00.000Z");
+  assert.equal(snapshot.proof.sources.x.evidenceLevel, "waiting");
+});
+
 test("createFeedHub broadcasts messages and status updates to subscribers", () => {
   const hub = createFeedHub();
   const events = [];

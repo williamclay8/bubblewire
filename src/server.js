@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createDemoConnector } from "./connectors/demo.js";
 import { resolveKickConfig, shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
-import { startXConnector } from "./connectors/x.js";
+import { resolveXRulesFromEnv, startXConnector } from "./connectors/x.js";
 import { createHistoryLog } from "./core/history.js";
 import { createFeedHub } from "./core/hub.js";
 import { createInjectedMessage, normalizeKickWebhook } from "./core/messages.js";
@@ -43,8 +43,9 @@ hub.subscribe((event) => {
 const twitchChannelsFile = join(dataDir, "twitch-channels.json");
 let runtimeTwitchChannels = await loadRuntimeTwitchChannels();
 let twitchConnector = startTwitchConnector(hub, twitchEnv());
+let xConnector = startXConnector(hub);
 
-connectors.push(startXConnector(hub));
+connectors.push(xConnector);
 if (demoEnabled) {
   demo.start();
 } else {
@@ -140,12 +141,16 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "POST" && matches(pathname, "/webhooks/kick", "/kick.webhook")) {
       const rawBody = await readRawBody(request);
+      let evidenceLevel = "webhook-proof";
+      let signatureStatus = "not-required";
       if (shouldRequireKickSignature()) {
         const signature = verifyKickWebhookSignature({ headers: request.headers, rawBody });
         if (!signature.ok) return sendJson(response, { ok: false, error: signature.reason }, 401);
+        evidenceLevel = "signed";
+        signatureStatus = "verified";
       }
       const payload = parseJsonBody(rawBody);
-      const message = normalizeKickWebhook(payload, request.headers);
+      const message = normalizeKickWebhook(payload, request.headers, { evidenceLevel, signatureStatus });
       if (!message) return sendJson(response, { ok: false, error: "unsupported Kick event" }, 400);
       hub.addMessage(message);
       hub.setSourceStatus("kick", {
@@ -345,6 +350,7 @@ function setupSnapshot(request) {
   const env = process.env;
   const present = (name) => Boolean(env[name] && String(env[name]).trim());
   const kickConfig = resolveKickConfig(env);
+  const xSnapshot = xConnector?.snapshot?.() || { rules: resolveXRulesFromEnv(env) };
   const hostHeader = request.headers.host || `${host}:${port}`;
   const kickPublicBase = (env.KICK_WEBHOOK_PUBLIC_URL || "").trim().replace(/\/$/, "");
 
@@ -372,6 +378,7 @@ function setupSnapshot(request) {
       },
       x: {
         vars: { X_BEARER_TOKEN: present("X_BEARER_TOKEN") },
+        rules: xSnapshot.rules,
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
       },
       kick: {

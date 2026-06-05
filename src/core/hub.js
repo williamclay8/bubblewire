@@ -33,6 +33,25 @@ export function createFeedHub(options = {}) {
         }
       ])
   );
+  const proof = {
+    updatedAt: new Date().toISOString(),
+    sources: Object.fromEntries(
+      Object.keys(SOURCE_META)
+        .filter((source) => source !== "demo")
+        .map((source) => [
+          source,
+          {
+            label: SOURCE_META[source].label,
+            count: 0,
+            evidenceLevel: "waiting",
+            lastMessageAt: null,
+            lastMessageId: null,
+            mode: null,
+            rawType: null
+          }
+        ])
+    )
+  };
 
   function addMessage(message) {
     if (!message?.id) return false;
@@ -53,9 +72,19 @@ export function createFeedHub(options = {}) {
     if (stats.sources[message.source]) {
       stats.sources[message.source].count += 1;
       stats.sources[message.source].lastMessageAt = message.receivedAt;
+      proof.sources[message.source] = {
+        ...proof.sources[message.source],
+        count: stats.sources[message.source].count,
+        evidenceLevel: proofLevelFor(message),
+        lastMessageAt: message.receivedAt,
+        lastMessageId: message.id,
+        mode: message.mode || "live",
+        rawType: message.rawType || "message"
+      };
+      proof.updatedAt = new Date().toISOString();
     }
 
-    broadcast({ type: "message", message, stats: clone(stats) });
+    broadcast({ type: "message", message, stats: clone(stats), proof: clone(proof) });
     return true;
   }
 
@@ -74,6 +103,7 @@ export function createFeedHub(options = {}) {
       messages: clone(messages),
       stats: clone(stats),
       status: clone(status),
+      proof: clone(proof),
       sources: SOURCE_META
     };
   }
@@ -100,4 +130,10 @@ export function createFeedHub(options = {}) {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function proofLevelFor(message) {
+  if (message.evidenceLevel) return message.evidenceLevel;
+  if (message.mode && message.mode !== "live") return message.mode;
+  return "live";
 }

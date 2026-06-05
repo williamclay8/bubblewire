@@ -55,6 +55,8 @@ Useful local controls:
 
 ## Visitor Experience
 
+- **Live proof receipt**: the feed header shows per-source proof levels (`waiting`, `live`, `webhook-proof`, or `signed`), latest raw event type, and counts from `/status.json`.
+- **Judge mode**: add `?judge=1` to skip the boot interstitial and make mobile viewports open feed-first.
 - **Boot sequence**: skippable terminal boot on first visit per session (respects reduced-motion).
 - **Signal stream**: a particle strip under the tape — every message fires a source-colored streak; speed scales with heat, accelerates during spikes.
 - **Volume spikes**: when the 10s rate hits 3× the 2-minute baseline, the tape flashes and a spike chip appears.
@@ -75,7 +77,7 @@ Useful local controls:
 
 ## Setup Panel
 
-Press `s` (or the `Setup` button) for a per-source credential checklist — it shows which env vars are set (names only, never values), the active Twitch path (EventSub/IRC/none), and a copyable Kick webhook URL.
+Press `s` (or the `Setup` button) for a per-source credential checklist — it shows which env vars are set (names only, never values), the active Twitch path (EventSub/IRC/none), sanitized X filtered-stream rules, and a copyable Kick webhook URL.
 
 In IRC mode, Twitch channels can be joined or left at runtime from the panel — anonymous read-only IRC needs no credentials. Runtime channels persist to `data/twitch-channels.json` and merge with `TWITCH_CHANNELS` on boot. Set `ADMIN_TOKEN` to require an `x-admin-token` header for channel mutations.
 
@@ -106,11 +108,11 @@ npm run proof:live # with DEMO_MODE=off server running
 npm run test:ui    # browser smoke test; needs playwright-core + Chromium, skips otherwise
 ```
 
-The tests cover Twitch IRC, Twitch EventSub, X filtered stream, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, source stats, and SSE subscriber behavior.
+The tests cover Twitch IRC, Twitch EventSub, X filtered stream, X rule visibility, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, proof receipts, source stats, and SSE subscriber behavior.
 
-`npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, and confirms `/status.json` responds.
+`npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, records the proof snapshot, and confirms `/status.json` responds.
 
-`npm run proof:live` writes `docs/evidence/logs/live-proof.json` and confirms `DEMO_MODE=off` rejects synthetic demo/inject routes without creating demo messages. Set `BUBBLEWIRE_EXPECT_SOURCES=twitch,x,kick` against the deployed app to prove all three live source paths are present with source-labeled messages.
+`npm run proof:live` writes `docs/evidence/logs/live-proof.json` and confirms `DEMO_MODE=off` rejects synthetic demo/inject routes without creating demo messages. It records per-message `evidenceLevel` and the source proof snapshot. Set `BUBBLEWIRE_EXPECT_SOURCES=twitch,x,kick` against the deployed app to prove all three live source paths are present with source-labeled messages.
 
 ## Deployment
 

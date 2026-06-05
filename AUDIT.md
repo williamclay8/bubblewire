@@ -77,6 +77,14 @@ From polish to product — every roadmap item implemented:
 - **Sticky**: first-visit channel hero wired to runtime IRC join, `(N)` title + alert-favicon on background tabs, opt-in watchlist Notifications, URL view state + Share button, presence count broadcast over SSE (`watching` in runtime snapshot + live `presence` events), canvas session-recap PNG download, persisted filter/priority/theme/density.
 - Tests: live-mode runtime expectation updated for `watching`; smoke suite extended to 18 checks (caught a real TDZ bug — `stream` const used before declaration — during this pass). 19/19 unit, 18/18 smoke, zero console errors.
 
+## Challenge proof tranche v5 — June 5, 2026
+
+- **Live proof receipts**: hub snapshots now include `proof.sources`; SSE message payloads broadcast proof updates; the dashboard displays per-source proof level, count, last message time, and raw event type.
+- **Judge mode/mobile**: `?judge=1` skips boot and mobile CSS orders the feed before controls and inspector.
+- **Kick evidence semantics**: Kick webhook messages carry `evidenceLevel` (`webhook-proof` by default, `signed` when signature verification is required and passes) and row-level evidence chips.
+- **X rule visibility**: the X connector exposes sanitized filtered-stream rule snapshots from the X rules API or `X_STREAM_RULES`; `/setup.json` and the drawer render tag/value rows without exposing bearer tokens.
+- **Receipts refreshed**: 28/28 unit tests, `npm run check`, `npm run proof`, and `npm run proof:live` passed; screenshots, video frames, and `docs/evidence/video/bubblewire-demo.webm` were regenerated.
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.

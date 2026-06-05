@@ -100,7 +100,28 @@ test("normalizeKickWebhook maps chat.message.sent webhook payloads", () => {
   assert.equal(message.channel, "marketbubble");
   assert.equal(message.content, "thanks for the polymarket picks");
   assert.equal(message.receivedAt, "2025-01-14T16:08:06.000Z");
+  assert.equal(message.evidenceLevel, "webhook-proof");
+  assert.equal(message.raw.signature, "not-required");
   assert.deepEqual(message.badges, ["Subscriber x3"]);
+});
+
+test("normalizeKickWebhook labels verified signed webhook evidence", () => {
+  const payload = {
+    message_id: "signed_message_456",
+    broadcaster: { username: "marketbubble", channel_slug: "marketbubble" },
+    sender: { username: "signedjudge", channel_slug: "signedjudge" },
+    content: "signed Kick proof",
+    created_at: "2026-06-04T18:00:00Z"
+  };
+
+  const message = normalizeKickWebhook(
+    payload,
+    { "Kick-Event-Type": "chat.message.sent" },
+    { evidenceLevel: "signed", signatureStatus: "verified" }
+  );
+
+  assert.equal(message.evidenceLevel, "signed");
+  assert.equal(message.raw.signature, "verified");
 });
 
 test("normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels", () => {

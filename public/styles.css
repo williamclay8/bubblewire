@@ -725,6 +725,64 @@ h1::before {
   font-variant-numeric: tabular-nums;
 }
 
+.proof-receipt {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel-2) 82%, transparent);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.proof-receipt strong,
+.proof-receipt span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.proof-receipt strong {
+  color: var(--gold);
+}
+
+.proof-receipt span {
+  gap: 4px;
+  max-width: 100%;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left-color: var(--src);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.035);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proof-receipt span b {
+  color: var(--src);
+}
+
+.proof-receipt span[data-proof="waiting"] {
+  opacity: 0.64;
+}
+
+.proof-receipt span[data-proof="signed"],
+.proof-receipt span[data-proof="live"],
+.proof-receipt span[data-proof="webhook-proof"] {
+  border-color: color-mix(in srgb, var(--src) 35%, rgba(255, 255, 255, 0.12));
+  border-left-color: var(--src);
+  color: var(--text);
+}
+
 .live-meter {
   display: grid;
   grid-template-columns: repeat(5, 7px);
@@ -911,6 +969,11 @@ h1::before {
   font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.evidence-tag {
+  border-color: color-mix(in srgb, var(--src) 42%, rgba(255, 255, 255, 0.1));
+  color: var(--src);
 }
 
 .msg-spacer {
@@ -1404,6 +1467,8 @@ mark {
   }
 
   .layout {
+    display: flex;
+    flex-direction: column;
     grid-template-columns: 1fr;
     padding: 10px;
   }
@@ -1415,11 +1480,17 @@ mark {
     overflow: visible;
   }
 
+  .rail {
+    order: 2;
+  }
+
   .feed-panel {
+    order: 1;
     height: 68vh;
   }
 
   .inspector {
+    order: 3;
     grid-template-columns: 1fr;
   }
 
@@ -1436,6 +1507,10 @@ mark {
     right: 10px;
     bottom: 10px;
   }
+}
+
+body[data-judge="1"] .channel-hero {
+  display: none !important;
 }
 
 /* ---------- v3: setup drawer, watchlist, history, collapse ---------- */
@@ -1583,6 +1658,51 @@ mark {
 
 .env-details summary:hover {
   color: var(--gold);
+}
+
+.rule-stack {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.rule-summary {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: minmax(76px, 0.42fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 7px 8px;
+  border: 1px solid var(--line-soft);
+  border-left: 2px solid var(--src, var(--gold));
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rule-row b,
+.rule-row code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rule-row b {
+  color: var(--src, var(--gold));
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.rule-row code {
+  color: var(--text);
+  font-size: 10.5px;
+  line-height: 1.5;
 }
 
 .webhook-row {

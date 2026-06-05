@@ -107,7 +107,7 @@ export function normalizeTwitchEventSubNotification(payload) {
   });
 }
 
-export function normalizeKickWebhook(payload, headers = {}) {
+export function normalizeKickWebhook(payload, headers = {}, options = {}) {
   if (!payload || typeof payload !== "object") return null;
 
   const normalizedHeaders = normalizeHeaders(headers);
@@ -118,6 +118,7 @@ export function normalizeKickWebhook(payload, headers = {}) {
   const broadcaster = payload.broadcaster || {};
   const channel = broadcaster.channel_slug || broadcaster.username || "kick";
   const messageId = payload.message_id || stableHash(JSON.stringify(payload));
+  const signatureStatus = options.signatureStatus || kickSignatureStatus(normalizedHeaders);
 
   return createUnifiedMessage({
     id: `kick:${messageId}`,
@@ -137,7 +138,8 @@ export function normalizeKickWebhook(payload, headers = {}) {
     url: `${SOURCE_META.kick.home}/${encodeURIComponent(channel)}`,
     badges: formatKickBadges(sender.identity?.badges),
     mode: "live",
-    raw: { eventType }
+    evidenceLevel: options.evidenceLevel || (signatureStatus === "verified" ? "signed" : "webhook-proof"),
+    raw: { eventType, signature: signatureStatus }
   });
 }
 
@@ -234,8 +236,13 @@ export function createUnifiedMessage(input) {
     metrics: input.metrics || {},
     heat,
     mode: input.mode || "live",
+    evidenceLevel: input.evidenceLevel || "",
     raw: input.raw || {}
   };
+}
+
+function kickSignatureStatus(headers) {
+  return headers["kick-event-signature"] ? "present-unverified" : "not-required";
 }
 
 function decodeIrcTagValue(value) {

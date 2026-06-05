@@ -77,7 +77,47 @@ test("DEMO_MODE=off blocks synthetic routes while keeping Kick webhooks live", a
   assert.equal(after.messages.length, 1);
   assert.equal(after.messages[0].source, "kick");
   assert.equal(after.messages[0].mode, "live");
+  assert.equal(after.messages[0].evidenceLevel, "webhook-proof");
+  assert.equal(after.proof.sources.kick.evidenceLevel, "webhook-proof");
+  assert.equal(after.proof.sources.kick.rawType, "chat.message.sent");
   assert.equal(after.messages.some((message) => message.mode === "demo"), false);
+});
+
+test("setup.json exposes configured X rule labels without credentials", async (t) => {
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  let stdout = "";
+  let stderr = "";
+
+  const child = spawn(process.execPath, ["src/server.js"], {
+    cwd: repoRoot,
+    env: {
+      ...process.env,
+      DEMO_MODE: "off",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      X_BEARER_TOKEN: "",
+      X_STREAM_RULES: "challenge: from:MarketBubble bubblewire; markets: polymarket OR kalshi"
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
+  });
+
+  t.after(() => stopChild(child));
+
+  await waitForServer(baseUrl, child, () => stdout, () => stderr);
+
+  const setup = await getJson(`${baseUrl}/setup.json`);
+  assert.equal(setup.sources.x.vars.X_BEARER_TOKEN, false);
+  assert.equal(setup.sources.x.rules.status, "configured");
+  assert.equal(setup.sources.x.rules.count, 2);
+  assert.deepEqual(setup.sources.x.rules.rules.map((rule) => rule.tag), ["challenge", "markets"]);
 });
 
 function getFreePort() {

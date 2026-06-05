@@ -27,8 +27,10 @@ const state = {
   messages: [],
   status: {},
   stats: { totalMessages: 0, duplicatesDropped: 0, sources: {} },
+  proof: { sources: {} },
   sources: {},
   runtime: { demoEnabled: true, demoMode: "on", demoRunning: false, liveOnly: false },
+  judgeMode: false,
   filter: "all",
   query: "",
   priorityOnly: false,
@@ -75,6 +77,7 @@ const els = {
   feedList: document.querySelector("#feedList"),
   overlayFeed: document.querySelector("#overlayFeed"),
   feedSummary: document.querySelector("#feedSummary"),
+  proofReceipt: document.querySelector("#proofReceipt"),
   searchInput: document.querySelector("#searchInput"),
   priorityOnly: document.querySelector("#priorityOnly"),
   pauseButton: document.querySelector("#pauseButton"),
@@ -420,6 +423,7 @@ function connectEvents() {
   events.addEventListener("message", (event) => {
     const payload = JSON.parse(event.data);
     state.stats = payload.stats || state.stats;
+    state.proof = payload.proof || state.proof;
     ingestMessage(payload.message);
   });
   events.addEventListener("status", (event) => {
@@ -461,6 +465,7 @@ function applySnapshot(snapshot) {
   state.messages = snapshot.messages || [];
   state.status = snapshot.status || {};
   state.stats = snapshot.stats || state.stats;
+  state.proof = snapshot.proof || state.proof;
   state.sources = snapshot.sources || {};
   state.runtime = snapshot.runtime || state.runtime;
   if (typeof state.runtime.watching === "number") {
@@ -533,6 +538,7 @@ function trackHiddenUnseen() {
 function renderAll() {
   renderStatus();
   renderStats();
+  renderProofReceipt();
   renderFeed();
   if (!isOverlay) {
     renderSourceCards();
@@ -591,6 +597,32 @@ function renderStats() {
   });
 
   renderTape(total, visible);
+  renderProofReceipt();
+}
+
+function renderProofReceipt() {
+  if (!els.proofReceipt || isOverlay) return;
+  const proofSources = state.proof?.sources || {};
+  const receipt = SOURCE_ORDER.map((source) => {
+    const proof = proofSources[source] || {};
+    const sourceStats = state.stats.sources?.[source] || {};
+    const status = state.status[source] || {};
+    const label = state.sources[source]?.label || source;
+    const count = proof.count ?? sourceStats.count ?? 0;
+    const level = proof.evidenceLevel || (count ? "live" : status.state || "waiting");
+    const last = proof.lastMessageAt
+      ? `last ${formatTime(proof.lastMessageAt)}`
+      : status.state || "waiting";
+    const rawType = proof.rawType ? ` · ${proof.rawType}` : "";
+
+    return `
+      <span data-source="${escapeAttr(source)}" data-proof="${escapeAttr(level)}" style="--src:${escapeAttr(sourceColor(source))}">
+        <b>${escapeHtml(label)}</b> ${escapeHtml(level)} · ${escapeHtml(String(count))} · ${escapeHtml(last)}${escapeHtml(rawType)}
+      </span>
+    `;
+  }).join("");
+
+  els.proofReceipt.innerHTML = `<strong>LIVE PROOF</strong>${receipt}`;
 }
 
 function renderDemoControls() {
@@ -803,6 +835,9 @@ function messageMarkup(message, dupes = 1) {
   const mode = message.mode && message.mode !== "live"
     ? `<span class="mode-tag">${escapeHtml(message.mode)}</span>`
     : "";
+  const evidence = message.evidenceLevel && message.evidenceLevel !== message.mode
+    ? `<span class="mode-tag evidence-tag">${escapeHtml(message.evidenceLevel)}</span>`
+    : "";
   const channel = message.channel ? `<span class="channel">#${escapeHtml(message.channel)}</span>` : "";
   const authorQ = message.author.handle || message.author.name;
   const watchTag = watchTerm ? `<span class="watch-tag" title="Watchlist hit">⚑ ${escapeHtml(watchTerm)}</span>` : "";
@@ -823,6 +858,7 @@ function messageMarkup(message, dupes = 1) {
         <span class="handle">${escapeHtml(formatHandle(message.author.handle))}</span>
         ${channel}
         ${mode}
+        ${evidence}
         ${watchTag}
         ${dupeBadge}
         <span class="msg-spacer"></span>
@@ -1170,6 +1206,7 @@ function renderSetup() {
     <section class="setup-section" style="--src:${escapeAttr(sourceColor("x"))}">
       <h3>X <small>filtered stream</small></h3>
       ${varRows(x.vars)}
+      ${ruleRows(x.rules)}
       <p class="setup-note">${escapeHtml(x.note)}</p>
     </section>
 
@@ -1195,6 +1232,34 @@ function renderSetup() {
         <span class="env-dot"></span><code>ADMIN_TOKEN</code><span class="env-state">${setup.adminLocked ? "locked" : "open"}</span>
       </div>
     </section>
+  `;
+}
+
+function ruleRows(ruleSnapshot) {
+  const rules = Array.isArray(ruleSnapshot?.rules) ? ruleSnapshot.rules : [];
+  const status = ruleSnapshot?.status || "unknown";
+  const count = Number(ruleSnapshot?.count || rules.length || 0);
+  const checked = ruleSnapshot?.checkedAt ? ` · checked ${formatTime(ruleSnapshot.checkedAt)}` : "";
+  const summary = `${count} visible ${count === 1 ? "rule" : "rules"} · ${status}${checked}`;
+
+  if (!rules.length) {
+    return `
+      <div class="rule-stack" data-status="${escapeAttr(status)}">
+        <span class="rule-summary">${escapeHtml(summary)}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="rule-stack" data-status="${escapeAttr(status)}">
+      <span class="rule-summary">${escapeHtml(summary)}</span>
+      ${rules.map((rule) => `
+        <div class="rule-row">
+          <b>${escapeHtml(rule.tag || "rule")}</b>
+          <code>${escapeHtml(rule.value || rule.id || "matching rule observed")}</code>
+        </div>
+      `).join("")}
+    </div>
   `;
 }
 
@@ -1353,6 +1418,8 @@ function setDensity(density, { skipSave = false } = {}) {
 function applyUrlState() {
   if (isOverlay) return;
   const params = new URLSearchParams(location.search);
+  state.judgeMode = params.get("judge") === "1";
+  document.body.dataset.judge = state.judgeMode ? "1" : "0";
   const src = params.get("src");
   if (src && ["all", ...SOURCE_ORDER].includes(src)) state.filter = src;
   const q = params.get("q");
@@ -1380,6 +1447,7 @@ function buildViewUrl() {
 
 function runBootSequence() {
   if (!els.bootScreen || !els.bootLog) return;
+  if (state.judgeMode) return;
   let booted = false;
   try {
     booted = sessionStorage.getItem(BOOT_KEY) === "1";

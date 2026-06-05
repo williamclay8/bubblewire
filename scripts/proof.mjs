@@ -59,6 +59,7 @@ function summarizeStatus(snapshot) {
     totalMessages: snapshot.stats.totalMessages,
     duplicatesDropped: snapshot.stats.duplicatesDropped,
     status: snapshot.status,
+    proof: snapshot.proof,
     sourceCounts: Object.fromEntries(
       Object.entries(snapshot.stats.sources).map(([source, value]) => [source, value.count])
     )

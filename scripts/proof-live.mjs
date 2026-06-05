@@ -179,6 +179,7 @@ function summarizeSnapshot(snapshot) {
     runtime: snapshot.runtime,
     status: snapshot.status,
     stats: snapshot.stats,
+    proof: snapshot.proof,
     sampleMessages: (snapshot.messages || []).slice(0, 12).map((message) => ({
       id: message.id,
       source: message.source,
@@ -186,6 +187,7 @@ function summarizeSnapshot(snapshot) {
       channel: message.channel,
       contentLength: String(message.content || "").length,
       mode: message.mode,
+      evidenceLevel: message.evidenceLevel || "",
       receivedAt: message.receivedAt,
       url: message.url,
       badges: message.badges || []

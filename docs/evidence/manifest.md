@@ -21,13 +21,13 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
 - Initial submission: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
 - Custom-domain resubmission: recorded 2026-06-04 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
-- Date: 2026-06-04
+- Date: 2026-06-05
 
 ## Verification Commands
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 16/16 tests | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 28/28 tests | `docs/evidence/logs/proof.json` |
 | `npm run check` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass | `docs/evidence/logs/live-proof.json` |
@@ -44,12 +44,22 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 | `docs/evidence/screenshots/dashboard-desktop.png` | 1280 x 720 | Main dashboard, source labels, health strip, feed, controls, inspector |
 | `docs/evidence/screenshots/overlay-desktop.png` | 1280 x 720 | OBS/browser-source style overlay without dashboard chrome |
 | `docs/evidence/screenshots/dashboard-mobile-390.png` | 390 x 844 | Mobile layout, no horizontal overflow, controls remain usable |
+| `docs/evidence/screenshots/setup-x-rules.png` | 1280 x 720 | Setup drawer showing sanitized X filtered-stream rule visibility |
 
-Note: screenshots and video frames were re-captured on 2026-06-04 after the front-end terminal redesign, security-header hardening, and custom-domain launch. The refreshed YouTube demo uses `https://bubblewire.xyz`, live-only production mode, source filters, pinned/raw provenance, and the overlay route.
+Note: screenshots and video frames were re-captured on 2026-06-05 after adding the live proof receipt, judge-mode mobile feed-first layout, Kick evidence-level labels, and X rule visibility.
 
 ## Demo Recording Plan
 
-The uploaded demo video is `https://youtu.be/MGEKOfs4yn0`. The local WebM source is `docs/evidence/video/bubblewire-demo.webm`, generated from `https://bubblewire.xyz` frames in `docs/evidence/video-frames/`. Public overlay proof content is redacted in the browser-rendered frame to avoid exposing arbitrary live chat text; no secrets or private dashboards are captured.
+The uploaded demo video is `https://youtu.be/MGEKOfs4yn0`. The local WebM source is `docs/evidence/video/bubblewire-demo.webm`, refreshed on 2026-06-05 from the proof receipt screenshots in `docs/evidence/video-frames/`. Public overlay proof content is redacted in the browser-rendered frame to avoid exposing arbitrary live chat text; no secrets or private dashboards are captured.
+
+## 2026-06-05 Tranche Receipts
+
+| Receipt | Evidence |
+| --- | --- |
+| Live proof receipt | `/status.json` includes `proof.sources`; dashboard displays per-source proof levels and raw event type |
+| Kick evidence labels | Kick webhook rows and receipt show `WEBHOOK-PROOF`; signed webhook mode can show `SIGNED` |
+| X rule visibility | `/setup.json` includes sanitized `sources.x.rules`; setup drawer displays rule tag/value rows |
+| Judge/mobile mode | `?judge=1` skips the boot interstitial and mobile CSS orders feed, controls, then inspector |
 
 ## Live Adapter Matrix
 
