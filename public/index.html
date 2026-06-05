@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bubblewire — Market Bubble Relay</title>
-    <meta name="description" content="Unified Twitch + X + Kick chat relay: one real-time feed with source labels.">
+    <title>Bubblewire — Live Audience Signal Command Center</title>
+    <meta name="description" content="One real-time command center for Twitch, X, and Kick: source-labeled chat, proof receipts, watchlist alerts, history, and an OBS overlay.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
     <link rel="manifest" href="/manifest.webmanifest">
@@ -12,7 +12,7 @@
     <link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/styles.css?v=mobile-width-fix-20260605b">
+    <link rel="stylesheet" href="/styles.css?v=mobile-width-fix-20260605h-product-command">
   </head>
   <body>
     <div class="shell" id="appShell">
@@ -41,6 +41,59 @@
       <div class="tape" id="tape" aria-hidden="true"></div>
 
       <canvas class="signal-stream" id="signalStream" aria-hidden="true"></canvas>
+
+      <section class="product-command" id="productCommand" aria-label="Bubblewire product command center">
+        <div class="product-command-inner">
+          <div class="command-copy">
+            <p class="eyebrow">Live audience signal command center</p>
+            <h1>One real-time feed for Twitch, X, and Kick</h1>
+            <p>
+              Source-labeled chat, filtered posts, proof receipts, watchlist alerts, replay history,
+              and OBS overlays for streams where missing the moment costs you.
+            </p>
+            <div class="command-actions">
+              <button id="productDemoButton" type="button">Try live demo</button>
+              <button id="connectSourcesButton" type="button">Connect sources</button>
+              <a id="overlaySetupLink" href="/overlay-setup.html">Launch overlay</a>
+              <button id="focusFeedButton" type="button">Show feed</button>
+            </div>
+          </div>
+
+          <div class="command-proof" aria-label="Live product proof">
+            <div class="proof-metrics" id="proofMetrics">
+              <article><span>Captured</span><b>0000</b></article>
+              <article><span>Proof</span><b>0/3</b></article>
+              <article><span>Rate</span><b>0/min</b></article>
+              <article><span>Watch hits</span><b>0</b></article>
+            </div>
+            <div class="launch-checklist" id="launchChecklist" aria-label="Self-serve launch checklist"></div>
+          </div>
+        </div>
+
+        <div class="capability-strip" id="capabilityStrip" aria-label="What Bubblewire does">
+          <article>
+            <strong>Collapse noise</strong>
+            <span>Deduped rows, heat, priority filters, and author drill-down.</span>
+          </article>
+          <article>
+            <strong>Catch moments</strong>
+            <span>Watchlist alerts, pins, session recap, and background notifications.</span>
+          </article>
+          <article>
+            <strong>Prove sources</strong>
+            <span>Per-source status, evidence levels, raw payloads, and live receipts.</span>
+          </article>
+          <article>
+            <strong>Go on air</strong>
+            <span>Transparent OBS overlay with size, fade, alignment, and source filters.</span>
+          </article>
+        </div>
+
+        <div class="operator-signal" id="operatorSignal">
+          <strong>Built for market streams</strong>
+          <span>Hosts watch the room, mods catch spam and alpha, producers clip the proof, and teams replay what mattered after the stream.</span>
+        </div>
+      </section>
 
       <div class="channel-hero" id="channelHero" hidden>
         <span class="channel-hero-label">▶ watch any twitch chat live — no login</span>

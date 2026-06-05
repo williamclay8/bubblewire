@@ -11,6 +11,7 @@ const WATCH_NOTIFY_KEY = "bubblewire:watchnotify:v1";
 const THEME_KEY = "bubblewire:theme:v1";
 const DENSITY_KEY = "bubblewire:density:v1";
 const PREFS_KEY = "bubblewire:prefs:v1";
+const ACTIVATION_STORAGE_KEY = "bubblewire:activation:v1";
 const HERO_KEY = "bubblewire:hero-dismissed:v1";
 const BOOT_KEY = "bubblewire:booted";
 const THEMES = ["gold", "matrix", "ice", "synthwave"];
@@ -49,6 +50,7 @@ const state = {
   loadingOlder: false,
   setup: null,
   watchNotify: loadFlag(WATCH_NOTIFY_KEY),
+  activation: loadActivation(),
   theme: "gold",
   density: "comfortable",
   watching: 0,
@@ -110,6 +112,13 @@ const els = {
   setupBody: document.querySelector("#setupBody"),
   setupClose: document.querySelector("#setupClose"),
   signalStream: document.querySelector("#signalStream"),
+  productCommand: document.querySelector("#productCommand"),
+  productDemoButton: document.querySelector("#productDemoButton"),
+  connectSourcesButton: document.querySelector("#connectSourcesButton"),
+  focusFeedButton: document.querySelector("#focusFeedButton"),
+  overlaySetupLink: document.querySelector("#overlaySetupLink"),
+  proofMetrics: document.querySelector("#proofMetrics"),
+  launchChecklist: document.querySelector("#launchChecklist"),
   channelHero: document.querySelector("#channelHero"),
   heroChannelInput: document.querySelector("#heroChannelInput"),
   heroWatchButton: document.querySelector("#heroWatchButton"),
@@ -144,6 +153,7 @@ if (isOverlay) {
 
 applyStoredPrefs();
 bindControls();
+renderProductSurface();
 applyUrlState();
 connectEvents();
 loadSnapshot();
@@ -269,12 +279,25 @@ function bindControls() {
   els.shareViewButton?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(buildViewUrl());
+      trackActivation("share");
       toast("view link copied");
     } catch {
       toast("clipboard unavailable", "err");
     }
   });
   els.recapButton?.addEventListener("click", downloadRecap);
+  els.productDemoButton?.addEventListener("click", runProductDemo);
+  els.connectSourcesButton?.addEventListener("click", () => {
+    trackActivation("setup");
+    openSetup();
+  });
+  els.focusFeedButton?.addEventListener("click", () => {
+    trackActivation("feed");
+    els.feedPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    els.feedList?.focus?.();
+  });
+  els.overlaySetupLink?.addEventListener("click", () => trackActivation("overlay"));
+  els.launchChecklist?.addEventListener("click", onLaunchChecklistClick);
 
   // Channel hero
   els.heroWatchButton?.addEventListener("click", () => heroWatch());
@@ -539,6 +562,7 @@ function renderAll() {
   renderStatus();
   renderStats();
   renderProofReceipt();
+  renderProductSurface();
   renderFeed();
   if (!isOverlay) {
     renderSourceCards();
@@ -598,6 +622,7 @@ function renderStats() {
 
   renderTape(total, visible);
   renderProofReceipt();
+  renderProductSurface();
 }
 
 function renderProofReceipt() {
@@ -623,6 +648,138 @@ function renderProofReceipt() {
   }).join("");
 
   els.proofReceipt.innerHTML = `<strong>LIVE PROOF</strong>${receipt}`;
+}
+
+function renderProductSurface() {
+  if (isOverlay) return;
+  renderProofMetrics();
+  renderLaunchChecklist();
+}
+
+function renderProofMetrics() {
+  if (!els.proofMetrics) return;
+  const total = state.stats.totalMessages || 0;
+  const rate = messageRate();
+  const proofReady = SOURCE_ORDER.filter((source) => sourceHasProof(source)).length;
+  const watchHits = state.session.watchHits || 0;
+  const metrics = [
+    ["Captured", pad(total)],
+    ["Proof", `${proofReady}/3`],
+    ["Rate", `${rate}/min`],
+    ["Watch hits", String(watchHits)]
+  ];
+
+  els.proofMetrics.innerHTML = metrics
+    .map(([label, value]) => `
+      <article>
+        <span>${escapeHtml(label)}</span>
+        <b>${escapeHtml(value)}</b>
+      </article>
+    `)
+    .join("");
+}
+
+function renderLaunchChecklist() {
+  if (!els.launchChecklist) return;
+  const activeSources = SOURCE_ORDER.filter((source) => sourceHasProof(source) || sourceIsConfigured(source)).length;
+  const steps = [
+    {
+      key: "demo",
+      label: "Try the feed",
+      body: "Inject a labeled Twitch, X, and Kick burst or watch live traffic.",
+      action: "demo",
+      cta: state.runtime.demoEnabled === false ? "Live only" : "Run demo",
+      done: Boolean(state.activation.demo || state.stats.totalMessages > 0)
+    },
+    {
+      key: "setup",
+      label: "Connect sources",
+      body: "Check Twitch channels, X rules, and the Kick webhook from one drawer.",
+      action: "setup",
+      cta: "Open setup",
+      done: Boolean(state.activation.setup || activeSources > 0)
+    },
+    {
+      key: "watch",
+      label: "Add an alert",
+      body: "Track a keyword or ticker so the stream team catches the moment.",
+      action: "watch",
+      cta: "Add term",
+      done: state.watchlist.length > 0
+    },
+    {
+      key: "overlay",
+      label: "Go on air",
+      body: "Configure a transparent OBS overlay with source filters and fade timing.",
+      action: "overlay",
+      cta: "Overlay",
+      done: Boolean(state.activation.overlay)
+    }
+  ];
+
+  els.launchChecklist.innerHTML = steps
+    .map((step, index) => `
+      <article class="launch-step" data-done="${step.done}" data-step="${escapeAttr(step.key)}">
+        <span class="step-index">${step.done ? "✓" : String(index + 1)}</span>
+        <div>
+          <strong>${escapeHtml(step.label)}</strong>
+          <p>${escapeHtml(step.body)}</p>
+        </div>
+        <button type="button" data-onboard-action="${escapeAttr(step.action)}">${escapeHtml(step.cta)}</button>
+      </article>
+    `)
+    .join("");
+}
+
+function sourceHasProof(source) {
+  const proof = state.proof?.sources?.[source] || {};
+  const stats = state.stats.sources?.[source] || {};
+  const level = proof.evidenceLevel || "";
+  return Boolean(
+    proof.count > 0 ||
+    stats.count > 0 ||
+    ["live", "webhook-proof", "signed"].includes(level)
+  );
+}
+
+function sourceIsConfigured(source) {
+  const status = state.status[source] || {};
+  return ["connected", "live", "webhook-ready", "demo"].includes(status.state);
+}
+
+function onLaunchChecklistClick(event) {
+  const button = event.target.closest("[data-onboard-action]");
+  if (!button) return;
+  const action = button.dataset.onboardAction;
+  if (action === "demo") {
+    runProductDemo();
+  } else if (action === "setup") {
+    trackActivation("setup");
+    openSetup();
+  } else if (action === "watch") {
+    trackActivation("watch_prompt");
+    els.watchInput?.focus();
+  } else if (action === "overlay") {
+    trackActivation("overlay");
+    location.href = "/overlay-setup.html";
+  }
+}
+
+async function runProductDemo() {
+  trackActivation("demo");
+  setFilter("all");
+  if (state.runtime.demoEnabled === false) {
+    toast("live-only mode — watching real sources", "warn");
+    els.feedPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  try {
+    await postJson("/demo-spike.json");
+    toast("demo burst injected across sources");
+    els.feedPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch {
+    toast("demo burst rejected", "err");
+  }
 }
 
 function renderDemoControls() {
@@ -1030,6 +1187,7 @@ function addWatchTerm() {
     return;
   }
   state.watchlist.push(term);
+  trackActivation("watch");
   if (els.watchInput) els.watchInput.value = "";
   saveWatchlist();
   renderWatchlist();
@@ -1136,6 +1294,7 @@ function isSetupOpen() {
 
 async function openSetup() {
   if (!els.setupDrawer) return;
+  trackActivation("setup");
   els.setupDrawer.hidden = false;
   if (els.setupBackdrop) els.setupBackdrop.hidden = false;
   await refreshSetup();
@@ -1277,7 +1436,10 @@ function onSetupClick(event) {
     const url = document.querySelector("#webhookUrl")?.textContent || "";
     navigator.clipboard
       .writeText(url)
-      .then(() => toast("webhook url copied"))
+      .then(() => {
+        trackActivation("kick");
+        toast("webhook url copied");
+      })
       .catch(() => toast("clipboard unavailable", "err"));
   }
 }
@@ -1287,6 +1449,7 @@ async function submitChannel(action, rawChannel) {
   if (!channel) return;
   try {
     await postJson("/api/twitch/channels", { action, channel });
+    if (action === "add") trackActivation("twitch");
     toast(action === "add" ? `joining #${channel}` : `left #${channel}`);
     await refreshSetup();
   } catch {
@@ -1348,6 +1511,29 @@ function saveFlag(key, value) {
   } catch {
     /* in-memory only */
   }
+}
+
+function loadActivation() {
+  try {
+    const value = JSON.parse(localStorage.getItem(ACTIVATION_STORAGE_KEY) || "{}");
+    return value && typeof value === "object" ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function trackActivation(step) {
+  if (!step) return;
+  state.activation = {
+    ...state.activation,
+    [step]: new Date().toISOString()
+  };
+  try {
+    localStorage.setItem(ACTIVATION_STORAGE_KEY, JSON.stringify(state.activation));
+  } catch {
+    /* in-memory only */
+  }
+  renderLaunchChecklist();
 }
 
 function applyStoredPrefs() {
@@ -1589,7 +1775,7 @@ function watchTabVisibility() {
 }
 
 function updateTabBadge() {
-  const base = "Bubblewire — Market Bubble Relay";
+  const base = "Bubblewire — Live Audience Signal Command Center";
   if (state.hiddenUnseen > 0 && document.hidden) {
     document.title = `(${Math.min(99, state.hiddenUnseen)}) ${base}`;
     if (els.favicon) els.favicon.href = "/assets/bubblewire-mark-alert.svg";
@@ -1667,6 +1853,7 @@ async function heroWatch() {
 /* ---------- session recap ---------- */
 
 function downloadRecap() {
+  trackActivation("recap");
   const canvas = document.createElement("canvas");
   canvas.width = 1200;
   canvas.height = 630;
