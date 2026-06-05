@@ -1486,7 +1486,14 @@ mark {
 
   .feed-panel {
     order: 1;
-    height: 68vh;
+    width: 100%;
+    min-width: 0;
+    height: 78vh;
+    height: 78svh;
+  }
+
+  .feed-head {
+    padding: 10px 12px;
   }
 
   .inspector {
@@ -2304,6 +2311,83 @@ body[data-density="compact"] .pin-btn {
 }
 
 @media (max-width: 820px) {
+  .proof-receipt {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 6px 10px;
+    scrollbar-width: none;
+  }
+
+  .proof-receipt::-webkit-scrollbar {
+    display: none;
+  }
+
+  .proof-receipt strong,
+  .proof-receipt span {
+    flex: none;
+  }
+
+  .proof-receipt span {
+    max-width: 260px;
+  }
+
+  .feed {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .message {
+    padding: 6px 9px 7px;
+  }
+
+  .msg-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+  }
+
+  .avatar,
+  .avatar-fallback,
+  .handle,
+  .channel,
+  .mode-tag,
+  .heat,
+  .verified,
+  .watch-tag,
+  .dupe-badge,
+  .msg-spacer {
+    display: none;
+  }
+
+  .author {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .msg-time {
+    justify-self: end;
+    font-size: 10px;
+  }
+
+  .pin-btn {
+    min-height: 24px;
+    padding: 0 6px;
+    font-size: 8.5px;
+  }
+
+  .msg-content {
+    font-size: 13.5px;
+    line-height: 1.42;
+  }
+
+  .feed-foot {
+    padding: 6px;
+  }
+
   .signal-stream {
     height: 38px;
   }
