@@ -365,8 +365,16 @@ function isFlagEnabled(value) {
 }
 
 function isAdminAuthorized(request) {
-  if (!adminToken) return true;
+  if (!adminToken) return !isProductionRuntime();
   return (request.headers["x-admin-token"] || "") === adminToken;
+}
+
+function isAdminLocked() {
+  return Boolean(adminToken) || isProductionRuntime();
+}
+
+function isProductionRuntime(env = process.env) {
+  return env.RENDER === "true" || Boolean(env.RENDER_SERVICE_ID || env.RENDER_EXTERNAL_URL);
 }
 
 function twitchEnv() {
@@ -452,7 +460,7 @@ function twitchChannelsSnapshot() {
     channels: runtimeTwitchChannels,
     mode: twitchPath(),
     mutable: twitchPath() !== "eventsub",
-    adminLocked: Boolean(adminToken)
+    adminLocked: isAdminLocked()
   };
 }
 
@@ -469,7 +477,7 @@ function setupSnapshot(request) {
   return {
     demo: { enabled: demoEnabled, mode: demoEnabled ? "on" : "off" },
     history: { enabled: history.enabled },
-    adminLocked: Boolean(adminToken),
+    adminLocked: isAdminLocked(),
     sources: {
       twitch: {
         path: twitchPath(),
@@ -501,7 +509,7 @@ function setupSnapshot(request) {
           paused: runtimeXPaused,
           endpoint: "/api/x/control",
           connectionsEndpoint: "/api/x/connections",
-          adminLocked: Boolean(adminToken)
+          adminLocked: isAdminLocked()
         },
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
       },

@@ -15,6 +15,8 @@ services:
         value: off
       - key: X_STREAM_ENABLED
         value: "on"
+      - key: ADMIN_TOKEN
+        sync: false
       - key: TWITCH_CHANNELS
         value: fazebanks,marketbubble,xqc
       - key: KICK_WEBHOOK_PUBLIC_URL

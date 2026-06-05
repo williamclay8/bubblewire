@@ -170,6 +170,49 @@ test("X connector control endpoint pauses and resumes runtime state", async (t) 
   assert.notEqual(resume.body.status.state, "paused");
 });
 
+test("Render production locks admin endpoints when ADMIN_TOKEN is missing", async (t) => {
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  let stdout = "";
+  let stderr = "";
+
+  const child = spawn(process.execPath, ["src/server.js"], {
+    cwd: repoRoot,
+    env: {
+      ...process.env,
+      ADMIN_TOKEN: "",
+      DEMO_MODE: "off",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      RENDER: "true",
+      X_BEARER_TOKEN: "",
+      X_STREAM_ENABLED: "off"
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
+  });
+
+  t.after(() => stopChild(child));
+
+  await waitForServer(baseUrl, child, () => stdout, () => stderr);
+
+  const setup = await getJson(`${baseUrl}/setup.json`);
+  assert.equal(setup.adminLocked, true);
+  assert.equal(setup.sources.x.control.adminLocked, true);
+
+  const pause = await postJson(`${baseUrl}/api/x/control`, { action: "pause" });
+  assert.equal(pause.status, 401);
+
+  const cleanup = await postJson(`${baseUrl}/api/x/connections`, { action: "terminate-all" });
+  assert.equal(cleanup.status, 401);
+});
+
 function getFreePort() {
   return new Promise((resolve, reject) => {
     const server = net.createServer();

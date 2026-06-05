@@ -79,7 +79,7 @@ Useful local controls:
 
 Press `s` (or the `Setup` button) for a per-source credential checklist — it shows which env vars are set (names only, never values), the active Twitch path (EventSub/IRC/none), sanitized X filtered-stream rules, and a copyable Kick webhook URL.
 
-In IRC mode, Twitch channels can be joined or left at runtime from the panel — anonymous read-only IRC needs no credentials. Runtime channels persist to `data/twitch-channels.json` and merge with `TWITCH_CHANNELS` on boot. Set `ADMIN_TOKEN` to require an `x-admin-token` header for channel mutations.
+In IRC mode, Twitch channels can be joined or left at runtime from the panel — anonymous read-only IRC needs no credentials. Runtime channels persist to `data/twitch-channels.json` and merge with `TWITCH_CHANNELS` on boot. Production admin routes lock by default; set `ADMIN_TOKEN` to allow runtime source controls with an `x-admin-token` header.
 
 ## Overlay Configurator
 
