@@ -17,7 +17,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Branch: `main`
 - GitHub repo: `https://github.com/williamclay8/bubblewire`
 - Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
-- Latest commit/deploy IDs are recorded in the final Lumi closeout for each release run.
+- Latest commit/deploy: `afcf587` / `dep-d8h2bg67r5hc73d1olig` (Render status `live`, 2026-06-05T01:26:50Z).
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
 - Initial submission: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
 - Custom-domain resubmission: recorded 2026-06-04 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
@@ -101,15 +101,15 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 | `https://bubblewire.xyz/export.ndjson` | HTTP 200, NDJSON export |
 | `POST https://bubblewire.xyz/kick.webhook` | HTTP 200, Kick webhook payload accepted |
 
-Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-04T22:53:10.306Z against `https://bubblewire.xyz`, passed with expected sources `twitch,x,kick`.
+Latest public live proof: `docs/evidence/logs/live-proof.json`, generated 2026-06-05T01:27:48.941Z against `https://bubblewire.xyz`, passed with expected sources `twitch,x,kick`.
 
 Latest live source evidence from that proof:
 
 | Source | Status | Count |
 | --- | --- | --- |
-| Twitch | `connected`, `watching 3 channels anonymously` | 1046 |
-| X | `connected`, `filtered stream online` | 42 |
-| Kick | `connected`, `last webhook accepted` | 2 |
+| Twitch | `connected`, live `PRIVMSG` proof | 39 |
+| X | `connected`, live `filtered-stream` proof | 1 |
+| Kick | `connected`, `webhook-proof` `chat.message.sent` proof | 1 |
 
 ## Deployment Readiness
 

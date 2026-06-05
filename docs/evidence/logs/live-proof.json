@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-05T01:17:40.268Z",
-  "baseUrl": "http://127.0.0.1:3000",
+  "generatedAt": "2026-06-05T01:27:48.941Z",
+  "baseUrl": "https://bubblewire.xyz",
   "checks": [
     {
       "name": "overlay HTML",
@@ -10,13 +10,13 @@
     {
       "name": "NDJSON export",
       "status": 200,
-      "bytes": 539
+      "bytes": 38657
     },
     {
       "name": "SSE stream opens",
       "status": 200,
       "contentType": "text/event-stream",
-      "firstChunkBytes": 2048
+      "firstChunkBytes": 1363
     },
     {
       "name": "before runtime is live-only",
@@ -26,9 +26,9 @@
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true,
-        "watching": 1
+        "watching": 10
       },
-      "totalMessages": 1,
+      "totalMessages": 40,
       "demoMessages": 0
     },
     {
@@ -61,7 +61,7 @@
       "status": 200,
       "body": {
         "ok": true,
-        "id": "kick:live-proof-1780622260411"
+        "id": "kick:live-proof-1780622872342"
       }
     },
     {
@@ -72,10 +72,41 @@
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true,
-        "watching": 1
+        "watching": 10
       },
-      "totalMessages": 2,
+      "totalMessages": 41,
       "demoMessages": 0
+    },
+    {
+      "name": "expected live sources are present",
+      "status": "pass",
+      "expectedSources": [
+        "twitch",
+        "x",
+        "kick"
+      ],
+      "sourceStatus": {
+        "twitch": {
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-05T01:26:47.837Z"
+        },
+        "x": {
+          "state": "connected",
+          "detail": "filtered stream online · 1 rules: marketbubble-live",
+          "updatedAt": "2026-06-05T01:27:02.745Z"
+        },
+        "kick": {
+          "state": "connected",
+          "detail": "last webhook accepted",
+          "updatedAt": "2026-06-05T01:27:52.539Z"
+        }
+      },
+      "sourceCounts": {
+        "twitch": 39,
+        "x": 1,
+        "kick": 1
+      }
     },
     {
       "name": "live-only smoke",
@@ -86,8 +117,8 @@
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 481,
-      "checkedAt": "2026-06-05T01:17:40.362Z"
+      "uptimeSeconds": 62,
+      "checkedAt": "2026-06-05T01:27:49.573Z"
     },
     "before": {
       "runtime": {
@@ -95,89 +126,247 @@
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true,
-        "watching": 1
+        "watching": 10
       },
       "status": {
         "twitch": {
-          "state": "missing",
-          "detail": "missing TWITCH_CHANNELS",
-          "updatedAt": "2026-06-05T01:09:39.551Z"
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-05T01:26:47.837Z"
         },
         "x": {
-          "state": "missing",
-          "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-05T01:09:39.552Z"
+          "state": "connected",
+          "detail": "filtered stream online · 1 rules: marketbubble-live",
+          "updatedAt": "2026-06-05T01:27:02.745Z"
         },
         "kick": {
-          "state": "connected",
-          "detail": "last webhook accepted",
-          "updatedAt": "2026-06-05T01:11:31.164Z"
+          "state": "webhook-ready",
+          "detail": "waiting for chat.message.sent webhooks",
+          "updatedAt": "2026-06-05T01:26:47.737Z"
         }
       },
       "stats": {
-        "totalMessages": 1,
+        "totalMessages": 40,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-05T01:09:39.541Z",
+        "startedAt": "2026-06-05T01:26:47.634Z",
         "sources": {
           "twitch": {
-            "count": 0,
-            "lastMessageAt": null
+            "count": 39,
+            "lastMessageAt": "2026-06-05T01:27:44.290Z"
           },
           "x": {
-            "count": 0,
-            "lastMessageAt": null
+            "count": 1,
+            "lastMessageAt": "2026-06-05T01:26:56.000Z"
           },
           "kick": {
-            "count": 1,
-            "lastMessageAt": "2026-06-05T01:11:31.156Z"
+            "count": 0,
+            "lastMessageAt": null
           }
         }
       },
       "proof": {
-        "updatedAt": "2026-06-05T01:11:31.164Z",
+        "updatedAt": "2026-06-05T01:27:44.360Z",
         "sources": {
           "twitch": {
             "label": "Twitch",
-            "count": 0,
-            "evidenceLevel": "waiting",
-            "lastMessageAt": null,
-            "lastMessageId": null,
-            "mode": null,
-            "rawType": null
+            "count": 39,
+            "evidenceLevel": "live",
+            "lastMessageAt": "2026-06-05T01:27:44.290Z",
+            "lastMessageId": "twitch:811e60ea-3f9b-40f1-a473-1bca61803d50",
+            "mode": "live",
+            "rawType": "PRIVMSG"
           },
           "x": {
             "label": "X",
+            "count": 1,
+            "evidenceLevel": "live",
+            "lastMessageAt": "2026-06-05T01:26:56.000Z",
+            "lastMessageId": "x:2062707713763598727",
+            "mode": "live",
+            "rawType": "filtered-stream"
+          },
+          "kick": {
+            "label": "Kick",
             "count": 0,
             "evidenceLevel": "waiting",
             "lastMessageAt": null,
             "lastMessageId": null,
             "mode": null,
             "rawType": null
-          },
-          "kick": {
-            "label": "Kick",
-            "count": 1,
-            "evidenceLevel": "webhook-proof",
-            "lastMessageAt": "2026-06-05T01:11:31.156Z",
-            "lastMessageId": "kick:live-proof-1780621891156",
-            "mode": "live",
-            "rawType": "chat.message.sent"
           }
         }
       },
       "sampleMessages": [
         {
-          "id": "kick:live-proof-1780621891156",
-          "source": "kick",
-          "sourceLabel": "Kick",
-          "channel": "marketbubble",
-          "contentLength": 29,
+          "id": "twitch:811e60ea-3f9b-40f1-a473-1bca61803d50",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 17,
           "mode": "live",
-          "evidenceLevel": "webhook-proof",
-          "receivedAt": "2026-06-05T01:11:31.156Z",
-          "url": "https://kick.com/marketbubble",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:44.290Z",
+          "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "Reviewer"
+            "turbo/1"
+          ]
+        },
+        {
+          "id": "twitch:68507cf1-5c51-4df1-94c8-3997238dd7af",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 56,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:39.743Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/12",
+            "went-outside/1"
+          ]
+        },
+        {
+          "id": "twitch:8167b219-61c9-41d0-9645-453924072051",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 36,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:39.184Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "turbo/1"
+          ]
+        },
+        {
+          "id": "twitch:9322de22-a576-4c5c-83f8-4ac6e4ec7b23",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 13,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:38.865Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/24",
+            "raging-wolf-helm/1"
+          ]
+        },
+        {
+          "id": "twitch:38b7019b-c49e-4b22-9632-f0a7d396ead2",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 18,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:35.658Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/48",
+            "no_audio/1"
+          ]
+        },
+        {
+          "id": "twitch:0612b428-bf7d-4e9f-937a-935b6b0d7f1d",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 7,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:29.629Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moments/4"
+          ]
+        },
+        {
+          "id": "twitch:b6bccb18-4127-4960-a489-9d8c1f5f6b6c",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 20,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:28.772Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "minecraft-15th-anniversary-celebration/1"
+          ]
+        },
+        {
+          "id": "twitch:312079af-a285-40b9-be3b-8898eb6b5661",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 21,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:23.874Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        },
+        {
+          "id": "twitch:090b65b1-f253-4f1f-accf-9d3837873d71",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 33,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:21.373Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moments/4"
+          ]
+        },
+        {
+          "id": "twitch:8ab5750d-7a1a-4688-a6b8-55610a1a22d3",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 9,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:19.634Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/78",
+            "purple-pixel-heart---together-for-good-24/1"
+          ]
+        },
+        {
+          "id": "twitch:41183e7c-9217-42f7-9ba4-d9b094642b51",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 4,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:19.268Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/12",
+            "went-outside/1"
+          ]
+        },
+        {
+          "id": "twitch:1abf645e-553e-4fd6-afd6-b6df2c4e38fe",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 55,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:18.297Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/78",
+            "purple-pixel-heart---together-for-good-24/1"
           ]
         }
       ]
@@ -188,71 +377,71 @@
         "demoMode": "off",
         "demoRunning": false,
         "liveOnly": true,
-        "watching": 1
+        "watching": 10
       },
       "status": {
         "twitch": {
-          "state": "missing",
-          "detail": "missing TWITCH_CHANNELS",
-          "updatedAt": "2026-06-05T01:09:39.551Z"
+          "state": "connected",
+          "detail": "watching 3 channels anonymously",
+          "updatedAt": "2026-06-05T01:26:47.837Z"
         },
         "x": {
-          "state": "missing",
-          "detail": "missing X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-05T01:09:39.552Z"
+          "state": "connected",
+          "detail": "filtered stream online · 1 rules: marketbubble-live",
+          "updatedAt": "2026-06-05T01:27:02.745Z"
         },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-05T01:17:40.424Z"
+          "updatedAt": "2026-06-05T01:27:52.539Z"
         }
       },
       "stats": {
-        "totalMessages": 2,
+        "totalMessages": 41,
         "duplicatesDropped": 0,
-        "startedAt": "2026-06-05T01:09:39.541Z",
+        "startedAt": "2026-06-05T01:26:47.634Z",
         "sources": {
           "twitch": {
-            "count": 0,
-            "lastMessageAt": null
+            "count": 39,
+            "lastMessageAt": "2026-06-05T01:27:44.290Z"
           },
           "x": {
-            "count": 0,
-            "lastMessageAt": null
+            "count": 1,
+            "lastMessageAt": "2026-06-05T01:26:56.000Z"
           },
           "kick": {
-            "count": 2,
-            "lastMessageAt": "2026-06-05T01:17:40.411Z"
+            "count": 1,
+            "lastMessageAt": "2026-06-05T01:27:52.342Z"
           }
         }
       },
       "proof": {
-        "updatedAt": "2026-06-05T01:17:40.424Z",
+        "updatedAt": "2026-06-05T01:27:52.539Z",
         "sources": {
           "twitch": {
             "label": "Twitch",
-            "count": 0,
-            "evidenceLevel": "waiting",
-            "lastMessageAt": null,
-            "lastMessageId": null,
-            "mode": null,
-            "rawType": null
+            "count": 39,
+            "evidenceLevel": "live",
+            "lastMessageAt": "2026-06-05T01:27:44.290Z",
+            "lastMessageId": "twitch:811e60ea-3f9b-40f1-a473-1bca61803d50",
+            "mode": "live",
+            "rawType": "PRIVMSG"
           },
           "x": {
             "label": "X",
-            "count": 0,
-            "evidenceLevel": "waiting",
-            "lastMessageAt": null,
-            "lastMessageId": null,
-            "mode": null,
-            "rawType": null
+            "count": 1,
+            "evidenceLevel": "live",
+            "lastMessageAt": "2026-06-05T01:26:56.000Z",
+            "lastMessageId": "x:2062707713763598727",
+            "mode": "live",
+            "rawType": "filtered-stream"
           },
           "kick": {
             "label": "Kick",
-            "count": 2,
+            "count": 1,
             "evidenceLevel": "webhook-proof",
-            "lastMessageAt": "2026-06-05T01:17:40.411Z",
-            "lastMessageId": "kick:live-proof-1780622260411",
+            "lastMessageAt": "2026-06-05T01:27:52.342Z",
+            "lastMessageId": "kick:live-proof-1780622872342",
             "mode": "live",
             "rawType": "chat.message.sent"
           }
@@ -260,31 +449,174 @@
       },
       "sampleMessages": [
         {
-          "id": "kick:live-proof-1780622260411",
+          "id": "kick:live-proof-1780622872342",
           "source": "kick",
           "sourceLabel": "Kick",
           "channel": "marketbubble",
           "contentLength": 29,
           "mode": "live",
           "evidenceLevel": "webhook-proof",
-          "receivedAt": "2026-06-05T01:17:40.411Z",
+          "receivedAt": "2026-06-05T01:27:52.342Z",
           "url": "https://kick.com/marketbubble",
           "badges": [
             "Reviewer"
           ]
         },
         {
-          "id": "kick:live-proof-1780621891156",
-          "source": "kick",
-          "sourceLabel": "Kick",
-          "channel": "marketbubble",
-          "contentLength": 29,
+          "id": "twitch:811e60ea-3f9b-40f1-a473-1bca61803d50",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 17,
           "mode": "live",
-          "evidenceLevel": "webhook-proof",
-          "receivedAt": "2026-06-05T01:11:31.156Z",
-          "url": "https://kick.com/marketbubble",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:44.290Z",
+          "url": "https://www.twitch.tv/xqc",
           "badges": [
-            "Reviewer"
+            "turbo/1"
+          ]
+        },
+        {
+          "id": "twitch:68507cf1-5c51-4df1-94c8-3997238dd7af",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 56,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:39.743Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/12",
+            "went-outside/1"
+          ]
+        },
+        {
+          "id": "twitch:8167b219-61c9-41d0-9645-453924072051",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 36,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:39.184Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "turbo/1"
+          ]
+        },
+        {
+          "id": "twitch:9322de22-a576-4c5c-83f8-4ac6e4ec7b23",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 13,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:38.865Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/24",
+            "raging-wolf-helm/1"
+          ]
+        },
+        {
+          "id": "twitch:38b7019b-c49e-4b22-9632-f0a7d396ead2",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 18,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:35.658Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/48",
+            "no_audio/1"
+          ]
+        },
+        {
+          "id": "twitch:0612b428-bf7d-4e9f-937a-935b6b0d7f1d",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 7,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:29.629Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moments/4"
+          ]
+        },
+        {
+          "id": "twitch:b6bccb18-4127-4960-a489-9d8c1f5f6b6c",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 20,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:28.772Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "minecraft-15th-anniversary-celebration/1"
+          ]
+        },
+        {
+          "id": "twitch:312079af-a285-40b9-be3b-8898eb6b5661",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 21,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:23.874Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": []
+        },
+        {
+          "id": "twitch:090b65b1-f253-4f1f-accf-9d3837873d71",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 33,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:21.373Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "moments/4"
+          ]
+        },
+        {
+          "id": "twitch:8ab5750d-7a1a-4688-a6b8-55610a1a22d3",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 9,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:19.634Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/78",
+            "purple-pixel-heart---together-for-good-24/1"
+          ]
+        },
+        {
+          "id": "twitch:41183e7c-9217-42f7-9ba4-d9b094642b51",
+          "source": "twitch",
+          "sourceLabel": "Twitch",
+          "channel": "xqc",
+          "contentLength": 4,
+          "mode": "live",
+          "evidenceLevel": "",
+          "receivedAt": "2026-06-05T01:27:19.268Z",
+          "url": "https://www.twitch.tv/xqc",
+          "badges": [
+            "subscriber/12",
+            "went-outside/1"
           ]
         }
       ]
