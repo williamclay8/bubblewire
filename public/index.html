@@ -26,6 +26,9 @@
         </a>
         <div class="status-strip" id="statusStrip" aria-label="Source status"></div>
         <div class="topbar-tools">
+          <span class="watching-chip" id="watchingChip" title="Viewers connected right now" hidden>
+            ◉ <b id="watchingCount">1</b>
+          </span>
           <span class="link-state" id="linkState" data-state="connecting" title="Event stream link">
             <span class="status-dot"></span><span class="link-label" id="linkLabel">LINK</span>
           </span>
@@ -36,6 +39,15 @@
       </header>
 
       <div class="tape" id="tape" aria-hidden="true"></div>
+
+      <canvas class="signal-stream" id="signalStream" aria-hidden="true"></canvas>
+
+      <div class="channel-hero" id="channelHero" hidden>
+        <span class="channel-hero-label">▶ watch any twitch chat live — no login</span>
+        <input id="heroChannelInput" type="text" placeholder="channel name" autocomplete="off" spellcheck="false" maxlength="25">
+        <button id="heroWatchButton" type="button">Watch live</button>
+        <button id="heroDismiss" type="button" class="hero-dismiss" title="Dismiss">×</button>
+      </div>
 
       <main class="layout">
         <aside class="rail" aria-label="Feed controls">
@@ -64,6 +76,21 @@
               <span class="switch" aria-hidden="true"></span>
               <span class="switch-label">Priority only <small>heat ≥ 18</small></span>
             </label>
+            <label class="switch-row" for="densityToggle">
+              <input id="densityToggle" type="checkbox">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Compact rows</span>
+            </label>
+          </section>
+
+          <section class="rail-section">
+            <h2>// theme</h2>
+            <div class="theme-row" role="group" aria-label="Theme">
+              <button type="button" data-theme-pick="gold" class="theme-swatch active" title="Gold terminal" aria-pressed="true"><i style="background:#d8a84a"></i></button>
+              <button type="button" data-theme-pick="matrix" class="theme-swatch" title="Matrix" aria-pressed="false"><i style="background:#3dff6e"></i></button>
+              <button type="button" data-theme-pick="ice" class="theme-swatch" title="Ice" aria-pressed="false"><i style="background:#6fd6ff"></i></button>
+              <button type="button" data-theme-pick="synthwave" class="theme-swatch" title="Synthwave" aria-pressed="false"><i style="background:#ff6ec7"></i></button>
+            </div>
           </section>
 
           <section class="rail-section">
@@ -78,6 +105,11 @@
               <span class="switch" aria-hidden="true"></span>
               <span class="switch-label">Alert sound</span>
             </label>
+            <label class="switch-row" for="watchNotify">
+              <input id="watchNotify" type="checkbox">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Browser alerts <small>background tab</small></span>
+            </label>
           </section>
 
           <section class="rail-section">
@@ -87,6 +119,8 @@
               <button id="spikeButton" type="button" title="Inject a demo burst">Spike</button>
               <button id="exportButton" type="button" title="Download feed as NDJSON">Export</button>
               <button id="clearSearchButton" type="button" title="Clear search [esc]">Clear</button>
+              <button id="recapButton" type="button" title="Download a session recap card">Recap</button>
+              <button id="shareViewButton" type="button" title="Copy a link to this exact view">Share</button>
             </div>
           </section>
 
@@ -113,6 +147,7 @@
               <span></span><span></span><span></span><span></span><span></span>
             </div>
           </div>
+          <div class="spike-chip" id="spikeChip" hidden>▲ volume spike</div>
           <div class="paused-banner" id="pausedBanner" hidden>
             feed paused — <b id="pausedBannerCount">0</b> buffered
           </div>
@@ -180,6 +215,14 @@
     </aside>
 
     <div class="toast-root" id="toastRoot" aria-live="polite"></div>
+
+    <div class="boot-screen" id="bootScreen" hidden>
+      <div class="boot-card">
+        <img src="/assets/bubblewire-mark.svg" alt="" width="44" height="44">
+        <pre id="bootLog">BUBBLEWIRE RELAY v4</pre>
+        <p class="boot-skip">click or press any key to skip</p>
+      </div>
+    </div>
 
     <script type="module" src="/app.js"></script>
   </body>

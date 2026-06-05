@@ -27,8 +27,10 @@ const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
   "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'"
 };
+
+let sseClients = 0;
 
 const history = createHistoryLog({
   filePath: process.env.HISTORY_FILE || join(dataDir, "feed.ndjson"),
@@ -215,7 +217,9 @@ function handleEvents(response) {
     ...securityHeaders
   });
   response.write("retry: 3000\n\n");
+  sseClients += 1;
   sendSse(response, "snapshot", appSnapshot());
+  hub.publish({ type: "presence", watching: sseClients });
 
   const unsubscribe = hub.subscribe((event) => {
     sendSse(response, event.type, event);
@@ -228,6 +232,8 @@ function handleEvents(response) {
   response.on("close", () => {
     clearInterval(heartbeat);
     unsubscribe();
+    sseClients = Math.max(0, sseClients - 1);
+    hub.publish({ type: "presence", watching: sseClients });
   });
 }
 
@@ -261,7 +267,8 @@ function appSnapshot() {
       demoEnabled,
       demoMode: demoEnabled ? "on" : "off",
       demoRunning: demo.isRunning(),
-      liveOnly: !demoEnabled
+      liveOnly: !demoEnabled,
+      watching: sseClients
     }
   };
 }

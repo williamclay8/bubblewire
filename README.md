@@ -53,6 +53,19 @@ Useful local controls:
 - Selecting a message shows its raw normalized payload.
 - Keyboard: `/` focuses search, `p` toggles pause, `s` opens setup, `1–4` switch source filters, `Esc` clears/closes.
 
+## Visitor Experience
+
+- **Boot sequence**: skippable terminal boot on first visit per session (respects reduced-motion).
+- **Signal stream**: a particle strip under the tape — every message fires a source-colored streak; speed scales with heat, accelerates during spikes.
+- **Volume spikes**: when the 10s rate hits 3× the 2-minute baseline, the tape flashes and a spike chip appears.
+- **Channel hero**: first-time visitors get a "watch any Twitch chat live" bar (anonymous IRC, no login). Dismissible, remembered.
+- **Themes**: gold / matrix / ice / synthwave swatches in the rail; persisted, shareable via `?theme=`.
+- **Presence**: live "◉ N" viewer count from SSE connections.
+- **Tab pull-backs**: background tab shows `(N)` unread in the title + alert favicon; optional browser notifications for watchlist hits.
+- **Deep links**: `?src=&q=&priority=&theme=` restore a view; `Share` copies the current one. Filters/density/theme persist locally.
+- **Recap**: downloads a 1200×630 session card (peak rate, hottest signal, top author, per-source volume).
+- **Compact mode** and avatar/initial chips on every row.
+
 ## Mod Tools
 
 - **Watchlist**: add keywords or `$tickers` in the rail. Hits get flagged rows, a toast, and an optional alert beep. Stored locally, capped at 12 terms.

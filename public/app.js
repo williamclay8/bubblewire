@@ -7,6 +7,13 @@ const PRIORITY_HEAT = 18;
 const PIN_STORAGE_KEY = "bubblewire:pins:v1";
 const WATCH_STORAGE_KEY = "bubblewire:watchlist:v1";
 const WATCH_SOUND_KEY = "bubblewire:watchsound:v1";
+const WATCH_NOTIFY_KEY = "bubblewire:watchnotify:v1";
+const THEME_KEY = "bubblewire:theme:v1";
+const DENSITY_KEY = "bubblewire:density:v1";
+const PREFS_KEY = "bubblewire:prefs:v1";
+const HERO_KEY = "bubblewire:hero-dismissed:v1";
+const BOOT_KEY = "bubblewire:booted";
+const THEMES = ["gold", "matrix", "ice", "synthwave"];
 const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
@@ -14,6 +21,7 @@ const SOURCE_ORDER = ["twitch", "x", "kick"];
 const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", demo: "#d8a84a" };
 
 const overlayConfig = parseOverlayConfig();
+const stream = { particles: [], running: false };
 
 const state = {
   messages: [],
@@ -37,7 +45,21 @@ const state = {
   older: [],
   olderExhausted: false,
   loadingOlder: false,
-  setup: null
+  setup: null,
+  watchNotify: loadFlag(WATCH_NOTIFY_KEY),
+  theme: "gold",
+  density: "comfortable",
+  watching: 0,
+  hiddenUnseen: 0,
+  spikeUntil: 0,
+  lastSpikeAt: 0,
+  session: {
+    peakRate: 0,
+    hottest: null,
+    watchHits: 0,
+    authors: new Map(),
+    startedAt: Date.now()
+  }
 };
 
 const els = {
@@ -83,7 +105,22 @@ const els = {
   setupDrawer: document.querySelector("#setupDrawer"),
   setupBackdrop: document.querySelector("#setupBackdrop"),
   setupBody: document.querySelector("#setupBody"),
-  setupClose: document.querySelector("#setupClose")
+  setupClose: document.querySelector("#setupClose"),
+  signalStream: document.querySelector("#signalStream"),
+  channelHero: document.querySelector("#channelHero"),
+  heroChannelInput: document.querySelector("#heroChannelInput"),
+  heroWatchButton: document.querySelector("#heroWatchButton"),
+  heroDismiss: document.querySelector("#heroDismiss"),
+  watchingChip: document.querySelector("#watchingChip"),
+  watchingCount: document.querySelector("#watchingCount"),
+  densityToggle: document.querySelector("#densityToggle"),
+  watchNotifyToggle: document.querySelector("#watchNotify"),
+  recapButton: document.querySelector("#recapButton"),
+  shareViewButton: document.querySelector("#shareViewButton"),
+  spikeChip: document.querySelector("#spikeChip"),
+  bootScreen: document.querySelector("#bootScreen"),
+  bootLog: document.querySelector("#bootLog"),
+  favicon: document.querySelector('link[rel="icon"]')
 };
 
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
@@ -102,11 +139,19 @@ if (isOverlay) {
   applyOverlayConfig();
 }
 
+applyStoredPrefs();
 bindControls();
+applyUrlState();
 connectEvents();
 loadSnapshot();
 startTicker();
 registerServiceWorker();
+if (!isOverlay) {
+  runBootSequence();
+  startSignalStream();
+  watchTabVisibility();
+  maybeShowChannelHero();
+}
 
 /* ---------- wiring ---------- */
 
@@ -128,6 +173,7 @@ function bindControls() {
 
   els.priorityOnly?.addEventListener("change", (event) => {
     state.priorityOnly = event.target.checked;
+    savePrefs();
     renderFeed();
     renderStats();
     toast(state.priorityOnly ? `priority only — heat ≥ ${PRIORITY_HEAT}` : "showing all heat levels");
@@ -210,9 +256,56 @@ function bindControls() {
     hideJumpPill();
   });
 
+  // Theme + density + share + recap
+  document.querySelectorAll("[data-theme-pick]").forEach((button) => {
+    button.addEventListener("click", () => setTheme(button.dataset.themePick));
+  });
+  els.densityToggle?.addEventListener("change", (event) => {
+    setDensity(event.target.checked ? "compact" : "comfortable");
+  });
+  els.shareViewButton?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(buildViewUrl());
+      toast("view link copied");
+    } catch {
+      toast("clipboard unavailable", "err");
+    }
+  });
+  els.recapButton?.addEventListener("click", downloadRecap);
+
+  // Channel hero
+  els.heroWatchButton?.addEventListener("click", () => heroWatch());
+  els.heroChannelInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      heroWatch();
+    }
+  });
+  els.heroDismiss?.addEventListener("click", () => {
+    hideChannelHero();
+    saveFlag(HERO_KEY, true);
+  });
+
+  // Avatar load failures → initial fallback chip.
+  els.feedList?.addEventListener(
+    "error",
+    (event) => {
+      const img = event.target;
+      if (!(img instanceof HTMLImageElement) || !img.classList.contains("avatar")) return;
+      const fallback = document.createElement("span");
+      fallback.className = "avatar avatar-fallback";
+      fallback.style.setProperty("--src", img.dataset.src || "var(--gold)");
+      fallback.textContent = img.dataset.initial || "?";
+      img.replaceWith(fallback);
+    },
+    true
+  );
+
   // Watchlist
   renderWatchlist();
   if (els.watchSoundToggle) els.watchSoundToggle.checked = state.watchSound;
+  if (els.watchNotifyToggle) els.watchNotifyToggle.checked = state.watchNotify && notificationsGranted();
+  els.watchNotifyToggle?.addEventListener("change", onNotifyToggle);
   els.watchAddButton?.addEventListener("click", addWatchTerm);
   els.watchInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -281,6 +374,7 @@ function setFilter(filter) {
     item.classList.toggle("active", active);
     item.setAttribute("aria-pressed", String(active));
   });
+  savePrefs();
   renderFeed();
   renderStats();
 }
@@ -338,6 +432,18 @@ function connectEvents() {
     state.stats = payload.stats || state.stats;
     renderStats();
   });
+  events.addEventListener("presence", (event) => {
+    const payload = JSON.parse(event.data);
+    state.watching = payload.watching || 0;
+    renderWatching();
+  });
+}
+
+function renderWatching() {
+  if (!els.watchingChip) return;
+  const show = state.watching >= 1;
+  els.watchingChip.hidden = !show;
+  if (show && els.watchingCount) els.watchingCount.textContent = String(state.watching);
 }
 
 function setLinkState(value) {
@@ -357,6 +463,10 @@ function applySnapshot(snapshot) {
   state.stats = snapshot.stats || state.stats;
   state.sources = snapshot.sources || {};
   state.runtime = snapshot.runtime || state.runtime;
+  if (typeof state.runtime.watching === "number") {
+    state.watching = state.runtime.watching;
+    renderWatching();
+  }
   renderAll();
 }
 
@@ -376,17 +486,46 @@ function ingestMessage(message) {
   if (!isOverlay) {
     renderSourceCards();
     alertWatchHit(message);
+    spawnStreamParticle(message);
+    trackSession(message);
+    trackHiddenUnseen();
   }
 }
 
 function alertWatchHit(message) {
   const term = matchWatchlist(message);
   if (!term) return;
+  state.session.watchHits += 1;
   const now = Date.now();
   if (now - (state.watchToastAt[term] || 0) < 8000) return;
   state.watchToastAt[term] = now;
   toast(`⚑ watch "${term}" — ${message.author.name}`, "warn");
   if (state.watchSound) beep();
+  if (state.watchNotify && document.hidden && notificationsGranted()) {
+    try {
+      new Notification(`⚑ "${term}" — ${message.author.name}`, {
+        body: String(message.content).slice(0, 110),
+        icon: "/assets/icons/icon-192.png",
+        tag: "bubblewire-watch"
+      });
+    } catch {
+      /* notifications unavailable */
+    }
+  }
+}
+
+function trackSession(message) {
+  const name = message.author?.name || "unknown";
+  state.session.authors.set(name, (state.session.authors.get(name) || 0) + 1);
+  if (!state.session.hottest || (message.heat || 0) > (state.session.hottest.heat || 0)) {
+    state.session.hottest = message;
+  }
+}
+
+function trackHiddenUnseen() {
+  if (!document.hidden) return;
+  state.hiddenUnseen += 1;
+  updateTabBadge();
 }
 
 /* ---------- rendering ---------- */
@@ -669,10 +808,16 @@ function messageMarkup(message, dupes = 1) {
   const watchTag = watchTerm ? `<span class="watch-tag" title="Watchlist hit">⚑ ${escapeHtml(watchTerm)}</span>` : "";
   const dupeBadge = dupes > 1 ? `<span class="dupe-badge" title="${dupes} repeats collapsed">×${dupes}</span>` : "";
 
+  const initial = (message.author.name || "?").trim().charAt(0).toUpperCase() || "?";
+  const avatar = message.author.avatar
+    ? `<img class="avatar" src="${escapeAttr(message.author.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-initial="${escapeAttr(initial)}" data-src="${escapeAttr(message.sourceColor)}">`
+    : `<span class="avatar avatar-fallback" style="--src:${escapeAttr(message.sourceColor)}">${escapeHtml(initial)}</span>`;
+
   return `
     <li class="message${selected}${pinnedState ? " pinned-state" : ""}${watchTerm ? " watch-hit" : ""}" data-message-id="${escapeAttr(message.id)}" data-collapse-key="${escapeAttr(collapseKey(message))}" data-dupes="${dupes}" style="--src:${escapeAttr(message.sourceColor)}">
       <div class="msg-head">
         <span class="src-tag">${escapeHtml(message.sourceLabel)}</span>
+        ${avatar}
         <span class="author" role="button" tabindex="0" data-author-q="${escapeAttr(authorQ)}" title="Filter feed to ${escapeAttr(authorQ)}" style="color:${escapeAttr(visibleColor(message.author.color || message.sourceColor))}">${escapeHtml(message.author.name)}</span>
         ${verified}
         <span class="handle">${escapeHtml(formatHandle(message.author.handle))}</span>
@@ -1122,6 +1267,451 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, num));
 }
 
+/* ---------- prefs, themes, deep links ---------- */
+
+function loadFlag(key) {
+  try {
+    return localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function saveFlag(key, value) {
+  try {
+    localStorage.setItem(key, value ? "1" : "0");
+  } catch {
+    /* in-memory only */
+  }
+}
+
+function applyStoredPrefs() {
+  if (isOverlay) return;
+  try {
+    setTheme(localStorage.getItem(THEME_KEY) || "gold", { silent: true, skipSave: true });
+    setDensity(localStorage.getItem(DENSITY_KEY) || "comfortable", { skipSave: true });
+    const prefs = JSON.parse(localStorage.getItem(PREFS_KEY) || "{}");
+    if (prefs.filter && ["all", ...SOURCE_ORDER].includes(prefs.filter)) state.filter = prefs.filter;
+    if (typeof prefs.priorityOnly === "boolean") state.priorityOnly = prefs.priorityOnly;
+  } catch {
+    /* defaults stand */
+  }
+  syncControlsToState();
+}
+
+function savePrefs() {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({ filter: state.filter, priorityOnly: state.priorityOnly }));
+  } catch {
+    /* in-memory only */
+  }
+}
+
+function syncControlsToState() {
+  document.querySelectorAll("[data-source-filter]").forEach((item) => {
+    const active = item.dataset.sourceFilter === state.filter;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+  });
+  if (els.priorityOnly) els.priorityOnly.checked = state.priorityOnly;
+  if (els.densityToggle) els.densityToggle.checked = state.density === "compact";
+}
+
+function setTheme(theme, { silent = false, skipSave = false } = {}) {
+  if (!THEMES.includes(theme)) theme = "gold";
+  state.theme = theme;
+  if (theme === "gold") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  document.querySelectorAll("[data-theme-pick]").forEach((button) => {
+    const active = button.dataset.themePick === theme;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (!skipSave) {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      /* in-memory only */
+    }
+  }
+  if (!silent) toast(`theme: ${theme}`);
+}
+
+function setDensity(density, { skipSave = false } = {}) {
+  state.density = density === "compact" ? "compact" : "comfortable";
+  document.body.dataset.density = state.density;
+  if (els.densityToggle) els.densityToggle.checked = state.density === "compact";
+  if (!skipSave) {
+    try {
+      localStorage.setItem(DENSITY_KEY, state.density);
+    } catch {
+      /* in-memory only */
+    }
+  }
+}
+
+function applyUrlState() {
+  if (isOverlay) return;
+  const params = new URLSearchParams(location.search);
+  const src = params.get("src");
+  if (src && ["all", ...SOURCE_ORDER].includes(src)) state.filter = src;
+  const q = params.get("q");
+  if (q) {
+    state.query = q.trim().toLowerCase();
+    if (els.searchInput) els.searchInput.value = q.trim();
+  }
+  if (params.get("priority") === "1") state.priorityOnly = true;
+  const theme = params.get("theme");
+  if (theme && THEMES.includes(theme)) setTheme(theme, { silent: true });
+  syncControlsToState();
+}
+
+function buildViewUrl() {
+  const params = new URLSearchParams();
+  if (state.filter !== "all") params.set("src", state.filter);
+  if (state.query) params.set("q", state.query);
+  if (state.priorityOnly) params.set("priority", "1");
+  if (state.theme !== "gold") params.set("theme", state.theme);
+  const query = params.toString();
+  return `${location.origin}/${query ? `?${query}` : ""}`;
+}
+
+/* ---------- boot sequence ---------- */
+
+function runBootSequence() {
+  if (!els.bootScreen || !els.bootLog) return;
+  let booted = false;
+  try {
+    booted = sessionStorage.getItem(BOOT_KEY) === "1";
+  } catch {
+    booted = true;
+  }
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (booted || reducedMotion) return;
+
+  els.bootScreen.hidden = false;
+  const lines = [
+    "BUBBLEWIRE RELAY v4",
+    ">> establishing link ............. ok",
+    ">> twitch / x / kick adapters .... armed",
+    ">> normalizing feed .............. ok",
+    ">> streaming"
+  ];
+  let index = 0;
+  let dismissed = false;
+  const timers = [];
+
+  const finish = () => {
+    if (dismissed) return;
+    dismissed = true;
+    timers.forEach(clearTimeout);
+    els.bootScreen.classList.add("boot-done");
+    setTimeout(() => {
+      els.bootScreen.hidden = true;
+    }, 380);
+    try {
+      sessionStorage.setItem(BOOT_KEY, "1");
+    } catch {
+      /* session only */
+    }
+    document.removeEventListener("keydown", finish, true);
+  };
+
+  els.bootScreen.addEventListener("click", finish);
+  document.addEventListener("keydown", finish, true);
+
+  const typeNext = () => {
+    if (dismissed) return;
+    index += 1;
+    els.bootLog.textContent = lines.slice(0, index).join("\n");
+    if (index < lines.length) timers.push(setTimeout(typeNext, 260));
+    else timers.push(setTimeout(finish, 500));
+  };
+  typeNext();
+}
+
+/* ---------- signal stream ---------- */
+
+function startSignalStream() {
+  const canvas = els.signalStream;
+  if (!canvas || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (canvas) canvas.hidden = true;
+    return;
+  }
+  stream.running = true;
+  // Seed from whatever is already in the buffer so the strip never starts empty.
+  setTimeout(() => {
+    state.messages.slice(0, 24).forEach((message, index) => {
+      spawnStreamParticle(message, Math.random() * canvas.clientWidth);
+    });
+  }, 600);
+  requestAnimationFrame(drawStream);
+}
+
+function spawnStreamParticle(message, atX = null) {
+  if (!stream.running || !els.signalStream) return;
+  const canvas = els.signalStream;
+  const width = canvas.clientWidth || 800;
+  const height = canvas.clientHeight || 56;
+  const lane = { twitch: 0.25, x: 0.5, kick: 0.75 }[message.source] ?? 0.5;
+  const heat = message.heat || 0;
+  stream.particles.push({
+    x: atX === null ? width + 8 : atX,
+    y: height * lane + (Math.random() - 0.5) * height * 0.3,
+    vx: -(0.9 + Math.random() * 0.5 + heat / 70),
+    size: heat >= 50 ? 2.6 : 1.8,
+    color: message.sourceColor || sourceColor(message.source),
+    hot: heat >= 50
+  });
+  if (stream.particles.length > 140) stream.particles.splice(0, stream.particles.length - 140);
+}
+
+function drawStream() {
+  if (!stream.running) return;
+  const canvas = els.signalStream;
+  if (!canvas) return;
+  requestAnimationFrame(drawStream);
+  if (!canvas.clientWidth) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const cssWidth = canvas.clientWidth;
+  const cssHeight = canvas.clientHeight;
+  if (canvas.width !== Math.round(cssWidth * dpr)) {
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+  }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+  // Center reference line.
+  ctx.strokeStyle = "rgba(236, 233, 223, 0.07)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, cssHeight / 2 + 0.5);
+  ctx.lineTo(cssWidth, cssHeight / 2 + 0.5);
+  ctx.stroke();
+
+  const spiking = Date.now() < state.spikeUntil;
+  for (const particle of stream.particles) {
+    particle.x += particle.vx * (spiking ? 1.9 : 1);
+    const fade = Math.max(0, Math.min(1, particle.x / 60));
+    ctx.globalAlpha = 0.85 * fade;
+    ctx.fillStyle = particle.color;
+    const trail = particle.hot ? 26 : 14;
+    const gradient = ctx.createLinearGradient(particle.x, 0, particle.x + trail, 0);
+    gradient.addColorStop(0, particle.color);
+    gradient.addColorStop(1, "transparent");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(particle.x, particle.y - particle.size / 2, trail, particle.size);
+  }
+  ctx.globalAlpha = 1;
+  stream.particles = stream.particles.filter((particle) => particle.x > -30);
+}
+
+/* ---------- tab badge ---------- */
+
+function watchTabVisibility() {
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      state.hiddenUnseen = 0;
+      updateTabBadge();
+    }
+  });
+}
+
+function updateTabBadge() {
+  const base = "Bubblewire — Market Bubble Relay";
+  if (state.hiddenUnseen > 0 && document.hidden) {
+    document.title = `(${Math.min(99, state.hiddenUnseen)}) ${base}`;
+    if (els.favicon) els.favicon.href = "/assets/bubblewire-mark-alert.svg";
+  } else {
+    document.title = base;
+    if (els.favicon) els.favicon.href = "/assets/bubblewire-mark.svg";
+  }
+}
+
+/* ---------- notifications ---------- */
+
+function notificationsGranted() {
+  return "Notification" in window && Notification.permission === "granted";
+}
+
+async function onNotifyToggle(event) {
+  if (!("Notification" in window)) {
+    event.target.checked = false;
+    toast("notifications unsupported here", "err");
+    return;
+  }
+  if (event.target.checked) {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      event.target.checked = false;
+      toast("notification permission denied", "err");
+      return;
+    }
+    state.watchNotify = true;
+    toast("background alerts on");
+  } else {
+    state.watchNotify = false;
+    toast("background alerts off");
+  }
+  saveFlag(WATCH_NOTIFY_KEY, state.watchNotify);
+}
+
+/* ---------- channel hero ---------- */
+
+async function maybeShowChannelHero() {
+  if (!els.channelHero || loadFlag(HERO_KEY)) return;
+  try {
+    const response = await fetch("/setup.json");
+    const setup = await response.json();
+    const twitch = setup.sources?.twitch;
+    if (twitch?.channelsMutable && (twitch.channels || []).length === 0 && !setup.adminLocked) {
+      els.channelHero.hidden = false;
+    }
+  } catch {
+    /* hero stays hidden */
+  }
+}
+
+function hideChannelHero() {
+  if (els.channelHero) els.channelHero.hidden = true;
+}
+
+async function heroWatch() {
+  const channel = (els.heroChannelInput?.value || "").trim().toLowerCase().replace(/^#/, "");
+  if (!/^[a-z0-9_]{1,25}$/.test(channel)) {
+    toast("enter a valid twitch channel", "warn");
+    return;
+  }
+  try {
+    await postJson("/api/twitch/channels", { action: "add", channel });
+    toast(`joining #${channel} — live chat incoming`);
+    hideChannelHero();
+    saveFlag(HERO_KEY, true);
+    setFilter("twitch");
+  } catch {
+    toast("could not join channel", "err");
+  }
+}
+
+/* ---------- session recap ---------- */
+
+function downloadRecap() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 630;
+  const ctx = canvas.getContext("2d");
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim() || "#d8a84a";
+
+  ctx.fillStyle = "#0a0a09";
+  ctx.fillRect(0, 0, 1200, 630);
+  ctx.strokeStyle = "rgba(236, 233, 223, 0.06)";
+  for (let x = 0; x < 1200; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, 630);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "rgba(236, 233, 223, 0.18)";
+  ctx.strokeRect(24.5, 24.5, 1151, 581);
+
+  ctx.fillStyle = accent;
+  ctx.font = "700 30px 'IBM Plex Mono', monospace";
+  ctx.fillText("BUBBLEWIRE_", 64, 96);
+  ctx.fillStyle = "rgba(236, 233, 223, 0.65)";
+  ctx.font = "500 16px 'IBM Plex Mono', monospace";
+  ctx.fillText(`SESSION RECAP — ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`, 64, 126);
+
+  const topAuthor = [...state.session.authors.entries()].sort((a, b) => b[1] - a[1])[0];
+  const stats = [
+    ["CAPTURED", String(state.stats.totalMessages || 0)],
+    ["PEAK RATE", `${state.session.peakRate}/min`],
+    ["WATCH HITS", String(state.session.watchHits)],
+    ["TOP AUTHOR", topAuthor ? `${topAuthor[0]} (${topAuthor[1]})` : "—"]
+  ];
+  stats.forEach(([label, value], index) => {
+    const x = 64 + index * 280;
+    ctx.fillStyle = "rgba(236, 233, 223, 0.55)";
+    ctx.font = "600 14px 'IBM Plex Mono', monospace";
+    ctx.fillText(label, x, 200);
+    ctx.fillStyle = "#ece9df";
+    ctx.font = "700 30px 'IBM Plex Mono', monospace";
+    ctx.fillText(value.slice(0, 16), x, 240);
+  });
+
+  const hottest = state.session.hottest;
+  ctx.fillStyle = "rgba(236, 233, 223, 0.55)";
+  ctx.font = "600 14px 'IBM Plex Mono', monospace";
+  ctx.fillText("HOTTEST SIGNAL", 64, 330);
+  if (hottest) {
+    ctx.fillStyle = hottest.sourceColor || accent;
+    ctx.font = "700 20px 'IBM Plex Mono', monospace";
+    ctx.fillText(`[${hottest.sourceLabel}] ${hottest.author.name} — heat ${hottest.heat}`, 64, 364);
+    ctx.fillStyle = "#ece9df";
+    ctx.font = "400 26px Inter, sans-serif";
+    wrapText(ctx, String(hottest.content), 64, 404, 1072, 38, 3);
+  } else {
+    ctx.fillStyle = "#ece9df";
+    ctx.font = "400 24px Inter, sans-serif";
+    ctx.fillText("No messages this session yet.", 64, 370);
+  }
+
+  const sourceEntries = SOURCE_ORDER.map((source) => [source, state.stats.sources?.[source]?.count || 0]);
+  const maxCount = Math.max(1, ...sourceEntries.map(([, count]) => count));
+  sourceEntries.forEach(([source, count], index) => {
+    const y = 520 + index * 26;
+    ctx.fillStyle = "rgba(236, 233, 223, 0.6)";
+    ctx.font = "600 13px 'IBM Plex Mono', monospace";
+    ctx.fillText(source.toUpperCase(), 64, y + 11);
+    ctx.fillStyle = sourceColor(source);
+    ctx.fillRect(150, y, (count / maxCount) * 700, 14);
+    ctx.fillStyle = "#ece9df";
+    ctx.font = "600 13px 'IBM Plex Mono', monospace";
+    ctx.fillText(String(count), 870, y + 12);
+  });
+
+  ctx.fillStyle = accent;
+  ctx.font = "600 15px 'IBM Plex Mono', monospace";
+  ctx.fillText(location.host || "bubblewire.xyz", 950, 580);
+
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      toast("recap render failed", "err");
+      return;
+    }
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `bubblewire-recap-${new Date().toISOString().slice(0, 10)}.png`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 4000);
+    toast("recap card downloaded");
+  }, "image/png");
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+  const words = text.split(/\s+/);
+  let line = "";
+  let lines = 0;
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width > maxWidth && line) {
+      lines += 1;
+      if (lines === maxLines) {
+        ctx.fillText(`${line}…`, x, y);
+        return;
+      }
+      ctx.fillText(line, x, y);
+      y += lineHeight;
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) ctx.fillText(line, x, y);
+}
+
 /* ---------- service worker ---------- */
 
 function registerServiceWorker() {
@@ -1150,8 +1740,45 @@ function tick() {
   if (els.uptimeValue && state.stats.startedAt) {
     els.uptimeValue.textContent = formatDuration(Date.now() - new Date(state.stats.startedAt).getTime());
   }
+  const rate = messageRate();
+  state.session.peakRate = Math.max(state.session.peakRate, rate);
+  updateMeterSpeed(rate);
+  detectSpike();
   drawRadar();
   drawSparks();
+}
+
+function updateMeterSpeed(rate) {
+  if (!els.feedPanel) return;
+  const duration = Math.max(280, Math.min(950, 950 - rate * 9));
+  els.feedPanel.style.setProperty("--meter-ms", `${duration}ms`);
+}
+
+function detectSpike() {
+  const now = Date.now();
+  if (state.spikeUntil && now > state.spikeUntil) {
+    state.spikeUntil = 0;
+    document.body.classList.remove("spiking");
+    if (els.spikeChip) els.spikeChip.hidden = true;
+  }
+
+  const last10 = countSince(now - 10000);
+  const baselinePer10 = countSince(now - 120000) / 12;
+  if (last10 >= 6 && last10 >= 3 * Math.max(1, baselinePer10) && now - state.lastSpikeAt > 30000) {
+    state.lastSpikeAt = now;
+    state.spikeUntil = now + 6000;
+    document.body.classList.add("spiking");
+    if (els.spikeChip) {
+      els.spikeChip.textContent = `▲ volume spike — ${Math.round(last10 / Math.max(1, baselinePer10))}× baseline`;
+      els.spikeChip.hidden = false;
+    }
+    toast("volume spike detected", "warn");
+    if (state.watchSound) beep();
+  }
+}
+
+function countSince(cutoffMs) {
+  return state.messages.filter((m) => new Date(m.receivedAt).getTime() >= cutoffMs).length;
 }
 
 function bucketize(messages, buckets, bucketMs) {
@@ -1377,11 +2004,31 @@ function setNum(el, value, flash) {
   if (!el) return;
   const next = String(value);
   if (el.textContent === next) return;
-  el.textContent = next;
+  tweenNumber(el, value);
   if (!flash) return;
   el.classList.remove("tick");
   void el.offsetWidth;
   el.classList.add("tick");
+}
+
+function tweenNumber(el, target) {
+  const from = Number(el.dataset.tweenValue ?? el.textContent) || 0;
+  const to = Number(target);
+  if (!Number.isFinite(to) || from === to || Math.abs(to - from) > 500) {
+    el.textContent = String(target);
+    el.dataset.tweenValue = String(target);
+    return;
+  }
+  el.dataset.tweenValue = String(to);
+  const startedAt = performance.now();
+  const duration = 280;
+  const step = (now) => {
+    const t = Math.min(1, (now - startedAt) / duration);
+    const eased = 1 - (1 - t) ** 3;
+    el.textContent = String(Math.round(from + (to - from) * eased));
+    if (t < 1 && el.dataset.tweenValue === String(to)) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function pad(value) {

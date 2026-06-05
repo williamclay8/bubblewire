@@ -71,6 +71,12 @@ From polish to product — every roadmap item implemented:
 - **PWA**: manifest + generated icons (incl. maskable) + service worker (network-first documents, stale-while-revalidate statics, never caches streams/APIs).
 - **UI smoke tests**: `npm run test:ui` boots the server and runs 12 browser checks (fonts, pause freeze, search marks, watchlist, drawer, history, overlay params, configurator, PWA, console errors). Gracefully skips when playwright-core/Chromium is absent, so `npm test` stays zero-dependency.
 
+## Delight & retention pass v4
+
+- **Visual**: signal-stream particle canvas (DPR-aware, rAF, reduced-motion exempt), spike detection (10s rate ≥ 3× 2-min baseline → tape flash + chip + faster stream), skippable boot sequence (once per session), four theme variants on CSS variables, avatar/initial chips with CSP widened to `img-src https:`, compact density mode, counter tweening, rate-driven live-meter speed.
+- **Sticky**: first-visit channel hero wired to runtime IRC join, `(N)` title + alert-favicon on background tabs, opt-in watchlist Notifications, URL view state + Share button, presence count broadcast over SSE (`watching` in runtime snapshot + live `presence` events), canvas session-recap PNG download, persisted filter/priority/theme/density.
+- Tests: live-mode runtime expectation updated for `watching`; smoke suite extended to 18 checks (caught a real TDZ bug — `stream` const used before declaration — during this pass). 19/19 unit, 18/18 smoke, zero console errors.
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.

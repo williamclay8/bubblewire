@@ -40,7 +40,8 @@ test("DEMO_MODE=off blocks synthetic routes while keeping Kick webhooks live", a
     demoEnabled: false,
     demoMode: "off",
     demoRunning: false,
-    liveOnly: true
+    liveOnly: true,
+    watching: 0
   });
   assert.equal(before.messages.length, 0);
 

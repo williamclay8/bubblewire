@@ -93,7 +93,8 @@ export function createFeedHub(options = {}) {
     addMessage,
     setSourceStatus,
     snapshot,
-    subscribe
+    subscribe,
+    publish: broadcast
   };
 }
 

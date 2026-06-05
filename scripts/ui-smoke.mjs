@@ -135,6 +135,28 @@ try {
   const sw = await page.evaluate(() => fetch("/sw.js").then((r) => r.ok));
   check("manifest + service worker served", manifest && sw);
 
+  // v4: themes, stream, presence, hero, deep links
+  await page.click('[data-theme-pick="matrix"]');
+  const theme = await page.evaluate(() => document.documentElement.dataset.theme);
+  check("theme switch applies", theme === "matrix");
+  await page.click('[data-theme-pick="gold"]');
+
+  const streamVisible = await page.locator("#signalStream").isVisible();
+  check("signal stream canvas present", streamVisible);
+
+  const watching = await page.locator("#watchingChip").isVisible();
+  check("presence chip shows watchers", watching);
+
+  const heroVisible = await page.locator("#channelHero").isVisible();
+  check("channel hero invites first-time visitors", heroVisible);
+
+  const deep = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await deep.goto(`${BASE}/?src=kick&q=picks&theme=ice`, { waitUntil: "load" });
+  await deep.waitForTimeout(2500);
+  const deepSummary = await deep.textContent("#feedSummary");
+  const deepTheme = await deep.evaluate(() => document.documentElement.dataset.theme);
+  check("deep link applies src/q/theme", deepSummary.includes("kick") && deepSummary.includes('"picks"') && deepTheme === "ice", deepSummary.trim());
+
   check("zero console errors", errors.length === 0, errors.slice(0, 3).join(" | "));
 } finally {
   await browser.close();
