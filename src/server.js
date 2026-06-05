@@ -352,6 +352,7 @@ function setupSnapshot(request) {
   const kickConfig = resolveKickConfig(env);
   const xSnapshot = xConnector?.snapshot?.() || { rules: resolveXRulesFromEnv(env) };
   const hostHeader = request.headers.host || `${host}:${port}`;
+  const protocol = forwardedProtocol(request) || (request.socket.encrypted ? "https" : "http");
   const kickPublicBase = (env.KICK_WEBHOOK_PUBLIC_URL || "").trim().replace(/\/$/, "");
 
   return {
@@ -389,7 +390,7 @@ function setupSnapshot(request) {
           KICK_BROADCASTER_USER_ID: present("KICK_BROADCASTER_USER_ID"),
           KICK_REQUIRE_SIGNATURE: shouldRequireKickSignature(env)
         },
-        webhookUrl: `${kickPublicBase || `http://${hostHeader}`}/kick.webhook`,
+        webhookUrl: `${kickPublicBase || `${protocol}://${hostHeader}`}/kick.webhook`,
         note: "Point Kick chat.message.sent webhooks at the URL above (public tunnel needed locally)."
       }
     }
@@ -398,6 +399,15 @@ function setupSnapshot(request) {
 
 function getPathname(request) {
   return new URL(request.url, `http://${request.headers.host}`).pathname;
+}
+
+function forwardedProtocol(request) {
+  const value = firstHeader(request.headers["x-forwarded-proto"]);
+  return value ? value.split(",")[0].trim() : "";
+}
+
+function firstHeader(value) {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function matches(value, ...candidates) {

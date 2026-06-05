@@ -113,11 +113,12 @@ test("setup.json exposes configured X rule labels without credentials", async (t
 
   await waitForServer(baseUrl, child, () => stdout, () => stderr);
 
-  const setup = await getJson(`${baseUrl}/setup.json`);
+  const setup = await getJson(`${baseUrl}/setup.json`, { "X-Forwarded-Proto": "https" });
   assert.equal(setup.sources.x.vars.X_BEARER_TOKEN, false);
   assert.equal(setup.sources.x.rules.status, "configured");
   assert.equal(setup.sources.x.rules.count, 2);
   assert.deepEqual(setup.sources.x.rules.rules.map((rule) => rule.tag), ["challenge", "markets"]);
+  assert.match(setup.sources.kick.webhookUrl, /^https:\/\/127\.0\.0\.1:\d+\/kick\.webhook$/);
 });
 
 function getFreePort() {
@@ -161,8 +162,8 @@ async function stopChild(child) {
   }
 }
 
-async function getJson(url) {
-  const response = await fetch(url);
+async function getJson(url, headers = {}) {
+  const response = await fetch(url, { headers });
   assert.equal(response.status, 200);
   return response.json();
 }
