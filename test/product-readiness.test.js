@@ -23,7 +23,7 @@ test("homepage presents Bubblewire as a self-serve live audience command center"
   assert.match(html, /id="capabilityStrip"/);
   assert.match(html, /id="operatorSignal"/);
   assert.match(html, /id="overlaySetupLink"/);
-  assert.match(html, /src="\/app\.js\?v=x-diagnostics-20260605a"/);
+  assert.match(html, /src="\/app\.js\?v=x-durable-20260605a"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
   assert.match(app, /productDemoButton:\s*document\.querySelector\("#productDemoButton"\)/);

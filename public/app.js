@@ -1375,6 +1375,7 @@ function renderSetup() {
       <h3>X <small>filtered stream</small></h3>
       ${varRows(x.vars)}
       ${ruleRows(x.rules)}
+      ${xStreamControl(x)}
       ${xDiagnostics(x.diagnostics)}
       <p class="setup-note">${escapeHtml(x.note)}</p>
     </section>
@@ -1467,7 +1468,40 @@ function xDiagnostics(diagnostics) {
   `;
 }
 
+function xStreamControl(x) {
+  const stream = x.stream || {};
+  const control = x.control || {};
+  const paused = Boolean(control.paused || stream.paused);
+  const enabled = Boolean(stream.enabled);
+  const source = stream.source || "unknown";
+  const state = paused ? "paused" : enabled ? "enabled" : "disabled";
+  const action = paused ? "resume" : "pause";
+  const disabled = control.adminLocked || (!enabled && !paused);
+  const detail = stream.detail || x.status?.detail || "";
+
+  return `
+    <div class="x-control" data-state="${escapeAttr(state)}">
+      <div>
+        <span class="x-control-label">Stream control</span>
+        <strong>${escapeHtml(state)}</strong>
+        <code>${escapeHtml(source)}</code>
+        ${detail ? `<p>${escapeHtml(detail)}</p>` : ""}
+      </div>
+      <div class="x-control-actions">
+        <button type="button" class="mini-btn" data-x-control="${escapeAttr(action)}"${disabled ? " disabled" : ""}>
+          ${paused ? "Resume" : "Pause"}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 function onSetupClick(event) {
+  const xControl = event.target.closest("[data-x-control]");
+  if (xControl) {
+    submitXControl(xControl.dataset.xControl);
+    return;
+  }
   const remove = event.target.closest("[data-channel-remove]");
   if (remove) {
     submitChannel("remove", remove.dataset.channelRemove);
@@ -1486,6 +1520,16 @@ function onSetupClick(event) {
         toast("webhook url copied");
       })
       .catch(() => toast("clipboard unavailable", "err"));
+  }
+}
+
+async function submitXControl(action) {
+  try {
+    await postJson("/api/x/control", { action });
+    toast(action === "pause" ? "X stream paused" : "X stream resuming");
+    await refreshSetup();
+  } catch {
+    toast("X stream control failed", "err");
   }
 }
 

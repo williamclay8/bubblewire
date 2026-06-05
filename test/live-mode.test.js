@@ -121,6 +121,55 @@ test("setup.json exposes configured X rule labels without credentials", async (t
   assert.match(setup.sources.kick.webhookUrl, /^https:\/\/127\.0\.0\.1:\d+\/kick\.webhook$/);
 });
 
+test("X connector control endpoint pauses and resumes runtime state", async (t) => {
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  let stdout = "";
+  let stderr = "";
+
+  const child = spawn(process.execPath, ["src/server.js"], {
+    cwd: repoRoot,
+    env: {
+      ...process.env,
+      ADMIN_TOKEN: "test-admin",
+      DEMO_MODE: "off",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      X_BEARER_TOKEN: "",
+      X_STREAM_ENABLED: "off"
+    },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
+  });
+
+  t.after(() => stopChild(child));
+
+  await waitForServer(baseUrl, child, () => stdout, () => stderr);
+
+  const unauthorized = await postJson(`${baseUrl}/api/x/control`, { action: "pause" });
+  assert.equal(unauthorized.status, 401);
+
+  const pause = await postJson(`${baseUrl}/api/x/control`, { action: "pause" }, { "x-admin-token": "test-admin" });
+  assert.equal(pause.status, 200);
+  assert.equal(pause.body.paused, true);
+  assert.equal(pause.body.status.state, "paused");
+
+  const pausedSetup = await getJson(`${baseUrl}/setup.json`);
+  assert.equal(pausedSetup.sources.x.control.paused, true);
+  assert.equal(pausedSetup.sources.x.status.state, "paused");
+
+  const resume = await postJson(`${baseUrl}/api/x/control`, { action: "resume" }, { "x-admin-token": "test-admin" });
+  assert.equal(resume.status, 200);
+  assert.equal(resume.body.paused, false);
+  assert.notEqual(resume.body.status.state, "paused");
+});
+
 function getFreePort() {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
@@ -177,10 +226,19 @@ async function postJson(url, body, headers = {}) {
     },
     body: JSON.stringify(body)
   });
+  const rawBody = await response.text();
   return {
     status: response.status,
-    body: await response.json()
+    body: rawBody ? parseMaybeJson(rawBody) : {}
   };
+}
+
+function parseMaybeJson(rawBody) {
+  try {
+    return JSON.parse(rawBody);
+  } catch {
+    return { rawBody };
+  }
 }
 
 function delay(ms) {

@@ -115,7 +115,7 @@ test("startXConnector reports redacted stream diagnostics in status and logs", a
       },
       addMessage() {}
     },
-    { X_BEARER_TOKEN: "SECRET_TOKEN" }
+    { X_BEARER_TOKEN: "SECRET_TOKEN", X_STREAM_ENABLED: "on" }
   );
 
   t.after(() => {
@@ -139,6 +139,98 @@ test("startXConnector reports redacted stream diagnostics in status and logs", a
   assert.match(logs[0], /TooManyConnections/);
   assert.doesNotMatch(serialized, /SECRET_TOKEN/);
   assert.doesNotMatch(serialized, /Bearer SECRET_TOKEN/);
+});
+
+test("startXConnector stays disabled by default outside Render production", () => {
+  const statuses = [];
+  let fetchCalls = 0;
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    return new Response("{}", { status: 200 });
+  };
+
+  const connector = startXConnector(
+    {
+      setSourceStatus(source, status) {
+        statuses.push({ source, status });
+      },
+      addMessage() {}
+    },
+    { X_BEARER_TOKEN: "SECRET_TOKEN" }
+  );
+
+  connector.stop();
+  globalThis.fetch = originalFetch;
+
+  assert.equal(fetchCalls, 0);
+  assert.equal(statuses[0]?.status.state, "disabled");
+  assert.equal(statuses[0]?.status.stream.enabled, false);
+  assert.match(statuses[0]?.status.detail || "", /X_STREAM_ENABLED/);
+  assert.equal(connector.snapshot().stream.enabled, false);
+});
+
+test("startXConnector uses a long backoff for TooManyConnections", async (t) => {
+  const statuses = [];
+  const timers = [];
+  const originalFetch = globalThis.fetch;
+  const originalWarn = console.warn;
+
+  globalThis.fetch = async (url) => {
+    const href = String(url);
+    if (href.endsWith("/rules")) {
+      return new Response(JSON.stringify({ data: [{ id: "1", tag: "live", value: "Bubblewire" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        title: "ConnectionException",
+        detail: "This stream is currently at the maximum allowed connection limit.",
+        connection_issue: "TooManyConnections",
+        type: "https://api.twitter.com/2/problems/streaming-connection"
+      }),
+      { status: 429, statusText: "Too Many Requests" }
+    );
+  };
+  console.warn = () => {};
+
+  const connector = startXConnector(
+    {
+      setSourceStatus(source, status) {
+        statuses.push({ source, status });
+      },
+      addMessage() {}
+    },
+    {
+      X_BEARER_TOKEN: "SECRET_TOKEN",
+      X_STREAM_ENABLED: "on",
+      X_TOO_MANY_CONNECTIONS_BACKOFF_MS: "300000"
+    },
+    {
+      setTimeout(fn, ms) {
+        timers.push(ms);
+        return { fn, ms };
+      },
+      clearTimeout() {}
+    }
+  );
+
+  t.after(() => {
+    connector.stop();
+    globalThis.fetch = originalFetch;
+    console.warn = originalWarn;
+  });
+
+  await waitFor(() => statuses.some((entry) => entry.status.state === "reconnecting"));
+  const reconnectingStatus = statuses.find((entry) => entry.status.state === "reconnecting")?.status;
+
+  assert.equal(timers[0], 300000);
+  assert.match(reconnectingStatus.detail, /retrying in 5m/);
+  assert.match(reconnectingStatus.detail, /TooManyConnections|ConnectionException/);
 });
 
 async function waitFor(predicate) {

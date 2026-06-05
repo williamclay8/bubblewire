@@ -2,29 +2,55 @@ import { normalizeXStreamEvent } from "../core/messages.js";
 
 const X_STREAM_URL = "https://api.x.com/2/tweets/search/stream";
 const X_RULES_URL = `${X_STREAM_URL}/rules`;
+const DEFAULT_RECONNECT_MS = 1000;
+const MAX_RECONNECT_MS = 45000;
+const DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS = 5 * 60 * 1000;
+const DEFAULT_X_RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
 
-export function startXConnector(hub, env = process.env) {
+export function startXConnector(hub, env = process.env, options = {}) {
   const bearerToken = env.X_BEARER_TOKEN;
   let rules = resolveXRulesFromEnv(env);
   let diagnostics = null;
+  const stream = resolveXStreamPolicy(env);
+  const timers = {
+    setTimeout: options.setTimeout || setTimeout,
+    clearTimeout: options.clearTimeout || clearTimeout
+  };
+
+  if (!stream.enabled) {
+    hub.setSourceStatus("x", {
+      state: "disabled",
+      detail: stream.detail,
+      diagnostics: null,
+      stream
+    });
+    return {
+      stop() {},
+      snapshot() {
+        return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
+      }
+    };
+  }
 
   if (!bearerToken) {
     hub.setSourceStatus("x", {
       state: "missing",
       detail: "missing X_BEARER_TOKEN for filtered stream",
-      diagnostics: null
+      diagnostics: null,
+      stream
     });
     return {
       stop() {},
       snapshot() {
-        return { rules: clone(rules), diagnostics: clone(diagnostics) };
+        return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
       }
     };
   }
 
   let stopped = false;
   let controller = null;
-  let reconnectMs = 1000;
+  let reconnectMs = DEFAULT_RECONNECT_MS;
+  let reconnectTimer = null;
 
   async function connect() {
     if (stopped) return;
@@ -33,7 +59,8 @@ export function startXConnector(hub, env = process.env) {
     hub.setSourceStatus("x", {
       state: "connecting",
       detail: xStatusDetail("opening filtered stream", rules),
-      diagnostics: null
+      diagnostics: null,
+      stream
     });
 
     const url = new URL(X_STREAM_URL);
@@ -58,12 +85,13 @@ export function startXConnector(hub, env = process.env) {
         );
       }
 
-      reconnectMs = 1000;
+      reconnectMs = DEFAULT_RECONNECT_MS;
       diagnostics = null;
       hub.setSourceStatus("x", {
         state: "connected",
         detail: xStatusDetail("filtered stream online", rules),
-        diagnostics: null
+        diagnostics: null,
+        stream
       });
 
       await readJsonLines(response.body, (payload) => {
@@ -85,14 +113,16 @@ export function startXConnector(hub, env = process.env) {
     }
 
     if (!stopped) {
+      const delayMs = reconnectDelayForDiagnostics(diagnostics, reconnectMs, env);
       const last = diagnostics?.summary ? ` · last ${diagnostics.summary}` : "";
       hub.setSourceStatus("x", {
         state: "reconnecting",
-        detail: `retrying in ${Math.round(reconnectMs / 1000)}s${last}`,
-        diagnostics: diagnostics ? clone(diagnostics) : null
+        detail: `retrying in ${formatReconnectDelay(delayMs)}${last}`,
+        diagnostics: diagnostics ? clone(diagnostics) : null,
+        stream
       });
-      setTimeout(connect, reconnectMs);
-      reconnectMs = Math.min(reconnectMs * 1.8, 45000);
+      reconnectTimer = timers.setTimeout(connect, delayMs);
+      reconnectMs = Math.min(reconnectMs * 1.8, MAX_RECONNECT_MS);
     }
   }
 
@@ -102,13 +132,15 @@ export function startXConnector(hub, env = process.env) {
     stop() {
       stopped = true;
       if (controller) controller.abort();
+      if (reconnectTimer) timers.clearTimeout(reconnectTimer);
       hub.setSourceStatus("x", {
         state: "stopped",
-        detail: "connector stopped"
+        detail: "connector stopped",
+        stream
       });
     },
     snapshot() {
-      return { rules: clone(rules), diagnostics: clone(diagnostics) };
+      return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
     }
   };
 
@@ -187,6 +219,25 @@ export function resolveXRulesFromEnv(env = process.env) {
   };
 }
 
+export function resolveXStreamPolicy(env = process.env) {
+  const raw = String(env.X_STREAM_ENABLED || "").trim().toLowerCase();
+  const explicit = raw !== "";
+  const enabled = explicit ? isEnabledValue(raw) : isRenderProduction(env);
+  const source = explicit ? "X_STREAM_ENABLED" : enabled ? "render-default" : "local-default";
+  const detail = enabled
+    ? "X filtered stream enabled"
+    : explicit
+      ? "X filtered stream disabled by X_STREAM_ENABLED"
+      : "X filtered stream disabled by default outside Render production; set X_STREAM_ENABLED=on to stream";
+
+  return {
+    enabled,
+    source,
+    detail,
+    paused: false
+  };
+}
+
 export function summarizeXRules(payload = {}, { checkedAt = new Date().toISOString() } = {}) {
   const rows = Array.isArray(payload?.data) ? payload.data : [];
   const rules = sanitizeRuleRows(rows);
@@ -219,6 +270,10 @@ export async function summarizeXStreamFailure(response, options = {}) {
     problemTitle: cleanDiagnosticText(problemTitle, { secrets, maxLength: 120 }),
     problemType: cleanDiagnosticText(problemType, { secrets, maxLength: 180 }),
     problemDetail: cleanDiagnosticText(problemDetail, { secrets, maxLength: 260 }),
+    connectionIssue: cleanDiagnosticText(parsed?.connection_issue || parsed?.errors?.[0]?.connection_issue || "", {
+      secrets,
+      maxLength: 120
+    }),
     bodySnippet,
     rateLimit: {
       limit: headerValue(response, "x-rate-limit-limit"),
@@ -229,6 +284,16 @@ export async function summarizeXStreamFailure(response, options = {}) {
 
   diagnostic.summary = buildXDiagnosticSummary(diagnostic);
   return diagnostic;
+}
+
+export function reconnectDelayForDiagnostics(diagnostic, currentMs, env = process.env) {
+  if (isXTooManyConnectionsDiagnostic(diagnostic)) {
+    return positiveInteger(env.X_TOO_MANY_CONNECTIONS_BACKOFF_MS, DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS);
+  }
+  if (isXRateLimitDiagnostic(diagnostic)) {
+    return positiveInteger(env.X_RATE_LIMIT_BACKOFF_MS, DEFAULT_X_RATE_LIMIT_BACKOFF_MS);
+  }
+  return currentMs;
 }
 
 async function readJsonLines(stream, onPayload) {
@@ -399,9 +464,52 @@ function buildXDiagnosticSummary(diagnostic) {
     : `X ${phase} ${diagnostic.errorName || "error"}`;
   const parts = [first];
   if (diagnostic.problemTitle) parts.push(diagnostic.problemTitle);
-  else if (diagnostic.problemDetail) parts.push(diagnostic.problemDetail);
+  if (diagnostic.connectionIssue && diagnostic.connectionIssue !== diagnostic.problemTitle) {
+    parts.push(diagnostic.connectionIssue);
+  }
+  if (!diagnostic.problemTitle && !diagnostic.connectionIssue && diagnostic.problemDetail) {
+    parts.push(diagnostic.problemDetail);
+  }
   if (diagnostic.rateLimit?.remaining === "0") parts.push("rate-limit remaining 0");
   return parts.join(" · ");
+}
+
+function isEnabledValue(value) {
+  return ["1", "true", "yes", "on", "live", "prod", "production", "enabled"].includes(String(value || "").trim().toLowerCase());
+}
+
+function isRenderProduction(env) {
+  return env.RENDER === "true" || Boolean(env.RENDER_SERVICE_ID || env.RENDER_EXTERNAL_URL);
+}
+
+function isXTooManyConnectionsDiagnostic(diagnostic) {
+  const text = [
+    diagnostic?.problemTitle,
+    diagnostic?.problemDetail,
+    diagnostic?.connectionIssue,
+    diagnostic?.bodySnippet,
+    diagnostic?.summary
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return /TooManyConnections|maximum allowed connection limit|ConnectionException/i.test(text);
+}
+
+function isXRateLimitDiagnostic(diagnostic) {
+  return Number(diagnostic?.httpStatus) === 429 && diagnostic?.rateLimit?.remaining === "0";
+}
+
+function positiveInteger(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed) : fallback;
+}
+
+function formatReconnectDelay(ms) {
+  if (ms >= 60000) {
+    const minutes = Math.round(ms / 60000);
+    return `${minutes}m`;
+  }
+  return `${Math.round(ms / 1000)}s`;
 }
 
 function clone(value) {

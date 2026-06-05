@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { createDemoConnector } from "./connectors/demo.js";
 import { resolveKickConfig, shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
-import { resolveXRulesFromEnv, startXConnector } from "./connectors/x.js";
+import { resolveXRulesFromEnv, resolveXStreamPolicy, startXConnector } from "./connectors/x.js";
 import { createHistoryLog } from "./core/history.js";
 import { createFeedHub } from "./core/hub.js";
 import { createInjectedMessage, normalizeKickWebhook } from "./core/messages.js";
@@ -22,6 +22,7 @@ const adminToken = (process.env.ADMIN_TOKEN || "").trim();
 const hub = createFeedHub();
 const demo = createDemoConnector(hub);
 const connectors = [];
+let runtimeXPaused = isFlagEnabled(process.env.X_STREAM_PAUSED);
 
 const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
@@ -43,9 +44,8 @@ hub.subscribe((event) => {
 const twitchChannelsFile = join(dataDir, "twitch-channels.json");
 let runtimeTwitchChannels = await loadRuntimeTwitchChannels();
 let twitchConnector = startTwitchConnector(hub, twitchEnv());
-let xConnector = startXConnector(hub);
+let xConnector = startManagedXConnector();
 
-connectors.push(xConnector);
 if (demoEnabled) {
   demo.start();
 } else {
@@ -88,6 +88,25 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && matches(pathname, "/api/setup", "/setup.json")) {
       return sendJson(response, setupSnapshot(request));
+    }
+
+    if (request.method === "POST" && pathname === "/api/x/control") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      const payload = await readJsonBody(request);
+      const action = String(payload.action || "").trim().toLowerCase();
+      if (!["pause", "resume"].includes(action)) {
+        return sendJson(response, { ok: false, error: "action must be pause or resume" }, 400);
+      }
+      runtimeXPaused = action === "pause";
+      restartXConnector();
+      return sendJson(response, {
+        ok: true,
+        paused: runtimeXPaused,
+        status: hub.snapshot().status.x,
+        x: xConnector.snapshot()
+      });
     }
 
     if (request.method === "GET" && pathname === "/api/twitch/channels") {
@@ -288,6 +307,11 @@ function isHistoryEnabled(value = "on") {
   return !["0", "false", "no", "off"].includes(normalized);
 }
 
+function isFlagEnabled(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return ["1", "true", "yes", "on", "pause", "paused"].includes(normalized);
+}
+
 function isAdminAuthorized(request) {
   if (!adminToken) return true;
   return (request.headers["x-admin-token"] || "") === adminToken;
@@ -312,6 +336,40 @@ function restartTwitchConnector() {
     /* connector already down */
   }
   twitchConnector = startTwitchConnector(hub, twitchEnv());
+}
+
+function startManagedXConnector() {
+  if (runtimeXPaused) return createPausedXConnector();
+  return startXConnector(hub);
+}
+
+function restartXConnector() {
+  try {
+    xConnector?.stop();
+  } catch {
+    /* connector already down */
+  }
+  xConnector = startManagedXConnector();
+}
+
+function createPausedXConnector() {
+  const rules = resolveXRulesFromEnv(process.env);
+  const stream = {
+    ...resolveXStreamPolicy(process.env),
+    paused: true
+  };
+  hub.setSourceStatus("x", {
+    state: "paused",
+    detail: "X filtered stream paused by admin control",
+    diagnostics: null,
+    stream
+  });
+  return {
+    stop() {},
+    snapshot() {
+      return { rules, diagnostics: null, stream };
+    }
+  };
 }
 
 async function loadRuntimeTwitchChannels() {
@@ -379,10 +437,19 @@ function setupSnapshot(request) {
         note: "EventSub needs all four vars. IRC works with channels alone (anonymous read-only)."
       },
       x: {
-        vars: { X_BEARER_TOKEN: present("X_BEARER_TOKEN") },
+        vars: {
+          X_BEARER_TOKEN: present("X_BEARER_TOKEN"),
+          X_STREAM_ENABLED: present("X_STREAM_ENABLED")
+        },
         status: statusSnapshot.x || null,
         rules: xSnapshot.rules,
         diagnostics: xSnapshot.diagnostics || statusSnapshot.x?.diagnostics || null,
+        stream: xSnapshot.stream || statusSnapshot.x?.stream || resolveXStreamPolicy(env),
+        control: {
+          paused: runtimeXPaused,
+          endpoint: "/api/x/control",
+          adminLocked: Boolean(adminToken)
+        },
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
       },
       kick: {
@@ -466,6 +533,11 @@ function shutdown() {
   demo.stop();
   try {
     twitchConnector?.stop();
+  } catch {
+    /* already stopped */
+  }
+  try {
+    xConnector?.stop();
   } catch {
     /* already stopped */
   }

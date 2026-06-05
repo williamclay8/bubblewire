@@ -17,8 +17,13 @@ test("setup drawer renders sanitized X stream rules", async () => {
   assert.match(app, /xDiagnostics\(x\.diagnostics\)/);
   assert.match(app, /class="x-diagnostics"/);
   assert.match(app, /bodySnippet/);
+  assert.match(app, /function xStreamControl\(x\)/);
+  assert.match(app, /data-x-control/);
+  assert.match(app, /\/api\/x\/control/);
   assert.match(css, /\.rule-stack/);
   assert.match(css, /\.rule-row/);
   assert.match(css, /\.x-diagnostics/);
   assert.match(css, /\.x-diagnostic-row/);
+  assert.match(css, /\.x-control/);
+  assert.match(css, /\.x-control-actions/);
 });

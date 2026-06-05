@@ -1781,6 +1781,56 @@ body[data-judge="1"] .product-command {
   overflow-wrap: anywhere;
 }
 
+.x-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.x-control-label {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.x-control strong {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.x-control code {
+  display: block;
+  margin-top: 2px;
+  color: var(--faint);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.x-control p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.x-control-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .webhook-row {
   display: flex;
   align-items: center;
