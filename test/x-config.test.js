@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   fetchXConnectionHistory,
   resolveXRulesFromEnv,
+  shouldAutoTerminateXConnections,
   startXConnector,
   summarizeXRules,
   summarizeXStreamFailure,
@@ -173,6 +174,14 @@ test("startXConnector stays disabled by default outside Render production", () =
   assert.equal(connector.snapshot().stream.enabled, false);
 });
 
+test("X auto-terminate defaults on only for Render production", () => {
+  assert.equal(shouldAutoTerminateXConnections({}), false);
+  assert.equal(shouldAutoTerminateXConnections({ RENDER: "true" }), true);
+  assert.equal(shouldAutoTerminateXConnections({ RENDER_SERVICE_ID: "srv-123" }), true);
+  assert.equal(shouldAutoTerminateXConnections({ RENDER: "true", X_AUTO_TERMINATE_CONNECTIONS: "off" }), false);
+  assert.equal(shouldAutoTerminateXConnections({ X_AUTO_TERMINATE_CONNECTIONS: "on" }), true);
+});
+
 test("startXConnector uses a long backoff for TooManyConnections", async (t) => {
   const statuses = [];
   const timers = [];
@@ -303,7 +312,7 @@ test("startXConnector can auto-clear stale X connections after TooManyConnection
     {
       X_BEARER_TOKEN: "SECRET_TOKEN",
       X_STREAM_ENABLED: "on",
-      X_AUTO_TERMINATE_CONNECTIONS: "on",
+      RENDER: "true",
       X_AUTO_TERMINATE_RECONNECT_MS: "2000"
     },
     {

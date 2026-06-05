@@ -32,7 +32,7 @@ X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_T
 
 **Important:** X integration delivers filtered posts, not live chat messages. This is a current limitation of the X API v2 filtered stream.
 
-Render deployments can briefly overlap old and new instances. Set `X_AUTO_TERMINATE_CONNECTIONS=on` for the dedicated Bubblewire X app so a new instance can clear stale filtered-stream sessions after X returns `TooManyConnections`; keep it off if the same X app is intentionally shared with another stream consumer.
+Render deployments can briefly overlap old and new instances. Bubblewire auto-clears stale filtered-stream sessions by default in Render production after X returns `TooManyConnections`; set `X_AUTO_TERMINATE_CONNECTIONS=off` if the same X app is intentionally shared with another stream consumer.
 
 Kick: Kick's official read-side chat path is the Events API. It delivers `chat.message.sent` events by webhook. Expose this app with a public tunnel or deployed URL and point Kick to `/kick.webhook`; `/webhooks/kick` is kept for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
 

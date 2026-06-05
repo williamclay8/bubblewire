@@ -384,7 +384,7 @@ function summarizeXConnectionRuntimeFailure(error, options = {}) {
 }
 
 async function maybeAutoTerminateXConnections(diagnostic, env = process.env) {
-  if (!isXTooManyConnectionsDiagnostic(diagnostic) || !isEnabledValue(env.X_AUTO_TERMINATE_CONNECTIONS)) {
+  if (!isXTooManyConnectionsDiagnostic(diagnostic) || !shouldAutoTerminateXConnections(env)) {
     return null;
   }
 
@@ -399,6 +399,12 @@ async function maybeAutoTerminateXConnections(diagnostic, env = process.env) {
     terminated: compactXConnectionManagementResult(terminated),
     after: compactXConnectionManagementResult(after)
   });
+}
+
+export function shouldAutoTerminateXConnections(env = process.env) {
+  const raw = String(env.X_AUTO_TERMINATE_CONNECTIONS || "").trim();
+  if (raw) return isEnabledValue(raw);
+  return isRenderProduction(env);
 }
 
 function compactXConnectionManagementResult(result) {
