@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  fetchXConnectionHistory,
   resolveXRulesFromEnv,
   startXConnector,
   summarizeXRules,
-  summarizeXStreamFailure
+  summarizeXStreamFailure,
+  terminateAllXConnections
 } from "../src/connectors/x.js";
 
 test("resolveXRulesFromEnv parses local X rule snapshots for setup visibility", () => {
@@ -231,6 +233,92 @@ test("startXConnector uses a long backoff for TooManyConnections", async (t) => 
   assert.equal(timers[0], 300000);
   assert.match(reconnectingStatus.detail, /retrying in 5m/);
   assert.match(reconnectingStatus.detail, /TooManyConnections|ConnectionException/);
+});
+
+test("fetchXConnectionHistory summarizes active X connections without leaking tokens", async () => {
+  const calls = [];
+  const result = await fetchXConnectionHistory(
+    { X_BEARER_TOKEN: "SECRET_TOKEN" },
+    {
+      fetch: async (url, options) => {
+        calls.push({ url: String(url), authorization: options.headers.Authorization });
+        return new Response(
+          JSON.stringify({
+            data: [
+              {
+                id: "conn-1",
+                endpoint_name: "filtered_stream",
+                connected_at: "2026-06-05T14:00:00Z",
+                client_ip: "203.0.113.10"
+              }
+            ],
+            errors: [{ title: "Note", detail: "Bearer SECRET_TOKEN should be hidden", status: 200 }],
+            meta: { result_count: 1 }
+          }),
+          { status: 200, statusText: "OK" }
+        );
+      }
+    }
+  );
+  const serialized = JSON.stringify(result);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.count, 1);
+  assert.equal(result.connections[0].id, "conn-1");
+  assert.match(calls[0].url, /\/2\/connections/);
+  assert.match(calls[0].url, /status=active/);
+  assert.match(calls[0].url, /endpoints=filtered_stream/);
+  assert.equal(calls[0].authorization, "Bearer SECRET_TOKEN");
+  assert.doesNotMatch(serialized, /SECRET_TOKEN/);
+  assert.doesNotMatch(serialized, /Bearer SECRET_TOKEN/);
+});
+
+test("terminateAllXConnections summarizes X termination results without leaking tokens", async () => {
+  const calls = [];
+  const result = await terminateAllXConnections(
+    { X_BEARER_TOKEN: "SECRET_TOKEN" },
+    {
+      fetch: async (url, options) => {
+        calls.push({ url: String(url), method: options.method, authorization: options.headers.Authorization });
+        return new Response(
+          JSON.stringify({
+            data: {
+              successful_kills: 1,
+              failed_kills: 0,
+              results: [{ uuid: "conn-1", success: true }]
+            }
+          }),
+          { status: 200, statusText: "OK" }
+        );
+      }
+    }
+  );
+  const serialized = JSON.stringify(result);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.termination.successfulKills, 1);
+  assert.equal(result.termination.results[0].uuid, "conn-1");
+  assert.match(calls[0].url, /\/2\/connections\/all$/);
+  assert.equal(calls[0].method, "DELETE");
+  assert.equal(calls[0].authorization, "Bearer SECRET_TOKEN");
+  assert.doesNotMatch(serialized, /SECRET_TOKEN/);
+});
+
+test("X connection management reports missing bearer token without calling fetch", async () => {
+  let fetchCalls = 0;
+  const result = await fetchXConnectionHistory(
+    {},
+    {
+      fetch: async () => {
+        fetchCalls += 1;
+        return new Response("{}", { status: 200 });
+      }
+    }
+  );
+
+  assert.equal(fetchCalls, 0);
+  assert.equal(result.ok, false);
+  assert.equal(result.summary, "missing X_BEARER_TOKEN");
 });
 
 async function waitFor(predicate) {

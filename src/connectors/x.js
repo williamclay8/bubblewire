@@ -2,6 +2,7 @@ import { normalizeXStreamEvent } from "../core/messages.js";
 
 const X_STREAM_URL = "https://api.x.com/2/tweets/search/stream";
 const X_RULES_URL = `${X_STREAM_URL}/rules`;
+const X_CONNECTIONS_URL = "https://api.x.com/2/connections";
 const DEFAULT_RECONNECT_MS = 1000;
 const MAX_RECONNECT_MS = 45000;
 const DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS = 5 * 60 * 1000;
@@ -249,6 +250,52 @@ export function summarizeXRules(payload = {}, { checkedAt = new Date().toISOStri
   };
 }
 
+export async function fetchXConnectionHistory(env = process.env, options = {}) {
+  const bearerToken = env.X_BEARER_TOKEN;
+  if (!bearerToken) return missingXBearerConnectionResult("connections");
+
+  const fetchImpl = options.fetch || fetch;
+  const url = new URL(X_CONNECTIONS_URL);
+  url.searchParams.set("status", options.status || "active");
+  url.searchParams.set("endpoints", options.endpoints || "filtered_stream");
+  url.searchParams.set("connection.fields", "id,endpoint_name,connected_at,client_ip,disconnect_reason,disconnected_at");
+
+  try {
+    const response = await fetchImpl(url, {
+      headers: {
+        Authorization: `Bearer ${bearerToken}`
+      }
+    });
+    return summarizeXConnectionResponse(response, await safeResponseText(response), {
+      bearerToken,
+      phase: "connections"
+    });
+  } catch (error) {
+    return summarizeXConnectionRuntimeFailure(error, { bearerToken, phase: "connections" });
+  }
+}
+
+export async function terminateAllXConnections(env = process.env, options = {}) {
+  const bearerToken = env.X_BEARER_TOKEN;
+  if (!bearerToken) return missingXBearerConnectionResult("terminate-connections");
+
+  const fetchImpl = options.fetch || fetch;
+  try {
+    const response = await fetchImpl(`${X_CONNECTIONS_URL}/all`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${bearerToken}`
+      }
+    });
+    return summarizeXConnectionResponse(response, await safeResponseText(response), {
+      bearerToken,
+      phase: "terminate-connections"
+    });
+  } catch (error) {
+    return summarizeXConnectionRuntimeFailure(error, { bearerToken, phase: "terminate-connections" });
+  }
+}
+
 export async function summarizeXStreamFailure(response, options = {}) {
   const phase = cleanDiagnosticText(options.phase || "stream", { maxLength: 32 }) || "stream";
   const rawBody = await safeResponseText(response);
@@ -284,6 +331,108 @@ export async function summarizeXStreamFailure(response, options = {}) {
 
   diagnostic.summary = buildXDiagnosticSummary(diagnostic);
   return diagnostic;
+}
+
+function summarizeXConnectionResponse(response, rawBody, options = {}) {
+  const phase = cleanDiagnosticText(options.phase || "connections", { maxLength: 48 }) || "connections";
+  const secrets = [options.bearerToken, ...(options.secrets || [])].filter(Boolean);
+  const parsed = parseDiagnosticBody(rawBody);
+  const result = pruneDiagnostic({
+    ok: Boolean(response?.ok),
+    phase,
+    httpStatus: response?.status || 0,
+    statusText: cleanDiagnosticText(response?.statusText || "", { secrets, maxLength: 80 }),
+    checkedAt: new Date().toISOString(),
+    count: Number(parsed?.meta?.result_count || 0),
+    connections: sanitizeXConnections(parsed?.data || []),
+    termination: sanitizeXTermination(parsed?.data),
+    errors: sanitizeXErrors(parsed?.errors || [], secrets),
+    bodySnippet: response?.ok ? "" : cleanDiagnosticText(rawBody, { secrets, maxLength: 420 })
+  });
+  result.summary = buildXConnectionSummary(result);
+  return result;
+}
+
+function summarizeXConnectionRuntimeFailure(error, options = {}) {
+  const secrets = [options.bearerToken, ...(options.secrets || [])].filter(Boolean);
+  const result = pruneDiagnostic({
+    ok: false,
+    phase: cleanDiagnosticText(options.phase || "connections", { secrets, maxLength: 48 }) || "connections",
+    checkedAt: new Date().toISOString(),
+    errorName: cleanDiagnosticText(error?.name || "Error", { secrets, maxLength: 80 }),
+    problemDetail: cleanDiagnosticText(error?.message || "X connection management failed", { secrets, maxLength: 260 })
+  });
+  result.summary = buildXConnectionSummary(result);
+  return result;
+}
+
+function missingXBearerConnectionResult(phase) {
+  return {
+    ok: false,
+    phase,
+    checkedAt: new Date().toISOString(),
+    count: 0,
+    connections: [],
+    summary: "missing X_BEARER_TOKEN"
+  };
+}
+
+function sanitizeXConnections(rows) {
+  return (Array.isArray(rows) ? rows : []).slice(0, 25).map((connection) => ({
+    id: cleanDiagnosticText(connection.id || "", { maxLength: 80 }),
+    endpoint: cleanDiagnosticText(connection.endpoint_name || "", { maxLength: 80 }),
+    connectedAt: cleanDiagnosticText(connection.connected_at || "", { maxLength: 80 }),
+    disconnectedAt: cleanDiagnosticText(connection.disconnected_at || "", { maxLength: 80 }),
+    disconnectReason: cleanDiagnosticText(connection.disconnect_reason || "", { maxLength: 120 }),
+    clientIp: cleanDiagnosticText(connection.client_ip || "", { maxLength: 80 })
+  }));
+}
+
+function sanitizeXTermination(data) {
+  if (!data || Array.isArray(data)) return null;
+  return pruneDiagnostic({
+    successfulKills: numberOrNull(data.successful_kills),
+    failedKills: numberOrNull(data.failed_kills),
+    results: Array.isArray(data.results)
+      ? data.results.slice(0, 25).map((result) => ({
+          uuid: cleanDiagnosticText(result.uuid || "", { maxLength: 80 }),
+          success: Boolean(result.success),
+          errorMessage: cleanDiagnosticText(result.error_message || "", { maxLength: 180 })
+        }))
+      : []
+  });
+}
+
+function sanitizeXErrors(errors, secrets) {
+  return (Array.isArray(errors) ? errors : []).slice(0, 10).map((error) =>
+    pruneDiagnostic({
+      title: cleanDiagnosticText(error.title || "", { secrets, maxLength: 120 }),
+      type: cleanDiagnosticText(error.type || "", { secrets, maxLength: 180 }),
+      detail: cleanDiagnosticText(error.detail || "", { secrets, maxLength: 260 }),
+      status: numberOrNull(error.status)
+    })
+  );
+}
+
+function buildXConnectionSummary(result) {
+  const phase = result.phase || "connections";
+  if (result.httpStatus) {
+    const parts = [`X ${phase} HTTP ${result.httpStatus}${result.statusText ? ` ${result.statusText}` : ""}`];
+    if (result.termination) {
+      parts.push(`${result.termination.successfulKills || 0} killed`);
+      if (result.termination.failedKills) parts.push(`${result.termination.failedKills} failed`);
+    } else if (Number.isFinite(result.count)) {
+      parts.push(`${result.count} active`);
+    }
+    return parts.join(" · ");
+  }
+  if (result.errorName) return `X ${phase} ${result.errorName}`;
+  return result.summary || `X ${phase}`;
+}
+
+function numberOrNull(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 export function reconnectDelayForDiagnostics(diagnostic, currentMs, env = process.env) {

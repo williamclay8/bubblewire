@@ -6,7 +6,13 @@ import { fileURLToPath } from "node:url";
 import { createDemoConnector } from "./connectors/demo.js";
 import { resolveKickConfig, shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
-import { resolveXRulesFromEnv, resolveXStreamPolicy, startXConnector } from "./connectors/x.js";
+import {
+  fetchXConnectionHistory,
+  resolveXRulesFromEnv,
+  resolveXStreamPolicy,
+  startXConnector,
+  terminateAllXConnections
+} from "./connectors/x.js";
 import { createHistoryLog } from "./core/history.js";
 import { createFeedHub } from "./core/hub.js";
 import { createInjectedMessage, normalizeKickWebhook } from "./core/messages.js";
@@ -107,6 +113,52 @@ const server = http.createServer(async (request, response) => {
         status: hub.snapshot().status.x,
         x: xConnector.snapshot()
       });
+    }
+
+    if (request.method === "GET" && pathname === "/api/x/connections") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      return sendJson(response, {
+        ok: true,
+        connections: await fetchXConnectionHistory(process.env)
+      });
+    }
+
+    if (request.method === "POST" && pathname === "/api/x/connections") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      const payload = await readJsonBody(request);
+      const action = String(payload.action || "").trim().toLowerCase();
+      if (!["list", "terminate", "terminate-all"].includes(action)) {
+        return sendJson(response, { ok: false, error: "action must be list or terminate-all" }, 400);
+      }
+      if (action === "list") {
+        return sendJson(response, {
+          ok: true,
+          connections: await fetchXConnectionHistory(process.env)
+        });
+      }
+
+      runtimeXPaused = true;
+      restartXConnector();
+      const before = await fetchXConnectionHistory(process.env);
+      const terminated = await terminateAllXConnections(process.env);
+      const after = await fetchXConnectionHistory(process.env);
+      return sendJson(
+        response,
+        {
+          ok: Boolean(terminated.ok),
+          paused: runtimeXPaused,
+          before,
+          terminated,
+          after,
+          status: hub.snapshot().status.x,
+          x: xConnector.snapshot()
+        },
+        terminated.ok ? 200 : 502
+      );
     }
 
     if (request.method === "GET" && pathname === "/api/twitch/channels") {
@@ -448,6 +500,7 @@ function setupSnapshot(request) {
         control: {
           paused: runtimeXPaused,
           endpoint: "/api/x/control",
+          connectionsEndpoint: "/api/x/connections",
           adminLocked: Boolean(adminToken)
         },
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
