@@ -14,6 +14,7 @@ const PREFS_KEY = "bubblewire:prefs:v1";
 const ACTIVATION_STORAGE_KEY = "bubblewire:activation:v1";
 const HERO_KEY = "bubblewire:hero-dismissed:v1";
 const BOOT_KEY = "bubblewire:booted";
+const COMMAND_KEY = "bubblewire:command:v1";
 const THEMES = ["gold", "matrix", "ice", "synthwave"];
 const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
@@ -113,6 +114,7 @@ const els = {
   setupClose: document.querySelector("#setupClose"),
   signalStream: document.querySelector("#signalStream"),
   productCommand: document.querySelector("#productCommand"),
+  commandToggle: document.querySelector("#commandToggle"),
   productDemoButton: document.querySelector("#productDemoButton"),
   connectSourcesButton: document.querySelector("#connectSourcesButton"),
   focusFeedButton: document.querySelector("#focusFeedButton"),
@@ -293,9 +295,14 @@ function bindControls() {
   });
   els.focusFeedButton?.addEventListener("click", () => {
     trackActivation("feed");
+    setCommandCollapsed(true);
     els.feedPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
     els.feedList?.focus?.();
   });
+  els.commandToggle?.addEventListener("click", () => {
+    setCommandCollapsed(!els.productCommand?.classList.contains("collapsed"));
+  });
+  initCommandCollapse();
   els.overlaySetupLink?.addEventListener("click", () => trackActivation("overlay"));
   els.launchChecklist?.addEventListener("click", onLaunchChecklistClick);
 
@@ -662,9 +669,11 @@ function renderProofMetrics() {
   const rate = messageRate();
   const proofReady = SOURCE_ORDER.filter((source) => sourceHasProof(source)).length;
   const watchHits = state.session.watchHits || 0;
+  const readyCount = SOURCE_ORDER.filter((source) => !sourceHasProof(source) && sourceIsConfigured(source)).length;
+  const sourcesLabel = proofReady < SOURCE_ORDER.length && readyCount > 0 ? `Sources · ${readyCount} ready` : "Sources";
   const metrics = [
     ["Captured", pad(total)],
-    ["Proof", `${proofReady}/3`],
+    [sourcesLabel, `${proofReady} live`],
     ["Rate", `${rate}/min`],
     ["Watch hits", String(watchHits)]
   ];
@@ -1965,6 +1974,48 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
     }
   }
   if (line) ctx.fillText(line, x, y);
+}
+
+/* ---------- command center collapse ---------- */
+
+function initCommandCollapse() {
+  if (!els.productCommand) return;
+  let stored = null;
+  try {
+    stored = localStorage.getItem(COMMAND_KEY);
+  } catch {
+    /* default expanded */
+  }
+  if (stored === null) {
+    // First visit: show the full pitch once, auto-collapse on the next load.
+    try {
+      localStorage.setItem(COMMAND_KEY, "auto");
+    } catch {
+      /* session only */
+    }
+    applyCommandCollapsed(false);
+    return;
+  }
+  applyCommandCollapsed(stored !== "expanded");
+}
+
+function setCommandCollapsed(collapsed) {
+  applyCommandCollapsed(collapsed);
+  try {
+    localStorage.setItem(COMMAND_KEY, collapsed ? "collapsed" : "expanded");
+  } catch {
+    /* session only */
+  }
+}
+
+function applyCommandCollapsed(collapsed) {
+  if (!els.productCommand) return;
+  els.productCommand.classList.toggle("collapsed", collapsed);
+  if (els.commandToggle) {
+    els.commandToggle.setAttribute("aria-expanded", String(!collapsed));
+    els.commandToggle.textContent = collapsed ? "▾ intro" : "▴ intro";
+    els.commandToggle.title = collapsed ? "Expand intro" : "Collapse intro";
+  }
 }
 
 /* ---------- service worker ---------- */
