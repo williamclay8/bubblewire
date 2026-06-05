@@ -7,6 +7,7 @@ const DEFAULT_RECONNECT_MS = 1000;
 const MAX_RECONNECT_MS = 45000;
 const DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS = 5 * 60 * 1000;
 const DEFAULT_X_RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
+const DEFAULT_X_AUTO_TERMINATE_RECONNECT_MS = 2000;
 
 export function startXConnector(hub, env = process.env, options = {}) {
   const bearerToken = env.X_BEARER_TOKEN;
@@ -52,6 +53,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
   let controller = null;
   let reconnectMs = DEFAULT_RECONNECT_MS;
   let reconnectTimer = null;
+  let nextReconnectOverrideMs = 0;
 
   async function connect() {
     if (stopped) return;
@@ -105,6 +107,20 @@ export function startXConnector(hub, env = process.env, options = {}) {
     } catch (error) {
       if (stopped || error.name === "AbortError") return;
       diagnostics = error.diagnostics || summarizeXRuntimeFailure(error, { bearerToken, phase: "stream" });
+      const cleanup = await maybeAutoTerminateXConnections(diagnostics, env);
+      if (cleanup) {
+        diagnostics = {
+          ...diagnostics,
+          connectionCleanup: cleanup
+        };
+        if (cleanup.terminated?.successfulKills > 0) {
+          reconnectMs = DEFAULT_RECONNECT_MS;
+          nextReconnectOverrideMs = positiveInteger(
+            env.X_AUTO_TERMINATE_RECONNECT_MS,
+            DEFAULT_X_AUTO_TERMINATE_RECONNECT_MS
+          );
+        }
+      }
       console.warn("[bubblewire:x]", JSON.stringify(diagnostics));
       hub.setSourceStatus("x", {
         state: "error",
@@ -114,7 +130,8 @@ export function startXConnector(hub, env = process.env, options = {}) {
     }
 
     if (!stopped) {
-      const delayMs = reconnectDelayForDiagnostics(diagnostics, reconnectMs, env);
+      const delayMs = nextReconnectOverrideMs || reconnectDelayForDiagnostics(diagnostics, reconnectMs, env);
+      nextReconnectOverrideMs = 0;
       const last = diagnostics?.summary ? ` · last ${diagnostics.summary}` : "";
       hub.setSourceStatus("x", {
         state: "reconnecting",
@@ -364,6 +381,37 @@ function summarizeXConnectionRuntimeFailure(error, options = {}) {
   });
   result.summary = buildXConnectionSummary(result);
   return result;
+}
+
+async function maybeAutoTerminateXConnections(diagnostic, env = process.env) {
+  if (!isXTooManyConnectionsDiagnostic(diagnostic) || !isEnabledValue(env.X_AUTO_TERMINATE_CONNECTIONS)) {
+    return null;
+  }
+
+  const before = await fetchXConnectionHistory(env);
+  const shouldTerminate = before.ok && before.count > 0;
+  const terminated = shouldTerminate ? await terminateAllXConnections(env) : null;
+  const after = terminated?.ok ? await fetchXConnectionHistory(env) : null;
+
+  return pruneDiagnostic({
+    enabled: true,
+    before: compactXConnectionManagementResult(before),
+    terminated: compactXConnectionManagementResult(terminated),
+    after: compactXConnectionManagementResult(after)
+  });
+}
+
+function compactXConnectionManagementResult(result) {
+  if (!result) return null;
+  return pruneDiagnostic({
+    ok: Boolean(result.ok),
+    httpStatus: result.httpStatus,
+    checkedAt: result.checkedAt,
+    count: result.count,
+    summary: result.summary,
+    successfulKills: result.termination?.successfulKills,
+    failedKills: result.termination?.failedKills
+  });
 }
 
 function missingXBearerConnectionResult(phase) {

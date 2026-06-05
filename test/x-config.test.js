@@ -235,6 +235,104 @@ test("startXConnector uses a long backoff for TooManyConnections", async (t) => 
   assert.match(reconnectingStatus.detail, /TooManyConnections|ConnectionException/);
 });
 
+test("startXConnector can auto-clear stale X connections after TooManyConnections", async (t) => {
+  const statuses = [];
+  const timers = [];
+  const fetchCalls = [];
+  const originalFetch = globalThis.fetch;
+  const originalWarn = console.warn;
+
+  globalThis.fetch = async (url, options = {}) => {
+    const href = String(url);
+    fetchCalls.push({ href, method: options.method || "GET" });
+
+    if (href.endsWith("/rules")) {
+      return new Response(JSON.stringify({ data: [{ id: "1", tag: "live", value: "Bubblewire" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    if (href.endsWith("/2/connections/all")) {
+      return new Response(
+        JSON.stringify({
+          data: {
+            successful_kills: 1,
+            failed_kills: 0,
+            results: [{ uuid: "conn-1", success: true }]
+          }
+        }),
+        { status: 200, statusText: "OK" }
+      );
+    }
+
+    if (href.includes("/2/connections?")) {
+      const alreadyKilled = fetchCalls.some((call) => call.href.endsWith("/2/connections/all"));
+      return new Response(
+        JSON.stringify(
+          alreadyKilled
+            ? { data: [], meta: { result_count: 0 } }
+            : {
+                data: [{ id: "conn-1", endpoint_name: "filtered_stream", connected_at: "2026-06-05T03:00:00Z" }],
+                meta: { result_count: 1 }
+              }
+        ),
+        { status: 200, statusText: "OK" }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        title: "ConnectionException",
+        detail: "This stream is currently at the maximum allowed connection limit.",
+        connection_issue: "TooManyConnections",
+        type: "https://api.twitter.com/2/problems/streaming-connection"
+      }),
+      { status: 429, statusText: "Too Many Requests" }
+    );
+  };
+  console.warn = () => {};
+
+  const connector = startXConnector(
+    {
+      setSourceStatus(source, status) {
+        statuses.push({ source, status });
+      },
+      addMessage() {}
+    },
+    {
+      X_BEARER_TOKEN: "SECRET_TOKEN",
+      X_STREAM_ENABLED: "on",
+      X_AUTO_TERMINATE_CONNECTIONS: "on",
+      X_AUTO_TERMINATE_RECONNECT_MS: "2000"
+    },
+    {
+      setTimeout(fn, ms) {
+        timers.push(ms);
+        return { fn, ms };
+      },
+      clearTimeout() {}
+    }
+  );
+
+  t.after(() => {
+    connector.stop();
+    globalThis.fetch = originalFetch;
+    console.warn = originalWarn;
+  });
+
+  await waitFor(() => statuses.some((entry) => entry.status.state === "reconnecting"));
+  const errorStatus = statuses.find((entry) => entry.status.state === "error")?.status;
+  const serialized = JSON.stringify({ statuses, fetchCalls });
+
+  assert.equal(errorStatus.diagnostics.connectionCleanup.before.count, 1);
+  assert.equal(errorStatus.diagnostics.connectionCleanup.terminated.successfulKills, 1);
+  assert.equal(errorStatus.diagnostics.connectionCleanup.after.count, 0);
+  assert.equal(timers[0], 2000);
+  assert.equal(fetchCalls.some((call) => call.href.endsWith("/2/connections/all") && call.method === "DELETE"), true);
+  assert.doesNotMatch(serialized, /SECRET_TOKEN/);
+});
+
 test("fetchXConnectionHistory summarizes active X connections without leaking tokens", async () => {
   const calls = [];
   const result = await fetchXConnectionHistory(

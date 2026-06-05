@@ -32,6 +32,8 @@ X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_T
 
 **Important:** X integration delivers filtered posts, not live chat messages. This is a current limitation of the X API v2 filtered stream.
 
+Render deployments can briefly overlap old and new instances. Set `X_AUTO_TERMINATE_CONNECTIONS=on` for the dedicated Bubblewire X app so a new instance can clear stale filtered-stream sessions after X returns `TooManyConnections`; keep it off if the same X app is intentionally shared with another stream consumer.
+
 Kick: Kick's official read-side chat path is the Events API. It delivers `chat.message.sent` events by webhook. Expose this app with a public tunnel or deployed URL and point Kick to `/kick.webhook`; `/webhooks/kick` is kept for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
 
 To let Bubblewire register the official Kick event subscription at startup, set `KICK_AUTO_SUBSCRIBE=1`, `KICK_ACCESS_TOKEN`, and `KICK_BROADCASTER_USER_ID` with a token that has `events:subscribe`. To reject unsigned webhook calls, set `KICK_REQUIRE_SIGNATURE=1`; unsigned local proof events should keep this off.

@@ -15,6 +15,10 @@ services:
         value: off
       - key: X_STREAM_ENABLED
         value: "on"
+      - key: X_AUTO_TERMINATE_CONNECTIONS
+        value: "on"
+      - key: X_AUTO_TERMINATE_RECONNECT_MS
+        value: "2000"
       - key: ADMIN_TOKEN
         sync: false
       - key: TWITCH_CHANNELS
