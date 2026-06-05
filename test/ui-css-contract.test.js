@@ -31,20 +31,30 @@ test("judge mode makes the mobile feed the first visible work surface", async ()
   assert.match(css, /body\[data-judge="1"\]\s+\.channel-hero\s*{[\s\S]*display:\s*none\s*!important;/);
 });
 
-test("mobile dashboard gives the unified feed more room for live messages", async () => {
-  const css = await readFile(`${repoRoot}/public/styles.css`, "utf8");
+test("mobile dashboard keeps a phone-width startup layout with a denser feed", async () => {
+  const [css, html] = await Promise.all([
+    readFile(`${repoRoot}/public/styles.css`, "utf8"),
+    readFile(`${repoRoot}/public/index.html`, "utf8")
+  ]);
   const mobile = css.slice(css.indexOf("@media (max-width: 820px)"));
   const avatarDensitySection = css.slice(css.indexOf("/* ---------- v4: avatars + density ---------- */"));
 
+  assert.match(html, /href="\/styles\.css\?v=mobile-width-fix/);
   assert.match(css, /\.layout\s*{[\s\S]*grid-template-columns:\s*236px minmax\(0,\s*1fr\) 332px;/);
-  assert.match(mobile, /\.feed-panel\s*{[\s\S]*width:\s*100%;[\s\S]*min-width:\s*0;[\s\S]*height:\s*78vh;[\s\S]*height:\s*78svh;/);
-  assert.match(mobile, /\.feed-head\s*{[\s\S]*padding:\s*10px 12px;/);
-  assert.match(mobile, /\.proof-receipt\s*{[\s\S]*flex-wrap:\s*nowrap;[\s\S]*overflow-x:\s*auto;[\s\S]*padding:\s*6px 10px;/);
-  assert.match(mobile, /\.feed\s*{[\s\S]*padding:\s*6px;[\s\S]*gap:\s*4px;/);
-  assert.match(mobile, /\.message\s*{[\s\S]*padding:\s*6px 9px 7px;/);
-  assert.match(mobile, /\.msg-head\s*{[\s\S]*display:\s*grid;[\s\S]*grid-template-columns:\s*auto minmax\(0,\s*1fr\) auto auto;/);
-  assert.match(mobile, /\.avatar,\s*\.avatar-fallback,\s*\.handle,\s*\.channel,\s*\.mode-tag,\s*\.heat,\s*\.verified,\s*\.watch-tag,\s*\.dupe-badge,\s*\.msg-spacer\s*{[\s\S]*display:\s*none;/);
-  assert.match(avatarDensitySection, /@media \(max-width: 820px\)\s*{[\s\S]*\.avatar,\s*\.avatar-fallback,\s*\.handle,\s*\.channel,\s*\.mode-tag,\s*\.heat,\s*\.verified,\s*\.watch-tag,\s*\.dupe-badge,\s*\.msg-spacer\s*{[\s\S]*display:\s*none;/);
-  assert.match(mobile, /\.author\s*{[\s\S]*overflow:\s*hidden;[\s\S]*text-overflow:\s*ellipsis;[\s\S]*white-space:\s*nowrap;/);
-  assert.match(mobile, /\.msg-content\s*{[\s\S]*font-size:\s*13\.5px;[\s\S]*line-height:\s*1\.42;/);
+  assert.match(mobile, /\.shell,\s*\.topbar,\s*\.tape,\s*\.signal-stream,\s*\.layout,\s*\.rail,\s*\.feed-panel,\s*\.inspector\s*{[\s\S]*max-width:\s*100%;[\s\S]*overflow-x:\s*hidden;/);
+  assert.match(mobile, /\.overlay-link\s*{[\s\S]*width:\s*36px;[\s\S]*font-size:\s*0;/);
+  assert.match(mobile, /\.overlay-link::after\s*{[\s\S]*content:\s*"↗";/);
+  assert.match(mobile, /\.feed-panel\s*{[^}]*width:\s*100%;[^}]*min-width:\s*0;[^}]*height:\s*74vh;[^}]*height:\s*74svh;/);
+  assert.match(mobile, /\.feed-head\s*{[^}]*padding:\s*10px 12px;/);
+  assert.doesNotMatch(mobile, /\.proof-receipt\s*{[^}]*flex-wrap:\s*nowrap;/);
+  assert.match(mobile, /\.proof-receipt\s*{[^}]*overflow-x:\s*hidden;[^}]*padding:\s*6px 10px;/);
+  assert.match(mobile, /\.feed\s*{[^}]*padding:\s*6px;[^}]*gap:\s*4px;/);
+  assert.match(mobile, /\.message\s*{[^}]*padding:\s*6px 9px 7px;/);
+  assert.doesNotMatch(mobile, /\.msg-head\s*{[^}]*display:\s*grid;/);
+  assert.match(mobile, /\.avatar,\s*\.avatar-fallback,\s*\.handle,\s*\.channel,\s*\.mode-tag,\s*\.heat,\s*\.verified,\s*\.watch-tag,\s*\.dupe-badge\s*{[^}]*display:\s*none;/);
+  assert.match(avatarDensitySection, /@media \(max-width: 820px\)\s*{[\s\S]*\.avatar,\s*\.avatar-fallback,\s*\.handle,\s*\.channel,\s*\.mode-tag,\s*\.heat,\s*\.verified,\s*\.watch-tag,\s*\.dupe-badge\s*{[\s\S]*display:\s*none;/);
+  assert.match(mobile, /\.author\s*{[^}]*overflow:\s*hidden;[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap;/);
+  assert.match(mobile, /\.msg-content\s*{[^}]*font-size:\s*12px;[^}]*line-height:\s*1\.32;/);
+  assert.match(mobile, /body\[data-density="compact"\]\s+\.msg-content\s*{[^}]*font-size:\s*12px;[^}]*line-height:\s*1\.32;/);
+  assert.match(css, /@media \(max-width: 540px\)\s*{[\s\S]*\.message\s*{[^}]*padding:\s*5px 7px 6px;[\s\S]*\.author\s*{[^}]*font-size:\s*11px;[\s\S]*\.msg-content\s*{[^}]*font-size:\s*11px;[^}]*line-height:\s*1\.28;[\s\S]*body\[data-density="compact"\]\s+\.msg-content\s*{[^}]*font-size:\s*11px;[^}]*line-height:\s*1\.28;/);
 });
