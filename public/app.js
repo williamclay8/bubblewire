@@ -1375,6 +1375,7 @@ function renderSetup() {
       <h3>X <small>filtered stream</small></h3>
       ${varRows(x.vars)}
       ${ruleRows(x.rules)}
+      ${xDiagnostics(x.diagnostics)}
       <p class="setup-note">${escapeHtml(x.note)}</p>
     </section>
 
@@ -1425,6 +1426,41 @@ function ruleRows(ruleSnapshot) {
         <div class="rule-row">
           <b>${escapeHtml(rule.tag || "rule")}</b>
           <code>${escapeHtml(rule.value || rule.id || "matching rule observed")}</code>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function xDiagnostics(diagnostics) {
+  if (!diagnostics) return "";
+  const status = diagnostics.httpStatus
+    ? `HTTP ${diagnostics.httpStatus}${diagnostics.statusText ? ` ${diagnostics.statusText}` : ""}`
+    : diagnostics.errorName || "runtime error";
+  const rateLimit = diagnostics.rateLimit
+    ? [
+        diagnostics.rateLimit.remaining ? `remaining ${diagnostics.rateLimit.remaining}` : "",
+        diagnostics.rateLimit.limit ? `limit ${diagnostics.rateLimit.limit}` : "",
+        diagnostics.rateLimit.reset ? `reset ${diagnostics.rateLimit.reset}` : ""
+      ].filter(Boolean).join(" · ")
+    : "";
+  const rows = [
+    ["status", status],
+    ["problem", diagnostics.problemTitle || diagnostics.problemDetail || diagnostics.summary || ""],
+    ["type", diagnostics.problemType || ""],
+    ["rate", rateLimit],
+    ["body", diagnostics.bodySnippet || ""]
+  ].filter(([, value]) => value);
+
+  if (!rows.length) return "";
+
+  return `
+    <div class="x-diagnostics" aria-label="Redacted X stream diagnostics">
+      <span class="x-diagnostic-title">Last stream diagnostic</span>
+      ${rows.map(([label, value]) => `
+        <div class="x-diagnostic-row">
+          <b>${escapeHtml(label)}</b>
+          <code>${escapeHtml(value)}</code>
         </div>
       `).join("")}
     </div>

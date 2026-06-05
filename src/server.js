@@ -351,6 +351,7 @@ function setupSnapshot(request) {
   const present = (name) => Boolean(env[name] && String(env[name]).trim());
   const kickConfig = resolveKickConfig(env);
   const xSnapshot = xConnector?.snapshot?.() || { rules: resolveXRulesFromEnv(env) };
+  const statusSnapshot = hub.snapshot().status;
   const hostHeader = request.headers.host || `${host}:${port}`;
   const protocol = forwardedProtocol(request) || (request.socket.encrypted ? "https" : "http");
   const kickPublicBase = (env.KICK_WEBHOOK_PUBLIC_URL || "").trim().replace(/\/$/, "");
@@ -379,7 +380,9 @@ function setupSnapshot(request) {
       },
       x: {
         vars: { X_BEARER_TOKEN: present("X_BEARER_TOKEN") },
+        status: statusSnapshot.x || null,
         rules: xSnapshot.rules,
+        diagnostics: xSnapshot.diagnostics || statusSnapshot.x?.diagnostics || null,
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
       },
       kick: {
