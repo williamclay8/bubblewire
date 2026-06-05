@@ -584,6 +584,7 @@ function mimeType(filePath) {
       ".svg": "image/svg+xml",
       ".woff2": "font/woff2",
       ".png": "image/png",
+      ".mp4": "video/mp4",
       ".json": "application/json; charset=utf-8",
       ".webmanifest": "application/manifest+json; charset=utf-8"
     }[extname(filePath)] || "application/octet-stream"

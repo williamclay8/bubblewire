@@ -1,8 +1,8 @@
 # Bubblewire Demo Video Storyboard
 
-Uploaded demo: `https://youtu.be/MGEKOfs4yn0`
+Final-cut demo: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
-Actual uploaded length: 0:36.
+Final-cut length: 1:19.97.
 
 Initial target length: 60-90 seconds.
 

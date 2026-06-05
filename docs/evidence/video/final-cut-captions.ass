@@ -1,0 +1,34 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Title, Inter, 54, &H00F7F2DF, &H000000FF, &HAA000000, &HDD050505, -1, 0, 0, 0, 100, 100, 0, 0, 3, 3, 0, 2, 82, 82, 72, 1
+Style: Sub, Inter, 34, &H00D8A84A, &H000000FF, &HAA000000, &HDD050505, 0, 0, 0, 0, 100, 100, 0, 0, 3, 2, 0, 2, 90, 90, 24, 1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:06.00,Title,,0,0,0,,Bubblewire live on bubblewire.xyz
+Dialogue: 1,0:00:00.00,0:00:06.00,Sub,,0,0,0,,One real-time feed for Twitch, X, and Kick.
+Dialogue: 0,0:00:06.00,0:00:16.00,Title,,0,0,0,,The hook: real source-labeled flow
+Dialogue: 1,0:00:06.00,0:00:16.00,Sub,,0,0,0,,Live Twitch chat and X filtered-stream posts share one operator feed.
+Dialogue: 0,0:00:16.00,0:00:24.00,Title,,0,0,0,,Every row keeps provenance
+Dialogue: 1,0:00:16.00,0:00:24.00,Sub,,0,0,0,,Select a message to inspect the raw normalized payload and proof receipt.
+Dialogue: 0,0:00:24.00,0:00:32.00,Title,,0,0,0,,Search and source filters
+Dialogue: 1,0:00:24.00,0:00:32.00,Sub,,0,0,0,,Keyboard-first filters highlight signal without losing the room.
+Dialogue: 0,0:00:32.00,0:00:39.00,Title,,0,0,0,,Author drill-down
+Dialogue: 1,0:00:32.00,0:00:39.00,Sub,,0,0,0,,Click an author to isolate context; Esc clears the view.
+Dialogue: 0,0:00:39.00,0:00:47.00,Title,,0,0,0,,Watchlist alerts
+Dialogue: 1,0:00:39.00,0:00:47.00,Sub,,0,0,0,,Terms flag matching rows and raise toasts before moments scroll away.
+Dialogue: 0,0:00:47.00,0:00:54.00,Title,,0,0,0,,Volume, heat, and themeable signal
+Dialogue: 1,0:00:47.00,0:00:54.00,Sub,,0,0,0,,Tape, radar, and heat rails expose bursts before you read every line.
+Dialogue: 0,0:00:54.00,0:01:02.00,Title,,0,0,0,,Setup is honest
+Dialogue: 1,0:00:54.00,0:01:02.00,Sub,,0,0,0,,Green means proven; env values are booleans only, never secrets.
+Dialogue: 0,0:01:02.00,0:01:12.00,Title,,0,0,0,,OBS overlay configurator
+Dialogue: 1,0:01:02.00,0:01:12.00,Sub,,0,0,0,,Tune max messages, fade, alignment, scale, and source filters.
+Dialogue: 0,0:01:12.00,0:01:20.00,Title,,0,0,0,,Bubblewire: the moment, the proof, the broadcast
+Dialogue: 1,0:01:12.00,0:01:20.00,Sub,,0,0,0,,Live at bubblewire.xyz.

@@ -1,0 +1,67 @@
+{
+  "target": "https://bubblewire.xyz",
+  "width": 1920,
+  "height": 1080,
+  "shots": [
+    {
+      "name": "01-boot",
+      "title": "Boot sequence",
+      "subtitle": "One real-time feed for Twitch, X, and Kick.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/01-boot.png"
+    },
+    {
+      "name": "02-live-feed",
+      "title": "Live command center",
+      "subtitle": "Twitch chat and X filtered-stream posts flow with source labels.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/02-live-feed.png"
+    },
+    {
+      "name": "03-proof-inspector",
+      "title": "Raw provenance",
+      "subtitle": "Selecting a row exposes the normalized source payload and live receipt.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/03-proof-inspector.png"
+    },
+    {
+      "name": "04-search-filter",
+      "title": "Search + source filter",
+      "subtitle": "Keyboard-first filtering highlights the signal without losing context.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/04-search-filter.png"
+    },
+    {
+      "name": "05-author-drilldown",
+      "title": "Author drill-down",
+      "subtitle": "Click any author to isolate their messages, then Esc clears the view.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/05-author-drilldown.png"
+    },
+    {
+      "name": "06-watchlist",
+      "title": "Watchlist alerts",
+      "subtitle": "Terms flag matching rows and raise toasts for fast moderation.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/06-watchlist.png"
+    },
+    {
+      "name": "07-volume-theme",
+      "title": "Volume + heat rail",
+      "subtitle": "The tape, radar, and heat meters surface bursts before the room scrolls past.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/07-volume-theme.png"
+    },
+    {
+      "name": "08-setup-honesty",
+      "title": "Setup honesty",
+      "subtitle": "The drawer shows real source status and sanitized credential checks, never secrets.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/08-setup-honesty.png"
+    },
+    {
+      "name": "09-overlay-config",
+      "title": "OBS overlay builder",
+      "subtitle": "Resize, fade, align, and filter the browser-source overlay live.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/09-overlay-config.png"
+    },
+    {
+      "name": "10-recap-close",
+      "title": "Recap + close",
+      "subtitle": "Bubblewire captures the moment, the proof, and the broadcast.",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/10-recap-close.png"
+    }
+  ]
+}
