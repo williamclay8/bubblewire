@@ -8,7 +8,8 @@ GitHub repository: `https://github.com/williamclay8/bubblewire`
 Public app: `https://bubblewire.xyz`
 Public overlay: `https://bubblewire.xyz/overlay.html`
 Fallback Render URL: `https://bubblewire-challenge.onrender.com`
-Demo video: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+Demo video: `https://youtu.be/hLerxCevS2w`
+Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 ## Why It Should Win
 
@@ -28,7 +29,9 @@ Demo video: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 ## Video Asset
 
-Final-cut hosted demo: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+YouTube final-cut demo: `https://youtu.be/hLerxCevS2w`
+
+Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 Local final-cut source: `docs/evidence/video/bubblewire-final-cut-2026-06-05.mp4`
 
@@ -45,13 +48,13 @@ curl -sS https://bubblewire.xyz/status.json
 
 `/events.stream`, `/demo-spike.json`, `/export.ndjson`, and `/overlay.html` are the public-safe live routes used by the browser UI.
 
-Latest verified Render deploy: `dep-d8gvqge8bjmc73cumgd0` for pushed commit `9f4f8e8`.
+Latest verified app-code Render deploy at YouTube resubmission time: `dep-d8hemdjrjlhs7384o2kg` for pushed commit `fef9b96`.
 
 Live smoke passed on 2026-06-04 for `https://bubblewire.xyz` routes: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html`.
 
 Latest public live proof verified `twitch,x,kick` expected sources: Twitch `connected` with 1046 messages, X `connected` with 42 messages, and Kick `connected` with 2 webhook proof events in `docs/evidence/logs/live-proof.json`.
 
-Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT. Custom-domain resubmission was recorded by Google Forms on 2026-06-04 at 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`. Final-cut resubmission uses hosted demo video `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
+Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 14:42 CDT. Custom-domain resubmission was recorded by Google Forms on 2026-06-04 at 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`. Final-cut hosted-MP4 resubmission was recorded on 2026-06-05. YouTube final-cut resubmission was recorded by Google Forms on 2026-06-06 at 09:46 CDT with demo video `https://youtu.be/hLerxCevS2w`.
 
 ## Live Integration Matrix
 
@@ -69,4 +72,4 @@ Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 
 
 ## Lumi Hygiene
 
-Verified app-code commit `d6814ce` is pushed, `https://bubblewire.xyz` is verified on Render and Cloudflare, and the final-cut demo asset is prepared for live deployment at `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
+Verified app-code commit `fef9b96` is pushed, Render deploy `dep-d8hemdjrjlhs7384o2kg` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, YouTube demo `https://youtu.be/hLerxCevS2w` is unlisted/reachable, and the Google Form YouTube resubmission is recorded.

@@ -1,6 +1,8 @@
 # Bubblewire Demo Video Storyboard
 
-Final-cut demo: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+Final-cut demo: `https://youtu.be/hLerxCevS2w`
+
+Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 Final-cut length: 1:19.97.
 

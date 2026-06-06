@@ -20,7 +20,9 @@ Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewir
 
 Fallback Render URL: `https://bubblewire-challenge.onrender.com`.
 
-Demo video: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
+Demo video: `https://youtu.be/hLerxCevS2w`.
+
+Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
 
 Health check: `http://localhost:3000/healthz`.
 

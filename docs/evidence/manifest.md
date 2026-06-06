@@ -10,25 +10,26 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Public app: `https://bubblewire.xyz`
 - Public overlay: `https://bubblewire.xyz/overlay.html`
 - Fallback Render URL: `https://bubblewire-challenge.onrender.com`
-- Public demo video: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+- Public demo video: `https://youtu.be/hLerxCevS2w`
+- Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 - Public health check: `https://bubblewire.xyz/healthz`
 - Local overlay: `http://127.0.0.1:3000/overlay.html`
 - Health check: `http://127.0.0.1:3000/healthz`
 - Branch: `main`
 - GitHub repo: `https://github.com/williamclay8/bubblewire`
 - Render service: `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`)
-- Latest pre-video commit/deploy: `d6814ce` / `dep-d8he2g8jo6nc73cp4nug` (Render status `live`, 2026-06-05).
+- Latest verified app-code commit/deploy at YouTube resubmission time: `fef9b96` / `dep-d8hemdjrjlhs7384o2kg` (Render status `live`, 2026-06-05).
 - Challenge form: `https://docs.google.com/forms/d/e/1FAIpQLSeX0D9XRdTaDq179eVNUxmN38MOXz4WSN5AaYk0LDy6us5oMg/viewform`
 - Initial submission: 2026-06-04 14:42 CDT; Google Forms confirmation: "Your response has been recorded."
 - Custom-domain resubmission: recorded 2026-06-04 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
-- Final-cut resubmission target: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
-- Date: 2026-06-05
+- YouTube final-cut resubmission: recorded 2026-06-06 09:46 CDT with demo video `https://youtu.be/hLerxCevS2w`, live app `https://bubblewire.xyz`, and pushed commit `fef9b96`.
+- Date: 2026-06-06
 
 ## Verification Commands
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 41/41 tests | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 42/42 tests | `docs/evidence/logs/proof.json` |
 | `npm run check` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof` | Pass | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass | `docs/evidence/logs/live-proof.json` |
@@ -51,7 +52,7 @@ Note: screenshots and video frames were re-captured on 2026-06-05 after adding t
 
 ## Demo Recording Plan
 
-The final-cut demo video is `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`. The local source is `docs/evidence/video/bubblewire-final-cut-2026-06-05.mp4`, rendered at 1920 x 1080, 30fps, H.264/AAC, with 79.97s duration. Source frames live in `docs/evidence/video-frames/final-cut/`, with `contact-sheet.png`, `shot-manifest.json`, and `docs/evidence/video/bubblewire-final-cut-preview.png` for QA review. Public proof content avoids secrets and private dashboards.
+The final-cut demo video is uploaded to YouTube as `https://youtu.be/hLerxCevS2w`, with hosted MP4 mirror `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`. The local source is `docs/evidence/video/bubblewire-final-cut-2026-06-05.mp4`, rendered at 1920 x 1080, 30fps, H.264/AAC, with 79.97s duration. Source frames live in `docs/evidence/video-frames/final-cut/`, with `contact-sheet.png`, `shot-manifest.json`, and `docs/evidence/video/bubblewire-final-cut-preview.png` for QA review. Public proof content avoids secrets and private dashboards.
 
 ## 2026-06-05 Tranche Receipts
 

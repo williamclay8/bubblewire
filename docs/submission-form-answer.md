@@ -22,7 +22,9 @@ Verified Render deploy: see `docs/evidence/manifest.md` and final Lumi closeout 
 
 ## Demo Video
 
-https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4
+https://youtu.be/hLerxCevS2w
+
+Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 ## Overlay
 
@@ -58,13 +60,14 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 
 ## Proof Checklist
 
-- `npm test`: 41/41 passing
+- `npm test`: 42/42 passing
 - `npm run check`: passing
 - `npm run proof`: passing
 - Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
 - Public live proof on `https://bubblewire.xyz`: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
-- Final-cut demo: hosted on the live app at `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
-- Challenge form: ready for final-cut resubmission with the live app and hosted MP4.
+- YouTube demo: uploaded as unlisted at `https://youtu.be/hLerxCevS2w`
+- Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+- Challenge form: YouTube resubmission recorded by Google Forms on 2026-06-06 at 09:46 CDT.
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`
