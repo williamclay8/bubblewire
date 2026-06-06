@@ -13,6 +13,7 @@ import {
   startXConnector,
   terminateAllXConnections
 } from "./connectors/x.js";
+import { createAnalyzer } from "./core/analysis.js";
 import { createHistoryLog } from "./core/history.js";
 import { createFeedHub } from "./core/hub.js";
 import { createInjectedMessage, normalizeKickWebhook } from "./core/messages.js";
@@ -43,9 +44,19 @@ const history = createHistoryLog({
   filePath: process.env.HISTORY_FILE || join(dataDir, "feed.ndjson"),
   enabled: isHistoryEnabled(process.env.HISTORY)
 });
+const analyzer = createAnalyzer();
 hub.subscribe((event) => {
-  if (event.type === "message") history.append(event.message);
+  if (event.type === "message") {
+    history.append(event.message);
+    analyzer.ingest(event.message);
+  }
 });
+
+// Push the rolling intelligence read to all SSE clients a couple times a second.
+const analysisInterval = setInterval(() => {
+  if (sseClients > 0) hub.publish({ type: "analysis", analysis: analyzer.snapshot() });
+}, 2500);
+if (typeof analysisInterval.unref === "function") analysisInterval.unref();
 
 const twitchChannelsFile = join(dataDir, "twitch-channels.json");
 let runtimeTwitchChannels = await loadRuntimeTwitchChannels();
@@ -90,6 +101,10 @@ const server = http.createServer(async (request, response) => {
         limit: url.searchParams.get("limit") || undefined
       });
       return sendJson(response, { ...page, historyEnabled: history.enabled });
+    }
+
+    if (request.method === "GET" && matches(pathname, "/api/analysis", "/analysis.json")) {
+      return sendJson(response, analyzer.snapshot());
     }
 
     if (request.method === "GET" && matches(pathname, "/api/setup", "/setup.json")) {
@@ -339,6 +354,7 @@ async function serveStatic(request, response) {
 function appSnapshot() {
   return {
     ...hub.snapshot(),
+    analysis: analyzer.snapshot(),
     runtime: {
       demoEnabled,
       demoMode: demoEnabled ? "on" : "off",

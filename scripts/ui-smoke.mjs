@@ -157,6 +157,31 @@ try {
   const deepTheme = await deep.evaluate(() => document.documentElement.dataset.theme);
   check("deep link applies src/q/theme", deepSummary.includes("kick") && deepSummary.includes('"picks"') && deepTheme === "ice", deepSummary.trim());
 
+  // v6: intelligence layer — needs a few seconds of demo traffic to accumulate.
+  await page.waitForTimeout(14000);
+  const intel = await page.evaluate(() => ({
+    moodBadgeHidden: document.querySelector("#moodBadge")?.hidden,
+    moodRows: document.querySelectorAll(".mood-row").length,
+    analysisMethod: window.fetch ? null : null
+  }));
+  check("mood readout renders per-source", intel.moodRows === 3 && intel.moodBadgeHidden === false);
+
+  const analysis = await page.evaluate(() => fetch("/analysis.json").then((r) => r.json()));
+  check("analysis endpoint reports heuristic mood", analysis.method === "heuristic-lexicon" && typeof analysis.overall.score === "number", analysis.overall.mood);
+  check("trends include a cross-platform term", (analysis.trends || []).some((t) => t.crossPlatform), `${(analysis.trends || []).length} trends`);
+
+  const moments = await page.locator(".moment").count();
+  const questions = await page.locator(".question").count();
+  check("moments and questions surface", moments >= 1 && questions >= 1, `moments=${moments} questions=${questions}`);
+
+  // Clicking a moment jumps into the feed and selects it.
+  if (moments >= 1) {
+    await page.locator(".moment").first().click();
+    await page.waitForTimeout(600);
+    const selected = await page.locator(".message.selected").count();
+    check("moment click jumps to a message", selected >= 1, `selected=${selected}`);
+  }
+
   check("zero console errors", errors.length === 0, errors.slice(0, 3).join(" | "));
 } finally {
   await browser.close();

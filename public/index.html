@@ -197,8 +197,14 @@
               <h1>Unified Feed</h1>
               <p id="feedSummary">awaiting messages</p>
             </div>
-            <div class="live-meter" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
+            <div class="feed-head-right">
+              <div class="mood-badge" id="moodBadge" data-tone="neutral" title="Live chat mood (heuristic)" hidden>
+                <span class="mood-badge-dot"></span>
+                <span class="mood-badge-label" id="moodBadgeLabel">quiet</span>
+              </div>
+              <div class="live-meter" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
             </div>
           </div>
           <div class="proof-receipt" id="proofReceipt" aria-label="Live proof receipt">
@@ -220,6 +226,26 @@
         </section>
 
         <aside class="inspector" aria-label="Signal inspector">
+          <section class="panel-section intel-section">
+            <h2>// chat mood <span class="intel-tag" title="Transparent rule-based scoring over message text — not a trained model">heuristic</span></h2>
+            <div id="moodReadout" class="mood-readout" aria-live="polite"></div>
+          </section>
+
+          <section class="panel-section intel-section">
+            <h2>// moments <span class="count-chip" id="momentCount">0</span></h2>
+            <div id="momentsList" class="moments-list"></div>
+          </section>
+
+          <section class="panel-section intel-section">
+            <h2>// trending now</h2>
+            <div id="trendChips" class="trend-chips"></div>
+          </section>
+
+          <section class="panel-section intel-section">
+            <h2>// surfaced questions</h2>
+            <div id="questionsList" class="questions-list"></div>
+          </section>
+
           <section class="panel-section">
             <h2>// source stack</h2>
             <div id="sourceCards" class="source-cards"></div>

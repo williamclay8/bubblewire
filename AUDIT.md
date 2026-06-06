@@ -85,6 +85,19 @@ From polish to product — every roadmap item implemented:
 - **X rule visibility**: the X connector exposes sanitized filtered-stream rule snapshots from the X rules API or `X_STREAM_RULES`; `/setup.json` and the drawer render tag/value rows without exposing bearer tokens.
 - **Receipts refreshed**: 28/28 unit tests, `npm run check`, `npm run proof`, and `npm run proof:live` passed; screenshots, video frames, and `docs/evidence/video/bubblewire-demo.webm` were regenerated.
 
+## Intelligence layer v6 — monitor → co-pilot
+
+The biggest single capability jump: from *displaying* multi-source chat to *understanding* it. New `src/core/analysis.js` is a pure, zero-dependency, heuristic engine over the already-normalized message stream:
+
+- **Sentiment + mood**: weighted livestream-tuned lexicon (POSITIVE/NEGATIVE), negation flipping, per-message score squashed to [-1,1], EWMA + window-average blend per source, banded into mood labels. Overall + per-source.
+- **Moments**: charged message (|score| ≥ 0.5) during an activity spike (≥6 msgs/10s) or high heat → captured with trigger id, throttled to one per 8s. Click-to-jump in the UI scrolls and flashes the source message.
+- **Trends**: windowed term frequency with stopword filtering and a cross-platform multiplier (sources.size bonus) so multi-platform terms rank above single-channel spam. Adaptive mention floor (2 low-traffic / 3 busy).
+- **Questions**: interrogative detection (punctuation or question-starter first token), deduped by normalized prefix, freshest-first.
+
+Wiring: analyzer subscribes to the hub's message events; `/analysis.json` endpoint; `appSnapshot` carries `analysis`; a 2.5s interval broadcasts the SSE `analysis` event (unref'd, only when clients connected). UI adds four inspector panels + a feed-header mood badge, all theme-aware and honestly labeled "heuristic". Demo connector enriched with sentiment-varied, question-bearing, cross-platform-term lines so the layer has real signal to surface without live credentials.
+
+Tests: 9 new analysis unit tests (tokenize, sentiment polarity, negation, mood bands, per-source mood, moment detection, question dedupe, cross-platform trend ranking, demo-source exclusion). Smoke suite extended to 23 checks (mood render, analysis endpoint, cross-platform trend, moments+questions, moment click-to-jump). Total: 51 unit / 23 smoke, zero console errors.
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.

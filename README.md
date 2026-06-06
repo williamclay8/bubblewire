@@ -57,6 +57,17 @@ Useful local controls:
 - Selecting a message shows its raw normalized payload.
 - Keyboard: `/` focuses search, `p` toggles pause, `s` opens setup, `1–4` switch source filters, `Esc` clears/closes.
 
+## Intelligence Layer
+
+Bubblewire doesn't just display chat — it reads it. A zero-dependency, server-side engine (`src/core/analysis.js`) scores every normalized message and surfaces, over a rolling 90-second window:
+
+- **Chat mood** — per-source and overall sentiment (hyped / positive / neutral / restless / negative), via a transparent rule-based lexicon with negation handling and EWMA smoothing. A mood badge sits in the feed header and a tone flip raises a toast ("chat mood turning negative").
+- **Moments** — charged messages during activity spikes are auto-captured with their trigger message; click one to jump straight to it in the feed (the clippable highlight).
+- **Trending now** — frequency-ranked terms with a cross-platform bonus, so a term appearing on Twitch *and* X *and* Kick outranks single-channel spam. Click a term to filter.
+- **Surfaced questions** — recent interrogatives the streamer may not have answered, deduped, click-to-jump.
+
+It is labeled **heuristic** in the UI on purpose: it is transparent scoring, not a trained model, and it never claims otherwise. Served at `/analysis.json`, pushed live over the SSE `analysis` event, and covered by 9 unit tests.
+
 ## Visitor Experience
 
 - **Live proof receipt**: the feed header shows per-source proof levels (`waiting`, `live`, `webhook-proof`, or `signed`), latest raw event type, and counts from `/status.json`.

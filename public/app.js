@@ -30,6 +30,8 @@ const state = {
   status: {},
   stats: { totalMessages: 0, duplicatesDropped: 0, sources: {} },
   proof: { sources: {} },
+  analysis: null,
+  lastMoodTone: null,
   sources: {},
   runtime: { demoEnabled: true, demoMode: "on", demoRunning: false, liveOnly: false },
   judgeMode: false,
@@ -81,6 +83,13 @@ const els = {
   overlayFeed: document.querySelector("#overlayFeed"),
   feedSummary: document.querySelector("#feedSummary"),
   proofReceipt: document.querySelector("#proofReceipt"),
+  moodReadout: document.querySelector("#moodReadout"),
+  moodBadge: document.querySelector("#moodBadge"),
+  moodBadgeLabel: document.querySelector("#moodBadgeLabel"),
+  momentsList: document.querySelector("#momentsList"),
+  momentCount: document.querySelector("#momentCount"),
+  trendChips: document.querySelector("#trendChips"),
+  questionsList: document.querySelector("#questionsList"),
   searchInput: document.querySelector("#searchInput"),
   priorityOnly: document.querySelector("#priorityOnly"),
   pauseButton: document.querySelector("#pauseButton"),
@@ -251,6 +260,27 @@ function bindControls() {
   els.pinnedList?.addEventListener("click", (event) => {
     const unpin = event.target.closest("[data-unpin-id]");
     if (unpin) togglePin(unpin.dataset.unpinId);
+  });
+
+  els.momentsList?.addEventListener("click", (event) => {
+    const moment = event.target.closest("[data-moment-id]");
+    if (moment) jumpToMessage(moment.dataset.momentId);
+  });
+
+  els.questionsList?.addEventListener("click", (event) => {
+    const question = event.target.closest("[data-question-id]");
+    if (question) jumpToMessage(question.dataset.questionId);
+  });
+
+  els.trendChips?.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-trend]");
+    if (chip) {
+      els.searchInput.value = chip.dataset.trend;
+      state.query = chip.dataset.trend.toLowerCase();
+      renderFeed();
+      renderStats();
+      toast(`filtering "${chip.dataset.trend}"`);
+    }
   });
 
   els.feedList?.addEventListener("scroll", () => {
@@ -471,6 +501,13 @@ function connectEvents() {
     state.watching = payload.watching || 0;
     renderWatching();
   });
+  events.addEventListener("analysis", (event) => {
+    const payload = JSON.parse(event.data);
+    if (payload.analysis) {
+      state.analysis = payload.analysis;
+      renderAnalysis();
+    }
+  });
 }
 
 function renderWatching() {
@@ -478,6 +515,143 @@ function renderWatching() {
   const show = state.watching >= 1;
   els.watchingChip.hidden = !show;
   if (show && els.watchingCount) els.watchingCount.textContent = String(state.watching);
+}
+
+/* ---------- intelligence layer ---------- */
+
+const MOOD_GLYPH = { hyped: "▲▲", positive: "▲", neutral: "▬", restless: "▽", negative: "▼▼", quiet: "··" };
+
+function renderAnalysis() {
+  if (isOverlay) return;
+  renderMood();
+  renderMoments();
+  renderTrends();
+  renderQuestions();
+}
+
+function renderMood() {
+  const analysis = state.analysis;
+  if (els.moodBadge) {
+    if (!analysis || !analysis.overall?.samples) {
+      els.moodBadge.hidden = true;
+    } else {
+      const overall = analysis.overall;
+      els.moodBadge.hidden = false;
+      els.moodBadge.dataset.tone = overall.tone;
+      if (els.moodBadgeLabel) els.moodBadgeLabel.textContent = overall.mood;
+      // Announce a tone flip once, as a toast — the headline demo beat.
+      if (state.lastMoodTone && state.lastMoodTone !== overall.tone && overall.samples >= 5) {
+        const verb = overall.tone === "pos" ? "lifting" : overall.tone === "neg" ? "turning negative" : "leveling out";
+        toast(`chat mood ${verb} — ${overall.mood}`, overall.tone === "neg" ? "warn" : "ok");
+      }
+      state.lastMoodTone = overall.tone;
+    }
+  }
+
+  if (!els.moodReadout) return;
+  if (!analysis) {
+    els.moodReadout.innerHTML = `<p class="intel-empty">listening…</p>`;
+    return;
+  }
+
+  const overall = analysis.overall || { mood: "quiet", tone: "neutral", score: 0, samples: 0 };
+  const rows = SOURCE_ORDER.map((source) => {
+    const data = analysis.sources?.[source] || { mood: "quiet", tone: "neutral", score: 0, samples: 0 };
+    const pct = Math.round(((data.score + 1) / 2) * 100);
+    return `
+      <div class="mood-row" data-tone="${escapeAttr(data.tone)}" style="--src:${escapeAttr(sourceColor(source))}">
+        <span class="mood-src">${escapeHtml(source)}</span>
+        <span class="mood-track"><span class="mood-fill" style="left:${pct}%"></span></span>
+        <span class="mood-label">${escapeHtml(data.mood)}</span>
+      </div>
+    `;
+  }).join("");
+
+  els.moodReadout.innerHTML = `
+    <div class="mood-overall" data-tone="${escapeAttr(overall.tone)}">
+      <span class="mood-overall-glyph">${MOOD_GLYPH[overall.mood] || "▬"}</span>
+      <span class="mood-overall-label">${escapeHtml(overall.mood)}</span>
+      <span class="mood-overall-meta">${overall.samples} msgs · ${analysis.windowSeconds}s</span>
+    </div>
+    ${rows}
+  `;
+}
+
+function renderMoments() {
+  if (!els.momentsList) return;
+  const moments = state.analysis?.moments || [];
+  if (els.momentCount) els.momentCount.textContent = String(moments.length);
+  if (moments.length === 0) {
+    els.momentsList.innerHTML = `<p class="intel-empty">no standout moments yet — spikes and charged messages land here</p>`;
+    return;
+  }
+  els.momentsList.innerHTML = moments
+    .map((moment) => `
+      <button type="button" class="moment" data-moment-id="${escapeAttr(moment.id)}" data-tone="${escapeAttr(moment.tone)}" style="--src:${escapeAttr(sourceColor(moment.source))}" title="Jump to this message">
+        <span class="moment-head">
+          <span class="src-tag">${escapeHtml(moment.sourceLabel || moment.source)}</span>
+          <span class="moment-reason">${escapeHtml(moment.reason)}</span>
+          <span class="moment-time">${escapeHtml(formatTime(moment.at))}</span>
+        </span>
+        <span class="moment-text">${escapeHtml(moment.content)}</span>
+      </button>
+    `)
+    .join("");
+}
+
+function renderTrends() {
+  if (!els.trendChips) return;
+  const trends = state.analysis?.trends || [];
+  if (trends.length === 0) {
+    els.trendChips.innerHTML = `<p class="intel-empty">no trending terms yet</p>`;
+    return;
+  }
+  els.trendChips.innerHTML = trends
+    .map((trend) => `
+      <button type="button" class="trend-chip${trend.crossPlatform ? " cross" : ""}" data-trend="${escapeAttr(trend.term)}" title="${trend.crossPlatform ? "Across " + trend.sources.join(", ") : trend.sources.join(", ")} · ${trend.count} mentions">
+        ${trend.crossPlatform ? "✦ " : ""}${escapeHtml(trend.term)}<b>${trend.count}</b>
+      </button>
+    `)
+    .join("");
+}
+
+function renderQuestions() {
+  if (!els.questionsList) return;
+  const questions = state.analysis?.questions || [];
+  if (questions.length === 0) {
+    els.questionsList.innerHTML = `<p class="intel-empty">no open questions detected</p>`;
+    return;
+  }
+  els.questionsList.innerHTML = questions
+    .map((question) => `
+      <button type="button" class="question" data-question-id="${escapeAttr(question.id)}" style="--src:${escapeAttr(sourceColor(question.source))}" title="Jump to this message">
+        <span class="question-meta">${escapeHtml(question.author)} · ${escapeHtml(question.sourceLabel || question.source)}</span>
+        <span class="question-text">${escapeHtml(question.content)}</span>
+      </button>
+    `)
+    .join("");
+}
+
+function jumpToMessage(id) {
+  const inFeed = state.messages.some((message) => message.id === id);
+  if (inFeed) {
+    if (state.query || state.filter !== "all") {
+      // Clear filters so the target is guaranteed visible, then select.
+      state.query = "";
+      if (els.searchInput) els.searchInput.value = "";
+      setFilter("all");
+    }
+    const row = els.feedList?.querySelector(`[data-message-id="${cssEscape(id)}"]`);
+    if (row) {
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      selectMessage(id);
+      row.classList.remove("moment-flash");
+      void row.offsetWidth;
+      row.classList.add("moment-flash");
+      return;
+    }
+  }
+  toast("message aged out of the live buffer", "warn");
 }
 
 function setLinkState(value) {
@@ -496,6 +670,7 @@ function applySnapshot(snapshot) {
   state.status = snapshot.status || {};
   state.stats = snapshot.stats || state.stats;
   state.proof = snapshot.proof || state.proof;
+  if (snapshot.analysis) state.analysis = snapshot.analysis;
   state.sources = snapshot.sources || {};
   state.runtime = snapshot.runtime || state.runtime;
   if (typeof state.runtime.watching === "number") {
@@ -574,6 +749,7 @@ function renderAll() {
   if (!isOverlay) {
     renderSourceCards();
     renderPinned();
+    renderAnalysis();
     drawRadar();
   }
 }
