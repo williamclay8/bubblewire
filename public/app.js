@@ -1,3 +1,4 @@
+const isJudgeRoute = location.pathname === "/judge";
 const isOverlay = location.pathname === "/overlay" || location.pathname === "/overlay.html";
 
 const MAX_RENDERED = 80;
@@ -12,6 +13,7 @@ const THEME_KEY = "bubblewire:theme:v1";
 const DENSITY_KEY = "bubblewire:density:v1";
 const PREFS_KEY = "bubblewire:prefs:v1";
 const ACTIVATION_STORAGE_KEY = "bubblewire:activation:v1";
+const WORKSPACE_STORAGE_KEY = "bubblewire:workspace:v1";
 const HERO_KEY = "bubblewire:hero-dismissed:v1";
 const BOOT_KEY = "bubblewire:booted";
 const COMMAND_KEY = "bubblewire:command:v1";
@@ -20,6 +22,11 @@ const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
 const SOURCE_ORDER = ["twitch", "x", "kick"];
+const OVERLAY_PRESETS = {
+  broadcast: { max: OVERLAY_RENDERED, fade: 0, scale: 1, align: "top", sources: SOURCE_ORDER },
+  ticker: { max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
+  questions: { max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
+};
 const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", demo: "#d8a84a" };
 
 const overlayConfig = parseOverlayConfig();
@@ -34,7 +41,7 @@ const state = {
   lastMoodTone: null,
   sources: {},
   runtime: { demoEnabled: true, demoMode: "on", demoRunning: false, liveOnly: false },
-  judgeMode: false,
+  judgeMode: isJudgeRoute,
   filter: "all",
   query: "",
   priorityOnly: false,
@@ -52,6 +59,7 @@ const state = {
   olderExhausted: false,
   loadingOlder: false,
   setup: null,
+  workspace: loadWorkspace(),
   watchNotify: loadFlag(WATCH_NOTIFY_KEY),
   activation: loadActivation(),
   theme: "gold",
@@ -83,6 +91,9 @@ const els = {
   overlayFeed: document.querySelector("#overlayFeed"),
   feedSummary: document.querySelector("#feedSummary"),
   proofReceipt: document.querySelector("#proofReceipt"),
+  momentRail: document.querySelector("#momentRail"),
+  momentRailList: document.querySelector("#momentRailList"),
+  momentShareLatest: document.querySelector("#momentShareLatest"),
   moodReadout: document.querySelector("#moodReadout"),
   moodBadge: document.querySelector("#moodBadge"),
   moodBadgeLabel: document.querySelector("#moodBadgeLabel"),
@@ -121,6 +132,18 @@ const els = {
   setupBackdrop: document.querySelector("#setupBackdrop"),
   setupBody: document.querySelector("#setupBody"),
   setupClose: document.querySelector("#setupClose"),
+  proofConsole: document.querySelector("#proofConsole"),
+  proofConsoleBody: document.querySelector("#proofConsoleBody"),
+  proofRefreshButton: document.querySelector("#proofRefreshButton"),
+  workspacePanel: document.querySelector("#workspacePanel"),
+  workspaceName: document.querySelector("#workspaceName"),
+  workspaceSaveButton: document.querySelector("#workspaceSaveButton"),
+  workspaceLoadButton: document.querySelector("#workspaceLoadButton"),
+  workspaceCopyOverlayButton: document.querySelector("#workspaceCopyOverlayButton"),
+  workspaceSummary: document.querySelector("#workspaceSummary"),
+  judgeBrief: document.querySelector("#judgeBrief"),
+  judgeBriefMetrics: document.querySelector("#judgeBriefMetrics"),
+  judgeDemoButton: document.querySelector("#judgeDemoButton"),
   signalStream: document.querySelector("#signalStream"),
   productCommand: document.querySelector("#productCommand"),
   commandToggle: document.querySelector("#commandToggle"),
@@ -168,6 +191,7 @@ renderProductSurface();
 applyUrlState();
 connectEvents();
 loadSnapshot();
+loadSetupSnapshot().catch(() => {});
 startTicker();
 registerServiceWorker();
 if (!isOverlay) {
@@ -267,6 +291,32 @@ function bindControls() {
     if (moment) jumpToMessage(moment.dataset.momentId);
   });
 
+  els.momentRailList?.addEventListener("click", (event) => {
+    const share = event.target.closest("[data-moment-share]");
+    if (share) {
+      event.stopPropagation();
+      shareMoment(share.dataset.momentShare);
+      return;
+    }
+    const replay = event.target.closest("[data-moment-replay]");
+    if (replay) {
+      event.stopPropagation();
+      jumpToMessage(replay.dataset.momentReplay);
+      return;
+    }
+    const moment = event.target.closest("[data-moment-id]");
+    if (moment) jumpToMessage(moment.dataset.momentId);
+  });
+
+  els.momentShareLatest?.addEventListener("click", () => {
+    const latest = state.analysis?.moments?.[0];
+    if (!latest) {
+      toast("no moment to share yet", "warn");
+      return;
+    }
+    shareMoment(latest.id);
+  });
+
   els.questionsList?.addEventListener("click", (event) => {
     const question = event.target.closest("[data-question-id]");
     if (question) jumpToMessage(question.dataset.questionId);
@@ -318,6 +368,7 @@ function bindControls() {
     }
   });
   els.recapButton?.addEventListener("click", downloadRecap);
+  els.judgeDemoButton?.addEventListener("click", runProductDemo);
   els.productDemoButton?.addEventListener("click", runProductDemo);
   els.connectSourcesButton?.addEventListener("click", () => {
     trackActivation("setup");
@@ -395,6 +446,10 @@ function bindControls() {
   els.setupClose?.addEventListener("click", closeSetup);
   els.setupBackdrop?.addEventListener("click", closeSetup);
   els.setupBody?.addEventListener("click", onSetupClick);
+  els.proofRefreshButton?.addEventListener("click", () => loadSetupSnapshot({ announce: true }));
+  els.workspaceSaveButton?.addEventListener("click", saveWorkspaceSnapshot);
+  els.workspaceLoadButton?.addEventListener("click", applyWorkspaceSnapshot);
+  els.workspaceCopyOverlayButton?.addEventListener("click", copyWorkspaceOverlayUrl);
   els.setupBody?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target.id === "channelInput") {
       event.preventDefault();
@@ -524,6 +579,7 @@ const MOOD_GLYPH = { hyped: "▲▲", positive: "▲", neutral: "▬", restless:
 function renderAnalysis() {
   if (isOverlay) return;
   renderMood();
+  renderMomentRail();
   renderMoments();
   renderTrends();
   renderQuestions();
@@ -599,6 +655,44 @@ function renderMoments() {
     .join("");
 }
 
+function renderMomentRail() {
+  if (!els.momentRailList) return;
+  const moments = state.analysis?.moments || [];
+  if (moments.length === 0) {
+    const trends = state.analysis?.trends || [];
+    const questions = state.analysis?.questions || [];
+    const fallback = [
+      trends[0] ? `watching "${trends[0].term}" across ${trends[0].sources.length} source${trends[0].sources.length === 1 ? "" : "s"}` : "",
+      questions[0] ? `latest question: ${questions[0].content}` : ""
+    ].filter(Boolean)[0];
+    els.momentRailList.innerHTML = `<p class="intel-empty">${escapeHtml(fallback || "waiting for a spike, charged message, or cross-platform trend")}</p>`;
+    return;
+  }
+
+  els.momentRailList.innerHTML = moments
+    .slice(0, 5)
+    .map((moment, index) => `
+      <article class="moment-card" data-moment-id="${escapeAttr(moment.id)}" data-tone="${escapeAttr(moment.tone)}" style="--src:${escapeAttr(sourceColor(moment.source))}">
+        <button type="button" class="moment-card-main" data-moment-replay="${escapeAttr(moment.id)}" title="Replay this moment in the feed">
+          <span class="moment-rank">${String(index + 1).padStart(2, "0")}</span>
+          <span class="moment-card-copy">
+            <span class="moment-head">
+              <span class="src-tag">${escapeHtml(moment.sourceLabel || moment.source)}</span>
+              <span class="moment-reason">${escapeHtml(moment.reason)}</span>
+              <span class="moment-time">${escapeHtml(formatTime(moment.at))}</span>
+            </span>
+            <span class="moment-text">${escapeHtml(moment.content)}</span>
+          </span>
+        </button>
+        <span class="moment-action-row">
+          <button type="button" data-moment-replay="${escapeAttr(moment.id)}">Replay</button>
+          <button type="button" data-moment-share="${escapeAttr(moment.id)}">Share</button>
+        </span>
+      </article>
+    `)
+    .join("");
+}
+
 function renderTrends() {
   if (!els.trendChips) return;
   const trends = state.analysis?.trends || [];
@@ -652,6 +746,32 @@ function jumpToMessage(id) {
     }
   }
   toast("message aged out of the live buffer", "warn");
+}
+
+async function shareMoment(id) {
+  const moment = findMoment(id);
+  if (!moment) {
+    toast("moment unavailable", "warn");
+    return;
+  }
+  const text = [
+    `Bubblewire moment: ${moment.reason}`,
+    `${moment.sourceLabel || moment.source} / ${moment.author || "unknown"} / heat ${moment.heat || 0}`,
+    `"${moment.content}"`,
+    buildViewUrl()
+  ].join("\n");
+
+  try {
+    await navigator.clipboard.writeText(text);
+    trackActivation("moment_share");
+    toast("moment card copied");
+  } catch {
+    toast("clipboard unavailable", "err");
+  }
+}
+
+function findMoment(id) {
+  return (state.analysis?.moments || []).find((moment) => moment.id === id);
 }
 
 function setLinkState(value) {
@@ -833,10 +953,200 @@ function renderProofReceipt() {
   els.proofReceipt.innerHTML = `<strong>LIVE PROOF</strong>${receipt}`;
 }
 
+function renderProofConsole() {
+  if (!els.proofConsoleBody || isOverlay) return;
+  const setup = state.setup?.sources || {};
+  const rows = SOURCE_ORDER.map((source) => {
+    const meta = state.sources[source] || {};
+    const proof = state.proof?.sources?.[source] || {};
+    const sourceStats = state.stats.sources?.[source] || {};
+    const status = state.status[source] || {};
+    const setupSource = setup[source] || {};
+    const label = meta.label || source;
+    const count = proof.count ?? sourceStats.count ?? 0;
+    const evidence = proof.evidenceLevel || (count ? "live" : status.state || "waiting");
+    const last = proof.lastMessageAt || sourceStats.lastMessageAt;
+    const detail = status.detail || setupSource.note || "waiting for source evidence";
+    const xDiag = source === "x" ? diagnosticsRows(setupSource.diagnostics || status.diagnostics) : "";
+    const xRules = source === "x" && setupSource.rules
+      ? `<span class="proof-meta">rules ${escapeHtml(setupSource.rules.status || "unknown")} · ${escapeHtml(String(setupSource.rules.count || 0))}</span>`
+      : "";
+    const kickWebhook = source === "kick" && setupSource.webhookUrl
+      ? `<code class="proof-url">${escapeHtml(maskPublicUrl(setupSource.webhookUrl))}</code>`
+      : "";
+    return `
+      <article class="proof-console-row" data-source="${escapeAttr(source)}" data-proof="${escapeAttr(evidence)}" style="--src:${escapeAttr(sourceColor(source))}">
+        <header>
+          <span class="src-tag">${escapeHtml(label)}</span>
+          <strong>${escapeHtml(evidence)}</strong>
+          <span>${escapeHtml(String(count))} seen</span>
+        </header>
+        <p>${escapeHtml(detail)}</p>
+        <div class="proof-meta-row">
+          <span class="proof-meta">${last ? `last ${escapeHtml(formatTime(last))}` : "no live message yet"}</span>
+          <span class="proof-meta">${escapeHtml(status.state || "idle")}</span>
+          ${xRules}
+        </div>
+        ${kickWebhook}
+        ${xDiag}
+      </article>
+    `;
+  }).join("");
+
+  els.proofConsoleBody.innerHTML = rows;
+}
+
+function diagnosticsRows(diagnostics) {
+  if (!diagnostics) return "";
+  const status = diagnostics.httpStatus
+    ? `HTTP ${diagnostics.httpStatus}${diagnostics.statusText ? ` ${diagnostics.statusText}` : ""}`
+    : diagnostics.errorName || "runtime error";
+  const fields = [
+    ["status", status],
+    ["problem", diagnostics.problemTitle || diagnostics.problemDetail || diagnostics.summary || ""],
+    ["body", diagnostics.bodySnippet || ""]
+  ].filter(([, value]) => value);
+  if (!fields.length) return "";
+  return `
+    <div class="proof-diagnostics" aria-label="Redacted X diagnostics">
+      ${fields.map(([label, value]) => `
+        <span><b>${escapeHtml(label)}</b><code>${escapeHtml(value)}</code></span>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderProductSurface() {
   if (isOverlay) return;
   renderProofMetrics();
   renderLaunchChecklist();
+  renderProofConsole();
+  renderWorkspaceSummary();
+  renderJudgeBrief();
+}
+
+function renderWorkspaceSummary() {
+  if (!els.workspaceSummary || isOverlay) return;
+  const saved = state.workspace;
+  const activeSources = SOURCE_ORDER.filter((source) => sourceHasProof(source) || sourceIsConfigured(source)).length;
+  const topAuthor = [...state.session.authors.entries()].sort((a, b) => b[1] - a[1])[0];
+  const savedName = saved?.name || "No saved setup";
+  const savedAt = saved?.savedAt ? `saved ${formatTime(saved.savedAt)}` : "save this stream setup";
+  if (els.workspaceName && saved?.name && !els.workspaceName.value) els.workspaceName.value = saved.name;
+
+  els.workspaceSummary.innerHTML = `
+    <div class="workspace-stat">
+      <span>Saved</span>
+      <b>${escapeHtml(savedName)}</b>
+      <small>${escapeHtml(savedAt)}</small>
+    </div>
+    <div class="workspace-stat">
+      <span>Sources</span>
+      <b>${activeSources}/3 active</b>
+      <small>${escapeHtml(state.runtime.liveOnly ? "live-only" : "demo/live")}</small>
+    </div>
+    <div class="workspace-stat">
+      <span>Watch terms</span>
+      <b>${state.watchlist.length}</b>
+      <small>${escapeHtml(state.watchlist.slice(0, 3).join(", ") || "none")}</small>
+    </div>
+    <div class="workspace-stat">
+      <span>Top author</span>
+      <b>${escapeHtml(topAuthor?.[0] || "listening")}</b>
+      <small>${topAuthor ? `${topAuthor[1]} messages` : "session not warm yet"}</small>
+    </div>
+  `;
+}
+
+function saveWorkspaceSnapshot() {
+  const name = (els.workspaceName?.value || "").trim() || "Stream desk";
+  state.workspace = {
+    name,
+    savedAt: new Date().toISOString(),
+    filter: state.filter,
+    priorityOnly: state.priorityOnly,
+    watchlist: state.watchlist.slice(),
+    watchSound: state.watchSound,
+    watchNotify: state.watchNotify,
+    theme: state.theme,
+    density: state.density
+  };
+  try {
+    localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(state.workspace));
+  } catch {
+    /* in-memory only */
+  }
+  trackActivation("workspace");
+  renderWorkspaceSummary();
+  toast("workspace saved");
+}
+
+function applyWorkspaceSnapshot() {
+  const saved = state.workspace || loadWorkspace();
+  if (!saved) {
+    toast("no saved workspace yet", "warn");
+    return;
+  }
+  if (saved.filter && ["all", ...SOURCE_ORDER].includes(saved.filter)) state.filter = saved.filter;
+  if (typeof saved.priorityOnly === "boolean") state.priorityOnly = saved.priorityOnly;
+  if (Array.isArray(saved.watchlist)) state.watchlist = saved.watchlist.slice(0, 12);
+  if (typeof saved.watchSound === "boolean") state.watchSound = saved.watchSound;
+  if (typeof saved.watchNotify === "boolean") state.watchNotify = saved.watchNotify;
+  if (saved.theme) setTheme(saved.theme, { silent: true });
+  setDensity(saved.density || "comfortable");
+  savePrefs();
+  saveWatchlist();
+  saveWatchSound();
+  syncControlsToState();
+  renderWatchlist();
+  renderFeed();
+  renderStats();
+  renderWorkspaceSummary();
+  toast(`workspace loaded: ${saved.name || "stream desk"}`);
+}
+
+async function copyWorkspaceOverlayUrl() {
+  try {
+    await navigator.clipboard.writeText(`${location.origin}/overlay.html?preset=broadcast&max=8&scale=1.1`);
+    trackActivation("overlay");
+    toast("OBS URL copied");
+  } catch {
+    toast("clipboard unavailable", "err");
+  }
+}
+
+function loadWorkspace() {
+  try {
+    const value = JSON.parse(localStorage.getItem(WORKSPACE_STORAGE_KEY) || "null");
+    return value && typeof value === "object" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderJudgeBrief() {
+  if (!els.judgeBrief || !els.judgeBriefMetrics) return;
+  els.judgeBrief.hidden = !state.judgeMode;
+  if (!state.judgeMode) return;
+  const proofReady = SOURCE_ORDER.filter((source) => sourceHasProof(source)).length;
+  const moments = state.analysis?.moments?.length || 0;
+  const questions = state.analysis?.questions?.length || 0;
+  const trends = state.analysis?.trends?.filter((trend) => trend.crossPlatform).length || 0;
+  const metrics = [
+    ["Sources proven", `${proofReady}/3`],
+    ["Messages", String(state.stats.totalMessages || 0)],
+    ["Moments", String(moments)],
+    ["Cross trends", String(trends)],
+    ["Questions", String(questions)]
+  ];
+  els.judgeBriefMetrics.innerHTML = metrics
+    .map(([label, value]) => `
+      <article>
+        <span>${escapeHtml(label)}</span>
+        <b>${escapeHtml(value)}</b>
+      </article>
+    `)
+    .join("");
 }
 
 function renderProofMetrics() {
@@ -1490,11 +1800,23 @@ function closeSetup() {
   if (els.setupBackdrop) els.setupBackdrop.hidden = true;
 }
 
-async function refreshSetup() {
+async function loadSetupSnapshot({ renderDrawer = false, announce = false } = {}) {
   try {
     const response = await fetch("/setup.json");
     state.setup = await response.json();
-    renderSetup();
+    if (renderDrawer || isSetupOpen()) renderSetup();
+    renderProofConsole();
+    renderWorkspaceSummary();
+    if (announce) toast("source proof refreshed");
+  } catch {
+    if (announce) toast("setup refresh failed", "err");
+    throw new Error("setup unavailable");
+  }
+}
+
+async function refreshSetup() {
+  try {
+    await loadSetupSnapshot({ renderDrawer: true });
   } catch {
     if (els.setupBody) els.setupBody.innerHTML = `<p class="setup-loading">setup unavailable</p>`;
   }
@@ -1726,16 +2048,17 @@ async function submitChannel(action, rawChannel) {
 
 function parseOverlayConfig() {
   const params = new URLSearchParams(location.search);
+  const preset = OVERLAY_PRESETS[params.get("preset")] || OVERLAY_PRESETS.broadcast;
   const sources = (params.get("sources") || "")
     .split(",")
     .map((source) => source.trim().toLowerCase())
     .filter((source) => SOURCE_ORDER.includes(source));
   return {
-    max: clampNumber(params.get("max"), 1, 12, OVERLAY_RENDERED),
-    fade: clampNumber(params.get("fade"), 0, 600, 0),
-    scale: clampNumber(params.get("scale"), 0.6, 2, 1),
-    align: params.get("align") === "bottom" ? "bottom" : "top",
-    sources: sources.length > 0 ? sources : null
+    max: clampNumber(params.has("max") ? params.get("max") : preset.max, 1, 12, OVERLAY_RENDERED),
+    fade: clampNumber(params.has("fade") ? params.get("fade") : preset.fade, 0, 600, 0),
+    scale: clampNumber(params.has("scale") ? params.get("scale") : preset.scale, 0.6, 2, 1),
+    align: params.has("align") ? (params.get("align") === "bottom" ? "bottom" : "top") : preset.align,
+    sources: sources.length > 0 ? sources : preset.sources
   };
 }
 
@@ -1870,6 +2193,7 @@ function applyUrlState() {
   if (isOverlay) return;
   const params = new URLSearchParams(location.search);
   state.judgeMode = params.get("judge") === "1";
+  if (isJudgeRoute) state.judgeMode = true;
   document.body.dataset.judge = state.judgeMode ? "1" : "0";
   const src = params.get("src");
   if (src && ["all", ...SOURCE_ORDER].includes(src)) state.filter = src;
@@ -1891,7 +2215,8 @@ function buildViewUrl() {
   if (state.priorityOnly) params.set("priority", "1");
   if (state.theme !== "gold") params.set("theme", state.theme);
   const query = params.toString();
-  return `${location.origin}/${query ? `?${query}` : ""}`;
+  const path = state.judgeMode ? "/judge" : "/";
+  return `${location.origin}${path}${query ? `?${query}` : ""}`;
 }
 
 /* ---------- boot sequence ---------- */
@@ -2625,6 +2950,17 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function maskPublicUrl(value) {
+  try {
+    const url = new URL(value);
+    const path = url.pathname.replace(/([^/]{4})[^/]*$/, "$1…");
+    return `${url.origin}${path}`;
+  } catch {
+    const text = String(value || "");
+    return text.length > 24 ? `${text.slice(0, 24)}…` : text;
+  }
 }
 
 function escapeAttr(value) {

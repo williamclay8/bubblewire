@@ -330,7 +330,7 @@ function handleEvents(response) {
 
 async function serveStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
-  const requestedPath = matches(url.pathname, "/", "/overlay", "/overlay.html") ? "/index.html" : url.pathname;
+  const requestedPath = matches(url.pathname, "/", "/judge", "/overlay", "/overlay.html") ? "/index.html" : url.pathname;
   const filePath = normalize(join(publicDir, requestedPath));
 
   if (!filePath.startsWith(publicDir)) {

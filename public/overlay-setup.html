@@ -28,6 +28,25 @@
       <main class="config-layout">
         <aside class="rail config-rail" aria-label="Overlay options">
           <section class="rail-section">
+            <h2>// presets</h2>
+            <div class="preset-grid" role="group" aria-label="Overlay presets">
+              <button type="button" class="preset-card active" data-cfg-preset="broadcast" aria-pressed="true">
+                <strong>Broadcast</strong>
+                <span>Readable lower-third stack</span>
+              </button>
+              <button type="button" class="preset-card" data-cfg-preset="ticker" aria-pressed="false">
+                <strong>Ticker</strong>
+                <span>Fast compact signal lane</span>
+              </button>
+              <button type="button" class="preset-card" data-cfg-preset="questions" aria-pressed="false">
+                <strong>Questions</strong>
+                <span>Longer queue for Q&A beats</span>
+              </button>
+            </div>
+            <p class="setup-note">Preset: <b id="cfgPresetOut">broadcast</b></p>
+          </section>
+
+          <section class="rail-section">
             <h2><label for="cfgMax">// max messages</label></h2>
             <div class="cfg-slider-row">
               <input id="cfgMax" type="range" min="1" max="12" step="1" value="6">

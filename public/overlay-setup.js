@@ -1,4 +1,12 @@
+const PRESETS = {
+  broadcast: { preset: "broadcast", label: "broadcast", max: 6, fade: 0, scale: 1, align: "top", sources: ["twitch", "x", "kick"] },
+  ticker: { preset: "ticker", label: "ticker", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
+  questions: { preset: "questions", label: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
+};
+
 const els = {
+  presets: [...document.querySelectorAll("[data-cfg-preset]")],
+  presetOut: document.querySelector("#cfgPresetOut"),
   max: document.querySelector("#cfgMax"),
   maxOut: document.querySelector("#cfgMaxOut"),
   fade: document.querySelector("#cfgFade"),
@@ -14,22 +22,28 @@ const els = {
 };
 
 let align = "top";
+let preset = "broadcast";
 let previewTimer = null;
 
 for (const input of [els.max, els.fade, els.scale]) {
-  input?.addEventListener("input", update);
+  input?.addEventListener("input", () => {
+    markCustomPreset();
+    update();
+  });
 }
 for (const box of els.sources) {
-  box.addEventListener("change", update);
+  box.addEventListener("change", () => {
+    markCustomPreset();
+    update();
+  });
+}
+for (const button of els.presets) {
+  button.addEventListener("click", () => applyPreset(button.dataset.cfgPreset));
 }
 for (const button of els.alignButtons) {
   button.addEventListener("click", () => {
-    align = button.dataset.cfgAlign;
-    els.alignButtons.forEach((item) => {
-      const active = item === button;
-      item.classList.toggle("active", active);
-      item.setAttribute("aria-pressed", String(active));
-    });
+    markCustomPreset();
+    setAlign(button.dataset.cfgAlign);
     update();
   });
 }
@@ -43,7 +57,47 @@ els.copy?.addEventListener("click", async () => {
   }
 });
 
-update();
+applyPreset("broadcast", { silent: true });
+
+function applyPreset(name, { silent = false } = {}) {
+  const next = PRESETS[name] ? name : "broadcast";
+  const config = PRESETS[next];
+  preset = next;
+  if (els.max) els.max.value = String(config.max);
+  if (els.fade) els.fade.value = String(config.fade);
+  if (els.scale) els.scale.value = String(config.scale);
+  setAlign(config.align);
+  for (const box of els.sources) {
+    box.checked = config.sources.includes(box.dataset.cfgSource);
+  }
+  syncPresetButtons();
+  update();
+  if (!silent) toast(`${config.label} preset loaded`);
+}
+
+function markCustomPreset() {
+  if (preset === "custom") return;
+  preset = "custom";
+  syncPresetButtons();
+}
+
+function syncPresetButtons() {
+  for (const button of els.presets) {
+    const active = button.dataset.cfgPreset === preset;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+  if (els.presetOut) els.presetOut.textContent = preset;
+}
+
+function setAlign(value) {
+  align = value === "bottom" ? "bottom" : "top";
+  els.alignButtons.forEach((item) => {
+    const active = item.dataset.cfgAlign === align;
+    item.classList.toggle("active", active);
+    item.setAttribute("aria-pressed", String(active));
+  });
+}
 
 function update() {
   const max = els.max?.value || "6";
@@ -71,6 +125,7 @@ function buildUrl(absolute) {
   const scale = Number(els.scale?.value || 1);
   const picked = els.sources.filter((box) => box.checked).map((box) => box.dataset.cfgSource);
 
+  if (preset !== "custom") params.set("preset", preset);
   if (max !== 6) params.set("max", String(max));
   if (fade > 0) params.set("fade", String(fade));
   if (scale !== 1) params.set("scale", scale.toFixed(1));
