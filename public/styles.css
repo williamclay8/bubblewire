@@ -1029,9 +1029,18 @@ h1::before {
   font-size: 9px;
 }
 
-.message.pinned-state .pin-btn {
+.message.pinned-state [data-pin-id] {
   color: var(--gold);
   border-color: rgba(216, 168, 74, 0.5);
+}
+
+.queue-btn {
+  color: color-mix(in srgb, var(--text) 72%, var(--muted));
+}
+
+.feature-btn {
+  color: var(--kick);
+  border-color: rgba(83, 252, 24, 0.25);
 }
 
 .msg-content {
@@ -2174,6 +2183,303 @@ body[data-judge="1"] .product-command {
   margin-top: 8px;
 }
 
+.control-select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--text);
+  background: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.control-select {
+  min-height: 36px;
+  padding: 0 10px;
+}
+
+textarea {
+  min-height: 76px;
+  padding: 8px 9px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.control-note {
+  margin: 7px 0 0;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.session-desk,
+.moderator-queue,
+.replay-studio,
+.guided-setup-panel,
+.safety-panel {
+  min-width: 0;
+}
+
+.session-desk {
+  border-left: 2px solid rgba(240, 196, 105, 0.42);
+  padding-left: 10px;
+}
+
+.session-desk-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.session-desk-head strong,
+.replay-summary strong {
+  display: block;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.session-desk-head span,
+.replay-summary span {
+  display: block;
+  margin-top: 3px;
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.session-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.session-actions button {
+  min-height: 26px;
+  padding: 0 8px;
+  font-size: 9px;
+}
+
+.session-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.session-metrics article {
+  min-width: 0;
+  padding: 6px 5px;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  background: rgba(236, 233, 223, 0.024);
+  text-align: center;
+}
+
+.session-metrics span {
+  display: block;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.session-metrics b {
+  display: block;
+  margin-top: 2px;
+  color: var(--gold-bright);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.session-preflight,
+.guided-setup-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.session-preflight li,
+.guided-setup-list li {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 5px 8px;
+  align-items: center;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  background: rgba(236, 233, 223, 0.018);
+}
+
+.guided-setup-list li {
+  grid-template-columns: 44px 58px minmax(0, 1fr);
+}
+
+.session-preflight li::before,
+.guided-setup-list li::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.session-preflight li b,
+.guided-setup-list li b {
+  grid-column: 1;
+  padding-left: 13px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.session-preflight li span,
+.guided-setup-list li span,
+.guided-setup-list li small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.session-preflight li[data-status="pass"]::before,
+.guided-setup-list li[data-status="pass"]::before {
+  background: var(--kick);
+}
+
+.session-preflight li[data-status="warn"]::before,
+.guided-setup-list li[data-status="warn"]::before {
+  background: var(--gold);
+}
+
+.session-preflight li[data-status="fail"]::before,
+.guided-setup-list li[data-status="fail"]::before {
+  background: var(--danger);
+}
+
+.moderator-queue {
+  border-left: 2px solid rgba(83, 252, 24, 0.28);
+  padding-left: 10px;
+}
+
+.moderator-queue-list {
+  display: grid;
+  gap: 7px;
+}
+
+.queue-empty {
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.queue-item {
+  display: grid;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  background: rgba(236, 233, 223, 0.02);
+}
+
+.queue-item[data-status="approved"] {
+  border-color: rgba(83, 252, 24, 0.25);
+}
+
+.queue-item[data-status="escalated"] {
+  border-color: rgba(255, 93, 93, 0.35);
+}
+
+.queue-item header,
+.queue-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.queue-item header strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.queue-item header small {
+  margin-left: auto;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.queue-item p,
+.replay-summary p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.queue-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.queue-actions button {
+  min-height: 26px;
+  padding: 0 5px;
+  font-size: 8.5px;
+}
+
+.replay-studio {
+  border-left: 2px solid rgba(145, 70, 255, 0.36);
+  padding-left: 10px;
+}
+
+.replay-summary {
+  display: grid;
+  gap: 5px;
+  min-height: 72px;
+  padding: 8px 9px;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  background: rgba(236, 233, 223, 0.02);
+}
+
+.guided-setup-panel {
+  border-left: 2px solid rgba(111, 214, 255, 0.35);
+  padding-left: 10px;
+}
+
+.safety-panel {
+  border-left: 2px solid rgba(255, 93, 93, 0.28);
+  padding-left: 10px;
+}
+
 .watch-tag {
   padding: 1px 6px;
   border-radius: 2px;
@@ -3277,6 +3583,22 @@ body[data-density="compact"] .pin-btn {
   .pin-btn {
     min-height: 22px;
     padding: 0 5px;
+    font-size: 8px;
+  }
+
+  .queue-btn,
+  .feature-btn {
+    min-width: 26px;
+    font-size: 0;
+  }
+
+  .queue-btn::after {
+    content: "Q";
+    font-size: 8px;
+  }
+
+  .feature-btn::after {
+    content: "Air";
     font-size: 8px;
   }
 

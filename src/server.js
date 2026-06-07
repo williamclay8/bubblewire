@@ -17,6 +17,7 @@ import { createAnalyzer } from "./core/analysis.js";
 import { createHistoryLog } from "./core/history.js";
 import { createFeedHub } from "./core/hub.js";
 import { createInjectedMessage, normalizeKickWebhook } from "./core/messages.js";
+import { createProofPacket, createReplayBundle, createSessionSnapshot } from "./core/session.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const rootDir = normalize(join(__dirname, ".."));
@@ -109,6 +110,29 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && matches(pathname, "/api/setup", "/setup.json")) {
       return sendJson(response, setupSnapshot(request));
+    }
+
+    if (request.method === "GET" && matches(pathname, "/api/session", "/session.json")) {
+      const snapshot = appSnapshot();
+      const setup = setupSnapshot(request);
+      return sendJson(response, createSessionSnapshot({ snapshot, setup, routes: publicRoutes(request) }));
+    }
+
+    if (request.method === "GET" && matches(pathname, "/api/proof-packet", "/proof-packet.json")) {
+      const snapshot = appSnapshot();
+      const setup = setupSnapshot(request);
+      return sendJson(response, createProofPacket({ snapshot, setup, routes: publicRoutes(request) }));
+    }
+
+    if (request.method === "GET" && matches(pathname, "/api/replay", "/replay.json")) {
+      const url = new URL(request.url, `http://${request.headers.host}`);
+      const momentId = url.searchParams.get("moment") || url.searchParams.get("id") || "";
+      const windowSeconds = url.searchParams.get("window") || url.searchParams.get("windowSeconds") || 90;
+      return sendJson(response, createReplayBundle({
+        snapshot: appSnapshot(),
+        momentId,
+        windowSeconds
+      }));
     }
 
     if (request.method === "POST" && pathname === "/api/x/control") {
@@ -542,6 +566,26 @@ function setupSnapshot(request) {
       }
     }
   };
+}
+
+function publicRoutes(request) {
+  const origin = publicOrigin(request);
+  return {
+    app: origin,
+    judge: `${origin}/judge`,
+    overlay: `${origin}/overlay.html`,
+    setup: `${origin}/setup.json`,
+    status: `${origin}/status.json`,
+    session: `${origin}/session.json`,
+    proofPacket: `${origin}/proof-packet.json`,
+    replay: `${origin}/replay.json`
+  };
+}
+
+function publicOrigin(request) {
+  const hostHeader = request.headers.host || `${host}:${port}`;
+  const protocol = forwardedProtocol(request) || (request.socket.encrypted ? "https" : "http");
+  return `${protocol}://${hostHeader}`;
 }
 
 function getPathname(request) {

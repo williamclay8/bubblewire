@@ -1,6 +1,6 @@
 /* Bubblewire service worker — static shell only. Live data never gets cached. */
 
-const CACHE_NAME = "bubblewire-shell-v1";
+const CACHE_NAME = "bubblewire-shell-v2";
 const SHELL_ASSETS = [
   "/styles.css",
   "/app.js",
@@ -20,6 +20,9 @@ const NEVER_CACHE = [
   "/api/",
   "/history.json",
   "/setup.json",
+  "/session.json",
+  "/proof-packet.json",
+  "/replay.json",
   "/messages.json",
   "/export.ndjson",
   "/healthz"

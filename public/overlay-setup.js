@@ -1,7 +1,9 @@
 const PRESETS = {
-  broadcast: { preset: "broadcast", label: "broadcast", max: 6, fade: 0, scale: 1, align: "top", sources: ["twitch", "x", "kick"] },
-  ticker: { preset: "ticker", label: "ticker", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
-  questions: { preset: "questions", label: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
+  broadcast: { preset: "broadcast", label: "broadcast", mode: "feed", max: 6, fade: 0, scale: 1, align: "top", sources: ["twitch", "x", "kick"] },
+  ticker: { preset: "ticker", label: "ticker", mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
+  approved: { preset: "approved", label: "approved", mode: "approved", approvedOnly: true, max: 8, fade: 0, scale: 1.05, align: "top", sources: ["twitch", "x", "kick"] },
+  moments: { preset: "moments", label: "moments", mode: "moments", max: 5, fade: 0, scale: 1.08, align: "top", sources: ["twitch", "x", "kick"] },
+  questions: { preset: "questions", label: "questions", mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
 };
 
 const els = {
@@ -22,6 +24,8 @@ const els = {
 };
 
 let align = "top";
+let mode = "feed";
+let approvedOnly = false;
 let preset = "broadcast";
 let previewTimer = null;
 
@@ -66,6 +70,8 @@ function applyPreset(name, { silent = false } = {}) {
   if (els.max) els.max.value = String(config.max);
   if (els.fade) els.fade.value = String(config.fade);
   if (els.scale) els.scale.value = String(config.scale);
+  mode = config.mode || "feed";
+  approvedOnly = Boolean(config.approvedOnly);
   setAlign(config.align);
   for (const box of els.sources) {
     box.checked = config.sources.includes(box.dataset.cfgSource);
@@ -126,6 +132,8 @@ function buildUrl(absolute) {
   const picked = els.sources.filter((box) => box.checked).map((box) => box.dataset.cfgSource);
 
   if (preset !== "custom") params.set("preset", preset);
+  if (mode !== "feed") params.set("mode", mode);
+  if (approvedOnly) params.set("approvedOnly", "1");
   if (max !== 6) params.set("max", String(max));
   if (fade > 0) params.set("fade", String(fade));
   if (scale !== 1) params.set("scale", scale.toFixed(1));

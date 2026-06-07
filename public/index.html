@@ -12,7 +12,7 @@
     <link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/styles.css?v=x-durable-20260605a">
+    <link rel="stylesheet" href="/styles.css?v=build-order-20260607a">
   </head>
   <body>
     <div class="shell" id="appShell">
@@ -193,6 +193,38 @@
             </div>
           </section>
 
+          <section class="rail-section signal-preset-panel">
+            <h2><label for="signalPresetSelect">// signal preset</label></h2>
+            <select id="signalPresetSelect" class="control-select" aria-label="Signal preset">
+              <option value="balanced">Balanced</option>
+              <option value="market">Market</option>
+              <option value="qna">Q&amp;A</option>
+              <option value="launch">Launch</option>
+              <option value="highSignal">High Signal</option>
+            </select>
+            <p class="control-note" data-signal-summary>heat >= 18</p>
+          </section>
+
+          <section class="rail-section safety-panel" id="safetyPanel">
+            <h2><label for="safetyBlockedInput">// broadcast safety</label></h2>
+            <textarea id="safetyBlockedInput" rows="3" spellcheck="false" placeholder="blocked terms, separated by commas"></textarea>
+            <label class="switch-row" for="safetyApprovedOnly">
+              <input id="safetyApprovedOnly" type="checkbox">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">Approved overlay only</span>
+            </label>
+            <div class="control-grid">
+              <button id="safetySaveButton" type="button">Save</button>
+              <button type="button" data-copy-overlay-mode="approved">OBS Gate</button>
+            </div>
+            <p class="control-note" data-safety-summary>0 approved · 0 blocked</p>
+          </section>
+
+          <section class="rail-section moderator-queue" id="moderatorQueue">
+            <h2>// mod queue <button id="moderatorQueueClearButton" type="button" class="mini-btn" title="Clear queue">Clear</button></h2>
+            <div class="moderator-queue-list" id="moderatorQueueList"></div>
+          </section>
+
           <section class="rail-section">
             <h2>// transport</h2>
             <div class="control-grid">
@@ -283,6 +315,32 @@
             <div id="questionsList" class="questions-list"></div>
           </section>
 
+          <section class="panel-section session-desk" id="sessionDesk">
+            <h2>// stream session <button id="sessionProofButton" type="button" class="mini-btn" title="Copy proof packet URL">Proof</button></h2>
+            <header class="session-desk-head">
+              <div>
+                <strong data-session-title>Live stream session</strong>
+                <span data-session-state>ready</span>
+              </div>
+              <div class="session-actions">
+                <button id="sessionStartButton" type="button">Start</button>
+                <button id="sessionEndButton" type="button">End</button>
+              </div>
+            </header>
+            <div class="session-metrics" data-session-metrics></div>
+            <ol class="session-preflight" id="sessionPreflight"></ol>
+          </section>
+
+          <section class="panel-section replay-studio" id="replayStudio">
+            <h2>// replay studio <button id="replayExportButton" type="button" class="mini-btn">Export</button></h2>
+            <div class="replay-summary" id="replaySummary"></div>
+          </section>
+
+          <section class="panel-section guided-setup-panel" id="guidedSetupPanel">
+            <h2>// guided setup</h2>
+            <ol class="guided-setup-list" id="guidedSetupList"></ol>
+          </section>
+
           <section class="panel-section">
             <h2>// source stack</h2>
             <div id="sourceCards" class="source-cards"></div>
@@ -349,6 +407,6 @@
       </div>
     </div>
 
-    <script type="module" src="/app.js?v=x-durable-20260605a"></script>
+    <script type="module" src="/app.js?v=build-order-20260607a"></script>
   </body>
 </html>
