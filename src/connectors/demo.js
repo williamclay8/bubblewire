@@ -3,30 +3,38 @@ import { createInjectedMessage } from "../core/messages.js";
 const DEMO_AUTHORS = {
   twitch: ["BubbleOps", "chartlurker", "floorBidder", "candleBoss"],
   x: ["MarketBubble", "Ansem", "riskdesk", "liquiditywatch"],
+  xlive: ["degenwhale", "solmaxi", "fadethebooks", "perpsgoblin"],
   kick: ["kickwhale", "greenCandle", "mintedagain", "sidebet"]
 };
 
 // Varied enough — positive, negative, questions, repeated trend terms ($HYPE,
-// polymarket) across all three sources — that the intelligence layer (mood,
-// moments, trends, questions) has real signal to surface in demo mode.
+// polymarket) across all sources (including xlive broadcast-comment chatter) —
+// that the intelligence layer (mood, moments, trends, questions) has real
+// signal to surface in demo mode.
 const DEMO_LINES = [
   ["twitch", "marketbubble", "HYPE just different, this run is insane PogChamp"],
   ["x", "challenge-watch", "Ansem is cooking again, $HYPE looking cracked"],
+  ["xlive", "ansem-broadcast", "Ansem live rn and $HYPE chart printing, LFG"],
   ["kick", "marketbubble", "thanks for the polymarket picks, absolute W"],
   ["twitch", "marketbubble", "chat moving faster than the candles LETSGO"],
   ["x", "creator-signal", "one feed for Twitch X and Kick is the actual unlock"],
+  ["xlive", "ansem-broadcast", "what's the invalidation on this $SOL entry?"],
   ["kick", "marketbubble", "wait how do I add my own channel?"],
   ["twitch", "marketbubble", "this entry is so clean, mods need this every stream"],
   ["x", "market-watch", "source labels make the receipts clean, love it"],
+  ["xlive", "ansem-broadcast", "size or it didn't happen, post the fill"],
   ["kick", "marketbubble", "is the polymarket line still live or did it move?"],
   ["twitch", "marketbubble", "nah that last call was trash, total L ngl"],
   ["x", "market-watch", "$HYPE dumping now, this is painful copium"],
+  ["xlive", "ansem-broadcast", "is he still holding the polymarket position or did it close?"],
   ["kick", "marketbubble", "why is everyone selling $HYPE so fast"],
   ["twitch", "marketbubble", "GG that was clutch, clip it before it ships"],
   ["x", "creator-signal", "polymarket odds flipped, Ansem called it first"],
+  ["xlive", "ansem-broadcast", "$HYPE to a billion, this broadcast chat is cooking"],
   ["kick", "marketbubble", "green room saw that entry first, goated"],
   ["twitch", "marketbubble", "what channel should we raid after this?"],
   ["x", "challenge-watch", "the X filtered stream catching every $HYPE mention is wild"],
+  ["xlive", "ansem-broadcast", "nah fading this one, funding looks terrible ngl"],
   ["kick", "marketbubble", "this UI is actually beautiful, respect"]
 ];
 
@@ -44,6 +52,10 @@ export function createDemoConnector(hub, options = {}) {
     hub.setSourceStatus("x", {
       state: "demo",
       detail: "demo feed active; set X_BEARER_TOKEN for filtered stream"
+    });
+    hub.setSourceStatus("xlive", {
+      state: "demo",
+      detail: "demo feed active; set a live broadcast via /api/xlive/broadcast"
     });
     hub.setSourceStatus("kick", {
       state: "webhook-ready",

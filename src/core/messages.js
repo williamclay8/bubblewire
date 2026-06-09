@@ -11,6 +11,11 @@ export const SOURCE_META = {
     color: "#f4f2ea",
     home: "https://x.com"
   },
+  xlive: {
+    label: "X Live",
+    color: "#ff5c5c",
+    home: "https://x.com"
+  },
   kick: {
     label: "Kick",
     color: "#53fc18",
@@ -143,19 +148,36 @@ export function normalizeKickWebhook(payload, headers = {}, options = {}) {
   });
 }
 
-export function normalizeXStreamEvent(payload) {
+export const X_LIVE_RULE_TAG_PREFIX = "xlive:";
+
+export function findXLiveMatchingRule(matchingRules = []) {
+  if (!Array.isArray(matchingRules)) return null;
+  return matchingRules.find((rule) => String(rule?.tag || "").startsWith(X_LIVE_RULE_TAG_PREFIX)) || null;
+}
+
+// X live broadcast comments are replies in the broadcast post's conversation.
+// They arrive on the same single filtered-stream connection as regular X rules,
+// tagged `xlive:<postId>`; this forces those payloads onto the `xlive` source.
+export function normalizeXLiveStreamEvent(payload) {
+  return normalizeXStreamEvent(payload, { source: "xlive" });
+}
+
+export function normalizeXStreamEvent(payload, options = {}) {
   if (!payload?.data?.id) return null;
 
   const post = payload.data;
   const user = findXUser(payload.includes?.users, post.author_id);
-  const rule = payload.matching_rules?.[0];
+  const xliveRule = findXLiveMatchingRule(payload.matching_rules);
+  // Prefer xlive when a payload matches both xlive and regular rules.
+  const source = options.source || (xliveRule ? "xlive" : "x");
+  const rule = source === "xlive" ? xliveRule || payload.matching_rules?.[0] : payload.matching_rules?.[0];
   const username = user?.username || post.username || "";
   const publicMetrics = post.public_metrics || {};
 
   return createUnifiedMessage({
-    id: `x:${post.id}`,
-    source: "x",
-    rawType: "filtered-stream",
+    id: `${source}:${post.id}`,
+    source,
+    rawType: source === "xlive" ? "live-broadcast-reply" : "filtered-stream",
     author: {
       id: post.author_id || user?.id || "",
       name: user?.name || username || "X user",
@@ -163,7 +185,7 @@ export function normalizeXStreamEvent(payload) {
       avatar: user?.profile_image_url || "",
       verified: Boolean(user?.verified)
     },
-    channel: rule?.tag || "filtered-stream",
+    channel: rule?.tag || (source === "xlive" ? "live-broadcast" : "filtered-stream"),
     content: post.text || "",
     receivedAt: coerceDate(post.created_at),
     url: username

@@ -1,6 +1,6 @@
 # Bubblewire
 
-Bubblewire is a submission-grade unified chat relay for the Market Bubble Vibe Code Challenge: Twitch + X + Kick in one real-time feed with source labels.
+Bubblewire is a submission-grade unified chat relay for the Market Bubble Vibe Code Challenge: Twitch + X + Kick + X Live (Ansem's broadcast chat) in one real-time feed with source labels.
 
 It runs with no package install, starts demo mode automatically, and upgrades to live provider adapters when server-side credentials or public channel config are present.
 
@@ -34,6 +34,8 @@ X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_T
 
 **Important:** X integration delivers filtered posts, not live chat messages. This is a current limitation of the X API v2 filtered stream.
 
+X Live (Ansem's chat): comments on an X live video broadcast are replies to the broadcast post, so Bubblewire ingests them officially by adding a `conversation_id:<post id>` rule (tagged `xlive:<id>`) to the same shared filtered stream — X allows only one stream connection per app, so no second connection is opened. Paste the live post URL in the setup panel (`s` → X Live → Go live) when the stream starts, or set `X_LIVE_BROADCAST_ID` at boot; runtime config persists to `data/xlive.json`. Matching messages surface as the distinct `xlive` source ("X Live", red) across the feed, filters, analysis, overlay, and Streamer Mode.
+
 Render deployments can briefly overlap old and new instances. Bubblewire auto-clears stale filtered-stream sessions by default in Render production after X returns `TooManyConnections`; set `X_AUTO_TERMINATE_CONNECTIONS=off` if the same X app is intentionally shared with another stream consumer.
 
 Kick: Kick's official read-side chat path is the Events API. It delivers `chat.message.sent` events by webhook. Expose this app with a public tunnel or deployed URL and point Kick to `/kick.webhook`; `/webhooks/kick` is kept for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
@@ -55,7 +57,7 @@ Useful local controls:
 - `Pin` saves judge-worthy messages in the inspector (persisted across reloads).
 - `Export` downloads the normalized feed as NDJSON.
 - Selecting a message shows its raw normalized payload.
-- Keyboard: `/` focuses search, `p` toggles pause, `s` opens setup, `1–4` switch source filters, `Esc` clears/closes.
+- Keyboard: `/` focuses search, `p` toggles pause, `s` opens setup, `1–5` switch source filters, `Esc` clears/closes.
 
 ## Intelligence Layer
 
@@ -67,6 +69,10 @@ Bubblewire doesn't just display chat — it reads it. A zero-dependency, server-
 - **Surfaced questions** — recent interrogatives the streamer may not have answered, deduped, click-to-jump.
 
 It is labeled **heuristic** in the UI on purpose: it is transparent scoring, not a trained model, and it never claims otherwise. Served at `/analysis.json`, pushed live over the SSE `analysis` event, and covered by 9 unit tests.
+
+## Streamer Mode
+
+`/streamer.html` (the `STREAMER` link in the topbar) is the second-screen glanceable view: readable from 3 feet away in 2 seconds while live on Twitch. A large NOW slot surfaces the single most important thing this moment — mood flip, volume spike, watchlist/$ticker hit, or top unanswered question — with priority decay over 90s so stale items rotate out without flicker. Around it: per-source mood with trend arrows, per-source msgs/min with spike flags, top trending terms (cross-platform marked, $cashtags gold), the top open questions with click-to-dismiss "answered" tracking, and a one-line pulse strip of raw chat so it always feels live. Source chips are data-driven, so new sources (like `xlive`) appear automatically. Honors all four themes via `?theme=` or the dashboard's persisted choice; layouts for 1920×1080, 1280×800, and stacked mobile; respects reduced motion.
 
 ## Visitor Experience
 

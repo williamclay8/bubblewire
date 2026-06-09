@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bubblewire — Streamer Mode</title>
+    <meta name="description" content="Second-screen glanceable view: chat mood, trending terms, open questions, and volume — readable from across the room.">
+    <meta name="theme-color" content="#0a0a09">
+    <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
+    <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/IBMPlexMono-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/styles.css?v=build-order-20260607a">
+    <link rel="stylesheet" href="/streamer.css?v=streamer-20260609a">
+  </head>
+  <body class="streamer-page">
+    <div class="st-shell">
+      <header class="st-top">
+        <a class="st-brand" href="/" title="Back to dashboard">
+          <img src="/assets/bubblewire-mark.svg" alt="" width="30" height="30">
+          <span class="st-brand-text">
+            <strong>BUBBLEWIRE<span class="st-cursor">_</span></strong>
+            <small>STREAMER MODE</small>
+          </span>
+        </a>
+        <div class="st-top-tools">
+          <span class="st-watching" id="stWatching" hidden>◉ <b id="stWatchingCount">1</b></span>
+          <span class="st-link" id="stLink" data-state="connecting" title="Event stream link">
+            <i class="st-link-dot"></i><span id="stLinkLabel">LINK</span>
+          </span>
+          <time class="st-clock" id="stClock" aria-label="Local time">--:--:--</time>
+        </div>
+      </header>
+
+      <main class="st-grid" aria-label="Glanceable stream signal">
+        <section class="st-zone st-now" id="stNow" data-kind="idle" aria-live="polite">
+          <header class="st-zone-head">
+            <h2>// now</h2>
+            <span class="st-now-kind" id="stNowKind"></span>
+            <span class="st-now-age" id="stNowAge"></span>
+          </header>
+          <div class="st-now-body" id="stNowBody">
+            <div class="st-waiting">
+              <span class="st-waiting-dot" aria-hidden="true"></span>
+              <p>waiting for signal…</p>
+              <small>mood flips, spikes, ticker hits, and hot questions land here</small>
+            </div>
+          </div>
+        </section>
+
+        <section class="st-zone st-mood" id="stMoodZone">
+          <header class="st-zone-head">
+            <h2>// chat mood</h2>
+            <span class="st-tag">heuristic</span>
+          </header>
+          <div class="st-mood-body" id="stMoodBody">
+            <p class="st-empty">listening…</p>
+          </div>
+        </section>
+
+        <section class="st-zone st-rate" id="stRateZone">
+          <header class="st-zone-head">
+            <h2>// volume</h2>
+            <span class="st-rate-total" id="stRateTotal"></span>
+          </header>
+          <div class="st-rate-body" id="stRateBody">
+            <p class="st-empty">no traffic yet</p>
+          </div>
+        </section>
+
+        <section class="st-zone st-trends" id="stTrendsZone">
+          <header class="st-zone-head">
+            <h2>// trending</h2>
+            <span class="st-tag st-tag-cross">✦ cross-platform</span>
+          </header>
+          <div class="st-trends-body" id="stTrendsBody">
+            <p class="st-empty">no trending terms yet</p>
+          </div>
+        </section>
+
+        <section class="st-zone st-questions" id="stQuestionsZone">
+          <header class="st-zone-head">
+            <h2>// open questions</h2>
+            <span class="st-tag">tap to mark answered</span>
+          </header>
+          <div class="st-questions-body" id="stQuestionsBody">
+            <p class="st-empty">no open questions</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="st-pulse" aria-hidden="true">
+        <span class="st-pulse-label"><i></i>live</span>
+        <div class="st-pulse-line" id="stPulseLine"></div>
+      </footer>
+    </div>
+
+    <script type="module" src="/streamer.js?v=streamer-20260609a"></script>
+  </body>
+</html>

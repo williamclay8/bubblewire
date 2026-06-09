@@ -1,4 +1,4 @@
-import { normalizeXStreamEvent } from "../core/messages.js";
+import { normalizeXStreamEvent, X_LIVE_RULE_TAG_PREFIX } from "../core/messages.js";
 
 const X_STREAM_URL = "https://api.x.com/2/tweets/search/stream";
 const X_RULES_URL = `${X_STREAM_URL}/rules`;
@@ -14,37 +14,61 @@ export function startXConnector(hub, env = process.env, options = {}) {
   let rules = resolveXRulesFromEnv(env);
   let diagnostics = null;
   const stream = resolveXStreamPolicy(env);
+  let xliveBroadcastId = extractXPostId(env.X_LIVE_BROADCAST_ID || "");
+  let lastXState = "idle";
   const timers = {
     setTimeout: options.setTimeout || setTimeout,
     clearTimeout: options.clearTimeout || clearTimeout
   };
 
+  function setStatuses(state, payload) {
+    lastXState = state;
+    hub.setSourceStatus("x", { state, ...payload });
+    hub.setSourceStatus("xlive", xliveStatusForStreamState(state, xliveBroadcastId, payload));
+  }
+
+  function setXLiveBroadcast(id) {
+    xliveBroadcastId = extractXPostId(id || "") || "";
+    hub.setSourceStatus("xlive", xliveStatusForStreamState(lastXState, xliveBroadcastId));
+    return xliveBroadcastId;
+  }
+
   if (!stream.enabled) {
-    hub.setSourceStatus("x", {
-      state: "disabled",
+    setStatuses("disabled", {
       detail: stream.detail,
       diagnostics: null,
       stream
     });
     return {
       stop() {},
+      setXLiveBroadcast,
       snapshot() {
-        return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
+        return {
+          rules: clone(rules),
+          diagnostics: clone(diagnostics),
+          stream: clone(stream),
+          xlive: { broadcastId: xliveBroadcastId || null }
+        };
       }
     };
   }
 
   if (!bearerToken) {
-    hub.setSourceStatus("x", {
-      state: "missing",
+    setStatuses("missing", {
       detail: "missing X_BEARER_TOKEN for filtered stream",
       diagnostics: null,
       stream
     });
     return {
       stop() {},
+      setXLiveBroadcast,
       snapshot() {
-        return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
+        return {
+          rules: clone(rules),
+          diagnostics: clone(diagnostics),
+          stream: clone(stream),
+          xlive: { broadcastId: xliveBroadcastId || null }
+        };
       }
     };
   }
@@ -59,8 +83,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
     if (stopped) return;
     controller = new AbortController();
     await refreshRules();
-    hub.setSourceStatus("x", {
-      state: "connecting",
+    setStatuses("connecting", {
       detail: xStatusDetail("opening filtered stream", rules),
       diagnostics: null,
       stream
@@ -90,8 +113,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
 
       reconnectMs = DEFAULT_RECONNECT_MS;
       diagnostics = null;
-      hub.setSourceStatus("x", {
-        state: "connected",
+      setStatuses("connected", {
         detail: xStatusDetail("filtered stream online", rules),
         diagnostics: null,
         stream
@@ -122,8 +144,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
         }
       }
       console.warn("[bubblewire:x]", JSON.stringify(diagnostics));
-      hub.setSourceStatus("x", {
-        state: "error",
+      setStatuses("error", {
         detail: diagnostics.summary,
         diagnostics: clone(diagnostics)
       });
@@ -133,8 +154,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
       const delayMs = nextReconnectOverrideMs || reconnectDelayForDiagnostics(diagnostics, reconnectMs, env);
       nextReconnectOverrideMs = 0;
       const last = diagnostics?.summary ? ` · last ${diagnostics.summary}` : "";
-      hub.setSourceStatus("x", {
-        state: "reconnecting",
+      setStatuses("reconnecting", {
         detail: `retrying in ${formatReconnectDelay(delayMs)}${last}`,
         diagnostics: diagnostics ? clone(diagnostics) : null,
         stream
@@ -151,14 +171,19 @@ export function startXConnector(hub, env = process.env, options = {}) {
       stopped = true;
       if (controller) controller.abort();
       if (reconnectTimer) timers.clearTimeout(reconnectTimer);
-      hub.setSourceStatus("x", {
-        state: "stopped",
+      setStatuses("stopped", {
         detail: "connector stopped",
         stream
       });
     },
+    setXLiveBroadcast,
     snapshot() {
-      return { rules: clone(rules), diagnostics: clone(diagnostics), stream: clone(stream) };
+      return {
+        rules: clone(rules),
+        diagnostics: clone(diagnostics),
+        stream: clone(stream),
+        xlive: { broadcastId: xliveBroadcastId || null }
+      };
     }
   };
 
@@ -265,6 +290,193 @@ export function summarizeXRules(payload = {}, { checkedAt = new Date().toISOStri
     checkedAt,
     rules
   };
+}
+
+// --- X Live (live-broadcast comment) support -------------------------------
+// X live video comments are replies to the broadcast post, so ingestion is a
+// filtered-stream rule `conversation_id:<postId>` tagged `xlive:<postId>` on
+// the SAME single stream connection (X allows one per app).
+
+export function extractXPostId(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (/^\d{5,25}$/.test(raw)) return raw;
+
+  let url;
+  try {
+    url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+  } catch {
+    return "";
+  }
+
+  const host = url.hostname.toLowerCase().replace(/^www\.|^m\.|^mobile\./, "");
+  if (!["x.com", "twitter.com"].includes(host)) return "";
+
+  const match = url.pathname.match(/\/(?:status|statuses)\/(\d{5,25})(?:\/|$)/);
+  return match ? match[1] : "";
+}
+
+export function isXLiveRuleTag(tag) {
+  return String(tag || "").startsWith(X_LIVE_RULE_TAG_PREFIX);
+}
+
+export function xliveRuleForBroadcast(broadcastId) {
+  return {
+    value: `conversation_id:${broadcastId}`,
+    tag: `${X_LIVE_RULE_TAG_PREFIX}${broadcastId}`
+  };
+}
+
+export function xliveStatusForStreamState(state, broadcastId, extra = {}) {
+  if (!broadcastId) {
+    return {
+      state: "idle",
+      detail: "no live broadcast set",
+      broadcastId: null,
+      diagnostics: null
+    };
+  }
+
+  const base = {
+    broadcastId,
+    ruleTag: `${X_LIVE_RULE_TAG_PREFIX}${broadcastId}`,
+    diagnostics: extra.diagnostics || null
+  };
+  switch (state) {
+    case "connected":
+      return { ...base, state: "live", detail: `broadcast ${broadcastId} replies riding shared X stream` };
+    case "connecting":
+      return { ...base, state: "connecting", detail: `waiting for shared X stream · broadcast ${broadcastId}` };
+    case "missing":
+      return { ...base, state: "missing", detail: "missing X_BEARER_TOKEN for filtered stream" };
+    case "disabled":
+      return { ...base, state: "disabled", detail: `X stream disabled · broadcast ${broadcastId} queued` };
+    case "paused":
+      return { ...base, state: "paused", detail: `shared X stream paused · broadcast ${broadcastId} queued` };
+    case "stopped":
+      return { ...base, state: "stopped", detail: "connector stopped" };
+    case "error":
+    case "reconnecting":
+      return { ...base, state, detail: extra.detail || `shared X stream ${state}` };
+    default:
+      return { ...base, state: "connecting", detail: `broadcast ${broadcastId} configured` };
+  }
+}
+
+async function fetchXLiveRuleIds(bearerToken, fetchImpl) {
+  const response = await fetchImpl(X_RULES_URL, {
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  });
+  const body = parseDiagnosticBody(await safeResponseText(response));
+  if (!response.ok) {
+    return { ok: false, httpStatus: response.status, ids: [], snapshot: null };
+  }
+  const rows = Array.isArray(body?.data) ? body.data : [];
+  return {
+    ok: true,
+    httpStatus: response.status,
+    ids: rows.filter((rule) => isXLiveRuleTag(rule.tag)).map((rule) => rule.id).filter(Boolean),
+    snapshot: summarizeXRules(body)
+  };
+}
+
+async function mutateXRules(bearerToken, fetchImpl, body) {
+  const response = await fetchImpl(X_RULES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+  const parsed = parseDiagnosticBody(await safeResponseText(response));
+  return { ok: response.ok, httpStatus: response.status, body: parsed };
+}
+
+export async function setXLiveBroadcastRule(env = process.env, broadcastId, options = {}) {
+  const bearerToken = env.X_BEARER_TOKEN;
+  const id = extractXPostId(broadcastId);
+  if (!id) {
+    return { ok: false, broadcastId: null, summary: "invalid broadcast post id" };
+  }
+  const rule = xliveRuleForBroadcast(id);
+  if (!bearerToken) {
+    return {
+      ok: false,
+      broadcastId: id,
+      rule,
+      summary: "missing X_BEARER_TOKEN · rule not pushed to X"
+    };
+  }
+
+  const fetchImpl = options.fetch || fetch;
+  try {
+    const existing = await fetchXLiveRuleIds(bearerToken, fetchImpl);
+    const staleIds = existing.ids.filter(Boolean);
+    if (staleIds.length > 0) {
+      await mutateXRules(bearerToken, fetchImpl, { delete: { ids: staleIds } });
+    }
+    const added = await mutateXRules(bearerToken, fetchImpl, { add: [rule] });
+    const refreshed = await fetchXLiveRuleIds(bearerToken, fetchImpl);
+    return {
+      ok: added.ok,
+      broadcastId: id,
+      rule,
+      deletedStale: staleIds.length,
+      httpStatus: added.httpStatus,
+      rules: refreshed.snapshot,
+      summary: added.ok
+        ? `xlive rule active · ${rule.value}`
+        : `X rules HTTP ${added.httpStatus}`,
+      errors: sanitizeXErrors(added.body?.errors || [], [bearerToken])
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      broadcastId: id,
+      rule,
+      summary: cleanDiagnosticText(error?.message || "X rules request failed", {
+        secrets: [bearerToken],
+        maxLength: 200
+      })
+    };
+  }
+}
+
+export async function clearXLiveBroadcastRules(env = process.env, options = {}) {
+  const bearerToken = env.X_BEARER_TOKEN;
+  if (!bearerToken) {
+    return { ok: false, deleted: 0, summary: "missing X_BEARER_TOKEN · no rules to clear on X" };
+  }
+
+  const fetchImpl = options.fetch || fetch;
+  try {
+    const existing = await fetchXLiveRuleIds(bearerToken, fetchImpl);
+    if (!existing.ok) {
+      return { ok: false, deleted: 0, summary: `X rules HTTP ${existing.httpStatus}` };
+    }
+    if (existing.ids.length === 0) {
+      return { ok: true, deleted: 0, rules: existing.snapshot, summary: "no xlive rules present" };
+    }
+    const removed = await mutateXRules(bearerToken, fetchImpl, { delete: { ids: existing.ids } });
+    const refreshed = await fetchXLiveRuleIds(bearerToken, fetchImpl);
+    return {
+      ok: removed.ok,
+      deleted: removed.ok ? existing.ids.length : 0,
+      httpStatus: removed.httpStatus,
+      rules: refreshed.snapshot,
+      summary: removed.ok ? `cleared ${existing.ids.length} xlive rule(s)` : `X rules HTTP ${removed.httpStatus}`
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      deleted: 0,
+      summary: cleanDiagnosticText(error?.message || "X rules request failed", {
+        secrets: [bearerToken],
+        maxLength: 200
+      })
+    };
+  }
 }
 
 export async function fetchXConnectionHistory(env = process.env, options = {}) {

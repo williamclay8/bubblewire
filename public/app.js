@@ -25,7 +25,7 @@ const THEMES = ["gold", "matrix", "ice", "synthwave"];
 const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
-const SOURCE_ORDER = ["twitch", "x", "kick"];
+const SOURCE_ORDER = ["twitch", "x", "kick", "xlive"];
 const OVERLAY_PRESETS = {
   broadcast: { mode: "feed", max: OVERLAY_RENDERED, fade: 0, scale: 1, align: "top", sources: SOURCE_ORDER },
   ticker: { mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
@@ -40,7 +40,7 @@ const SIGNAL_PRESETS = {
   launch: { label: "Launch", heat: 14, watch: ["ship", "bug", "pricing", "signup", "demo"] },
   highSignal: { label: "High Signal", heat: 32, watch: ["alpha", "leak", "breaking", "confirmed"] }
 };
-const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", demo: "#d8a84a" };
+const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", xlive: "#ff5c5c", demo: "#d8a84a" };
 
 const overlayConfig = parseOverlayConfig();
 const stream = { particles: [], running: false };
@@ -522,6 +522,10 @@ function bindControls() {
       event.preventDefault();
       submitChannel("add", event.target.value);
     }
+    if (event.key === "Enter" && event.target.id === "xliveInput") {
+      event.preventDefault();
+      submitXLiveBroadcast(event.target.value);
+    }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -545,7 +549,7 @@ function bindControls() {
     } else if (event.key === "s" || event.key === "S") {
       if (isSetupOpen()) closeSetup();
       else openSetup();
-    } else if (["1", "2", "3", "4"].includes(event.key)) {
+    } else if (["1", "2", "3", "4", "5"].includes(event.key)) {
       setFilter(["all", ...SOURCE_ORDER][Number(event.key) - 1]);
     }
   });
@@ -2342,6 +2346,7 @@ function renderSetup() {
   const twitch = setup.sources.twitch;
   const kick = setup.sources.kick;
   const x = setup.sources.x;
+  const xlive = setup.sources.xlive;
 
   const varRow = (name, present) => `
     <div class="env-row" data-present="${present}">
@@ -2391,6 +2396,8 @@ function renderSetup() {
       ${xDiagnostics(x.diagnostics)}
       <p class="setup-note">${escapeHtml(x.note)}</p>
     </section>
+
+    ${xliveSection(xlive)}
 
     <section class="setup-section" style="--src:${escapeAttr(sourceColor("kick"))}">
       <h3>Kick <small>webhooks</small></h3>
@@ -2508,6 +2515,64 @@ function xStreamControl(x) {
   `;
 }
 
+function xliveSection(xlive) {
+  if (!xlive) return "";
+  const configured = Boolean(xlive.configured);
+  const status = xlive.status?.state || "idle";
+  const detail = xlive.status?.detail || "";
+  const adminLocked = Boolean(xlive.control?.adminLocked);
+  const current = configured
+    ? `
+      <div class="rule-stack" data-status="${escapeAttr(status)}">
+        <span class="rule-summary">broadcast ${escapeHtml(xlive.broadcastId || "")} · ${escapeHtml(status)}</span>
+        ${xlive.rule ? `<div class="rule-row"><b>${escapeHtml(xlive.rule.tag || "rule")}</b><code>${escapeHtml(xlive.rule.value || "")}</code></div>` : ""}
+      </div>
+    `
+    : `<p class="setup-note">No live broadcast set. Paste the X live post URL when the stream starts — replies to it become Ansem's chat.</p>`;
+
+  return `
+    <section class="setup-section" style="--src:${escapeAttr(sourceColor("xlive"))}">
+      <h3>X Live <small>ansem's chat</small></h3>
+      ${current}
+      <div class="watch-add">
+        <input id="xliveInput" type="text" placeholder="x.com/.../status/… or post id" autocomplete="off" spellcheck="false" maxlength="160">
+        <button type="button" id="xliveSetButton"${adminLocked ? " disabled" : ""}>Go live</button>
+        ${configured ? `<button type="button" class="mini-btn" id="xliveClearButton"${adminLocked ? " disabled" : ""}>Clear</button>` : ""}
+      </div>
+      ${Object.entries(xlive.vars || {}).map(([name, present]) => `
+        <div class="env-row" data-present="${present}">
+          <span class="env-dot"></span><code>${escapeHtml(name)}</code><span class="env-state">${present ? "set" : "missing"}</span>
+        </div>
+      `).join("")}
+      <p class="setup-note">${escapeHtml(xlive.note || "Rides the same X filtered stream — no extra connection.")}${adminLocked ? " Admin token required." : ""}</p>
+      ${detail ? `<p class="setup-note">${escapeHtml(detail)}</p>` : ""}
+    </section>
+  `;
+}
+
+async function submitXLiveBroadcast(rawValue) {
+  const value = String(rawValue || "").trim();
+  if (!value) return;
+  try {
+    await postJson("/api/xlive/broadcast", { url: value });
+    trackActivation("xlive");
+    toast("x live broadcast set — tracking replies");
+    await refreshSetup();
+  } catch {
+    toast("x live broadcast update failed", "err");
+  }
+}
+
+async function clearXLiveBroadcast() {
+  try {
+    await postJson("/api/xlive/broadcast", { action: "clear" });
+    toast("x live broadcast cleared");
+    await refreshSetup();
+  } catch {
+    toast("x live clear failed", "err");
+  }
+}
+
 function onSetupClick(event) {
   const xControl = event.target.closest("[data-x-control]");
   if (xControl) {
@@ -2521,6 +2586,14 @@ function onSetupClick(event) {
   }
   if (event.target.id === "channelAddButton") {
     submitChannel("add", document.querySelector("#channelInput")?.value);
+    return;
+  }
+  if (event.target.id === "xliveSetButton") {
+    submitXLiveBroadcast(document.querySelector("#xliveInput")?.value);
+    return;
+  }
+  if (event.target.id === "xliveClearButton") {
+    clearXLiveBroadcast();
     return;
   }
   if (event.target.id === "copyWebhookButton") {
@@ -2786,7 +2859,7 @@ function runBootSequence() {
   const lines = [
     "BUBBLEWIRE RELAY v4",
     ">> establishing link ............. ok",
-    ">> twitch / x / kick adapters .... armed",
+    ">> twitch / x / kick / x-live adapters .... armed",
     ">> normalizing feed .............. ok",
     ">> streaming"
   ];
@@ -2846,7 +2919,7 @@ function spawnStreamParticle(message, atX = null) {
   const canvas = els.signalStream;
   const width = canvas.clientWidth || 800;
   const height = canvas.clientHeight || 56;
-  const lane = { twitch: 0.25, x: 0.5, kick: 0.75 }[message.source] ?? 0.5;
+  const lane = { twitch: 0.2, x: 0.4, kick: 0.6, xlive: 0.8 }[message.source] ?? 0.5;
   const heat = message.heat || 0;
   stream.particles.push({
     x: atX === null ? width + 8 : atX,

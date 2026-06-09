@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-const SOURCES = ["twitch", "x", "kick"];
+const SOURCES = ["twitch", "x", "xlive", "kick"];
 const LIVE_EVIDENCE = new Set(["live", "webhook-proof", "signed"]);
 const DEFAULT_RULES = {
   approvedOnly: false,
@@ -243,6 +243,13 @@ function proofSetupSummary(source, setupSource = {}) {
       configured: xLooksConfigured(setupSource),
       rules: setupSource.rules?.count || 0,
       stream: setupSource.stream?.enabled ? "enabled" : setupSource.stream?.paused ? "paused" : "disabled"
+    };
+  }
+  if (source === "xlive") {
+    return {
+      configured: Boolean(setupSource.broadcastId || setupSource.configured),
+      broadcastId: setupSource.broadcastId || null,
+      ruleTag: setupSource.rule?.tag || ""
     };
   }
   if (source === "kick") {

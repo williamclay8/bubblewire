@@ -164,7 +164,7 @@ try {
     moodRows: document.querySelectorAll(".mood-row").length,
     analysisMethod: window.fetch ? null : null
   }));
-  check("mood readout renders per-source", intel.moodRows === 3 && intel.moodBadgeHidden === false);
+  check("mood readout renders per-source", intel.moodRows === 4 && intel.moodBadgeHidden === false); // twitch, x, kick, xlive
 
   const analysis = await page.evaluate(() => fetch("/analysis.json").then((r) => r.json()));
   check("analysis endpoint reports heuristic mood", analysis.method === "heuristic-lexicon" && typeof analysis.overall.score === "number", analysis.overall.mood);

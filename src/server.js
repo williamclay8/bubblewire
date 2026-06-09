@@ -7,11 +7,16 @@ import { createDemoConnector } from "./connectors/demo.js";
 import { resolveKickConfig, shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
 import {
+  clearXLiveBroadcastRules,
+  extractXPostId,
   fetchXConnectionHistory,
   resolveXRulesFromEnv,
   resolveXStreamPolicy,
+  setXLiveBroadcastRule,
   startXConnector,
-  terminateAllXConnections
+  terminateAllXConnections,
+  xliveRuleForBroadcast,
+  xliveStatusForStreamState
 } from "./connectors/x.js";
 import { createAnalyzer } from "./core/analysis.js";
 import { createHistoryLog } from "./core/history.js";
@@ -60,7 +65,9 @@ const analysisInterval = setInterval(() => {
 if (typeof analysisInterval.unref === "function") analysisInterval.unref();
 
 const twitchChannelsFile = join(dataDir, "twitch-channels.json");
+const xliveFile = process.env.XLIVE_FILE || join(dataDir, "xlive.json");
 let runtimeTwitchChannels = await loadRuntimeTwitchChannels();
+let runtimeXLiveBroadcastId = await loadRuntimeXLiveBroadcast();
 let twitchConnector = startTwitchConnector(hub, twitchEnv());
 let xConnector = startManagedXConnector();
 
@@ -232,6 +239,42 @@ const server = http.createServer(async (request, response) => {
       await persistRuntimeTwitchChannels();
       restartTwitchConnector();
       return sendJson(response, { ok: true, ...twitchChannelsSnapshot() });
+    }
+
+    if (request.method === "GET" && pathname === "/api/xlive/broadcast") {
+      return sendJson(response, xliveSnapshot());
+    }
+
+    if (request.method === "POST" && pathname === "/api/xlive/broadcast") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      const payload = await readJsonBody(request);
+      const action = String(payload.action || "").trim().toLowerCase();
+      if (action === "clear") {
+        return sendJson(response, await clearXLiveBroadcast());
+      }
+
+      const broadcastId = extractXPostId(payload.url || payload.id || payload.broadcast || "");
+      if (!broadcastId) {
+        return sendJson(response, {
+          ok: false,
+          error: "expected an x.com/twitter.com status URL or a numeric post id"
+        }, 400);
+      }
+
+      const rules = await setXLiveBroadcastRule(process.env, broadcastId);
+      runtimeXLiveBroadcastId = broadcastId;
+      await persistRuntimeXLiveBroadcast();
+      xConnector?.setXLiveBroadcast?.(runtimeXLiveBroadcastId);
+      return sendJson(response, { ok: true, rules, ...xliveSnapshot() });
+    }
+
+    if (request.method === "DELETE" && pathname === "/api/xlive/broadcast") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      return sendJson(response, await clearXLiveBroadcast());
     }
 
     if (request.method === "GET" && matches(pathname, "/api/export.ndjson", "/export.ndjson")) {
@@ -438,9 +481,13 @@ function restartTwitchConnector() {
   twitchConnector = startTwitchConnector(hub, twitchEnv());
 }
 
+function xEnv() {
+  return { ...process.env, X_LIVE_BROADCAST_ID: runtimeXLiveBroadcastId };
+}
+
 function startManagedXConnector() {
   if (runtimeXPaused) return createPausedXConnector();
-  return startXConnector(hub);
+  return startXConnector(hub, xEnv());
 }
 
 function restartXConnector() {
@@ -464,10 +511,16 @@ function createPausedXConnector() {
     diagnostics: null,
     stream
   });
+  hub.setSourceStatus("xlive", xliveStatusForStreamState("paused", runtimeXLiveBroadcastId));
   return {
     stop() {},
+    setXLiveBroadcast(id) {
+      const next = extractXPostId(id || "") || "";
+      hub.setSourceStatus("xlive", xliveStatusForStreamState("paused", next));
+      return next;
+    },
     snapshot() {
-      return { rules, diagnostics: null, stream };
+      return { rules, diagnostics: null, stream, xlive: { broadcastId: runtimeXLiveBroadcastId || null } };
     }
   };
 }
@@ -500,6 +553,43 @@ function twitchChannelsSnapshot() {
     channels: runtimeTwitchChannels,
     mode: twitchPath(),
     mutable: twitchPath() !== "eventsub",
+    adminLocked: isAdminLocked()
+  };
+}
+
+async function loadRuntimeXLiveBroadcast() {
+  const saved = await readFile(xliveFile, "utf8")
+    .then((raw) => JSON.parse(raw))
+    .catch(() => null);
+  if (saved && typeof saved === "object" && "broadcastId" in saved) {
+    return extractXPostId(saved.broadcastId || "") || "";
+  }
+  return extractXPostId(process.env.X_LIVE_BROADCAST_ID || "") || "";
+}
+
+async function persistRuntimeXLiveBroadcast() {
+  try {
+    await mkdir(dataDir, { recursive: true });
+    await writeFile(xliveFile, JSON.stringify({ broadcastId: runtimeXLiveBroadcastId || null }, null, 2));
+  } catch {
+    /* persistence is best-effort */
+  }
+}
+
+async function clearXLiveBroadcast() {
+  const rules = await clearXLiveBroadcastRules(process.env);
+  runtimeXLiveBroadcastId = "";
+  await persistRuntimeXLiveBroadcast();
+  xConnector?.setXLiveBroadcast?.("");
+  return { ok: true, rules, ...xliveSnapshot() };
+}
+
+function xliveSnapshot() {
+  return {
+    broadcastId: runtimeXLiveBroadcastId || null,
+    configured: Boolean(runtimeXLiveBroadcastId),
+    rule: runtimeXLiveBroadcastId ? xliveRuleForBroadcast(runtimeXLiveBroadcastId) : null,
+    status: hub.snapshot().status.xlive || null,
     adminLocked: isAdminLocked()
   };
 }
@@ -552,6 +642,21 @@ function setupSnapshot(request) {
           adminLocked: isAdminLocked()
         },
         note: "Filtered-stream rules are created on the X platform before starting Bubblewire."
+      },
+      xlive: {
+        vars: {
+          X_BEARER_TOKEN: present("X_BEARER_TOKEN"),
+          X_LIVE_BROADCAST_ID: present("X_LIVE_BROADCAST_ID")
+        },
+        broadcastId: runtimeXLiveBroadcastId || null,
+        configured: Boolean(runtimeXLiveBroadcastId),
+        rule: runtimeXLiveBroadcastId ? xliveRuleForBroadcast(runtimeXLiveBroadcastId) : null,
+        status: statusSnapshot.xlive || null,
+        control: {
+          endpoint: "/api/xlive/broadcast",
+          adminLocked: isAdminLocked()
+        },
+        note: "Paste the live broadcast post URL; replies ride the single shared X filtered-stream connection."
       },
       kick: {
         vars: {

@@ -98,6 +98,15 @@ Wiring: analyzer subscribes to the hub's message events; `/analysis.json` endpoi
 
 Tests: 9 new analysis unit tests (tokenize, sentiment polarity, negation, mood bands, per-source mood, moment detection, question dedupe, cross-platform trend ranking, demo-source exclusion). Smoke suite extended to 23 checks (mood render, analysis endpoint, cross-platform trend, moments+questions, moment click-to-jump). Total: 51 unit / 23 smoke, zero console errors.
 
+## X Live + Streamer Mode v7 — June 9, 2026
+
+Client ask: Ansem & Banks stream on Twitch and can't see X or Ansem's X live broadcast chat. Two workstreams, built in parallel with strict file boundaries, then integrated:
+
+- **X Live source (`xlive`)**: official-API ingestion of X live broadcast comments (replies to the broadcast post) via a `conversation_id:<id>` rule tagged `xlive:<id>` on the *existing single* filtered-stream connection (X permits one per app — no second stream). Runtime control `POST/DELETE /api/xlive/broadcast` (ADMIN_TOKEN-gated, twitch-channels pattern), persistence to `data/xlive.json`, `X_LIVE_BROADCAST_ID` boot env, full status/proof/setup wiring, demo-mode xlive lines, analyzer + session SOURCES updated. 16 new unit tests (60 → 76).
+- **Streamer Mode** (`public/streamer.html/.js/.css`): glanceable second-screen view — NOW slot with priority-decay candidate engine (mood flip > spike > watchlist hit > $cashtag > question, 90s decay, ×1.15 eviction threshold), per-source mood/volume, trending, dismissible open questions, pulse strip. Data-driven source chips; theme-aware; reduced-motion safe; layouts for 1920/1280/mobile.
+- **Dashboard integration**: `xlive` added to SOURCE_ORDER, filter pill `[5]`, fallback color `#ff5c5c`, radar legend + lane, setup-drawer X Live section with paste-URL "Go live"/Clear control, STREAMER topbar link.
+- **Verified**: 76/76 unit, `npm run check`, 23/23 UI smoke (one check updated: 3 → 4 mood rows is the new correct count), end-to-end browser test of the paste-URL→rule→persistence loop, screenshots of dashboard/setup/xlive filter/Streamer Mode at 1440×900 + streamer at 1920/1280/390 — zero console errors throughout.
+
 ## Follow-ups — status
 
 - ~~Backend headers~~ Done: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, CSP (`style-src 'unsafe-inline'` retained for inline source colors), and SSE `retry: 3000` hint. Verified live; zero console errors under CSP.
