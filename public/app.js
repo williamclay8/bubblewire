@@ -20,15 +20,15 @@ const THEMES = ["gold", "matrix", "ice", "synthwave"];
 const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
-const SOURCE_ORDER = ["twitch", "x", "kick", "xlive"];
+const SOURCE_ORDER = ["twitch", "youtube", "x", "xlive", "kick"];
 const OVERLAY_PRESETS = {
   broadcast: { mode: "feed", max: OVERLAY_RENDERED, fade: 0, scale: 1, align: "top", sources: SOURCE_ORDER },
-  ticker: { mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
+  ticker: { mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "youtube", "kick", "twitch"] },
   approved: { mode: "approved", approvedOnly: true, max: 8, fade: 0, scale: 1.05, align: "top", sources: SOURCE_ORDER },
   moments: { mode: "moments", max: 5, fade: 0, scale: 1.08, align: "top", sources: SOURCE_ORDER },
-  questions: { mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
+  questions: { mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "youtube", "kick", "x"] }
 };
-const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", xlive: "#ff5c5c", demo: "#d8a84a" };
+const FALLBACK_COLORS = { twitch: "#9146ff", youtube: "#ff0033", x: "#f4f2ea", kick: "#53fc18", xlive: "#ff5c5c", demo: "#d8a84a" };
 
 const overlayConfig = parseOverlayConfig();
 const stream = { particles: [], running: false };
@@ -402,6 +402,10 @@ function bindControls() {
       event.preventDefault();
       submitXLiveBroadcast(event.target.value);
     }
+    if (event.key === "Enter" && event.target.id === "youtubeInput") {
+      event.preventDefault();
+      submitYouTubeTarget(event.target.value);
+    }
   });
 
   document.addEventListener("keydown", (event) => {
@@ -425,7 +429,7 @@ function bindControls() {
     } else if (event.key === "s" || event.key === "S") {
       if (isSetupOpen()) closeSetup();
       else openSetup();
-    } else if (["1", "2", "3", "4", "5"].includes(event.key)) {
+    } else if (["1", "2", "3", "4", "5", "6"].includes(event.key)) {
       setFilter(["all", ...SOURCE_ORDER][Number(event.key) - 1]);
     }
   });
@@ -903,7 +907,7 @@ function renderJudgeBrief() {
   const questions = state.analysis?.questions?.length || 0;
   const trends = state.analysis?.trends?.filter((trend) => trend.crossPlatform).length || 0;
   const metrics = [
-    ["Sources proven", `${proofReady}/3`],
+    ["Sources proven", `${proofReady}/${SOURCE_ORDER.length}`],
     ["Messages", String(state.stats.totalMessages || 0)],
     ["Moments", String(moments)],
     ["Cross trends", String(trends)],
@@ -1466,6 +1470,7 @@ function renderSetup() {
   if (!els.setupBody || !state.setup) return;
   const setup = state.setup;
   const twitch = setup.sources.twitch;
+  const youtube = setup.sources.youtube;
   const kick = setup.sources.kick;
   const x = setup.sources.x;
   const xlive = setup.sources.xlive;
@@ -1510,6 +1515,8 @@ function renderSetup() {
       </details>
     </section>
 
+    ${youtubeSection(youtube)}
+
     <section class="setup-section" style="--src:${escapeAttr(sourceColor("x"))}">
       <h3>X <small>filtered stream</small></h3>
       ${varRows(x.vars)}
@@ -1542,6 +1549,44 @@ function renderSetup() {
       <div class="env-row" data-present="${setup.adminLocked}">
         <span class="env-dot"></span><code>ADMIN_TOKEN</code><span class="env-state">${setup.adminLocked ? "locked" : "open"}</span>
       </div>
+    </section>
+  `;
+}
+
+function youtubeSection(youtube) {
+  if (!youtube) return "";
+  const configured = Boolean(youtube.configured);
+  const status = youtube.status?.state || "idle";
+  const detail = youtube.status?.detail || "";
+  const adminLocked = Boolean(youtube.control?.adminLocked);
+  const current = configured
+    ? `
+      <div class="rule-stack" data-status="${escapeAttr(status)}">
+        <span class="rule-summary">YouTube ${escapeHtml(youtube.channelHandle ? `@${youtube.channelHandle}` : youtube.videoId || youtube.liveChatId || youtube.channelId || "target")} · ${escapeHtml(status)}</span>
+        ${youtube.channelHandle ? `<div class="rule-row"><b>handle</b><code>@${escapeHtml(youtube.channelHandle)}</code></div>` : ""}
+        ${youtube.channelId ? `<div class="rule-row"><b>channel</b><code>${escapeHtml(youtube.channelId)}</code></div>` : ""}
+        ${youtube.videoId ? `<div class="rule-row"><b>video</b><code>${escapeHtml(youtube.videoId)}</code></div>` : ""}
+        ${youtube.liveChatId ? `<div class="rule-row"><b>chat</b><code>${escapeHtml(youtube.liveChatId)}</code></div>` : ""}
+      </div>
+    `
+    : `<p class="setup-note">No YouTube live target set. Paste @notthreadguy, a channel URL/id, a live video URL/id, or a direct liveChatId.</p>`;
+
+  return `
+    <section class="setup-section" style="--src:${escapeAttr(sourceColor("youtube"))}">
+      <h3>YouTube <small>live chat</small></h3>
+      ${current}
+      <div class="watch-add">
+        <input id="youtubeInput" type="text" placeholder="@notthreadguy, youtube URL, video id, or liveChatId" autocomplete="off" spellcheck="false" maxlength="220">
+        <button type="button" id="youtubeSetButton"${adminLocked ? " disabled" : ""}>Go live</button>
+        ${configured ? `<button type="button" class="mini-btn" id="youtubeClearButton"${adminLocked ? " disabled" : ""}>Clear</button>` : ""}
+      </div>
+      ${Object.entries(youtube.vars || {}).map(([name, present]) => `
+        <div class="env-row" data-present="${present}">
+          <span class="env-dot"></span><code>${escapeHtml(name)}</code><span class="env-state">${present ? "set" : "missing"}</span>
+        </div>
+      `).join("")}
+      <p class="setup-note">${escapeHtml(youtube.note || "YouTube Data API key required.")}${adminLocked ? " Admin token required." : ""}</p>
+      ${detail ? `<p class="setup-note">${escapeHtml(detail)}</p>` : ""}
     </section>
   `;
 }
@@ -1695,6 +1740,30 @@ async function clearXLiveBroadcast() {
   }
 }
 
+async function submitYouTubeTarget(rawValue) {
+  const value = String(rawValue || "").trim();
+  if (!value) return;
+  try {
+    const isDirectChat = !/(^@|youtube\.com|youtu\.be|^[a-zA-Z0-9_-]{11}$)/.test(value);
+    await postJson("/api/youtube/live", isDirectChat ? { liveChatId: value } : { url: value });
+    trackActivation("youtube");
+    toast("youtube live chat target set");
+    await refreshSetup();
+  } catch {
+    toast("youtube live chat update failed", "err");
+  }
+}
+
+async function clearYouTubeTarget() {
+  try {
+    await postJson("/api/youtube/live", { action: "clear" });
+    toast("youtube live chat cleared");
+    await refreshSetup();
+  } catch {
+    toast("youtube clear failed", "err");
+  }
+}
+
 function onSetupClick(event) {
   const xControl = event.target.closest("[data-x-control]");
   if (xControl) {
@@ -1716,6 +1785,14 @@ function onSetupClick(event) {
   }
   if (event.target.id === "xliveClearButton") {
     clearXLiveBroadcast();
+    return;
+  }
+  if (event.target.id === "youtubeSetButton") {
+    submitYouTubeTarget(document.querySelector("#youtubeInput")?.value);
+    return;
+  }
+  if (event.target.id === "youtubeClearButton") {
+    clearYouTubeTarget();
     return;
   }
   if (event.target.id === "copyWebhookButton") {
@@ -1980,7 +2057,7 @@ function runBootSequence() {
   const lines = [
     "BUBBLEWIRE RELAY v4",
     ">> establishing link ............. ok",
-    ">> twitch / x / kick / x-live adapters .... armed",
+    ">> twitch / youtube / x / kick adapters .. armed",
     ">> normalizing feed .............. ok",
     ">> streaming"
   ];
@@ -2040,7 +2117,7 @@ function spawnStreamParticle(message, atX = null) {
   const canvas = els.signalStream;
   const width = canvas.clientWidth || 800;
   const height = canvas.clientHeight || 56;
-  const lane = { twitch: 0.2, x: 0.4, kick: 0.6, xlive: 0.8 }[message.source] ?? 0.5;
+  const lane = { twitch: 0.16, youtube: 0.34, x: 0.5, kick: 0.66, xlive: 0.84 }[message.source] ?? 0.5;
   const heat = message.heat || 0;
   stream.particles.push({
     x: atX === null ? width + 8 : atX,
@@ -2108,7 +2185,7 @@ function watchTabVisibility() {
 }
 
 function updateTabBadge() {
-  const base = "Bubblewire — One feed for Twitch, X, and Kick";
+  const base = "Bubblewire — One feed for Twitch, YouTube, X, and Kick";
   if (state.hiddenUnseen > 0 && document.hidden) {
     document.title = `(${Math.min(99, state.hiddenUnseen)}) ${base}`;
     if (els.favicon) els.favicon.href = "/assets/bubblewire-mark-alert.svg";

@@ -10,9 +10,10 @@ const ANSWERED_KEY = "bubblewire:streamer:answered:v1";
 
 const NOW_TTL_MS = 90000; // items decay out of the NOW slot after ~90s
 const NOW_SWAP_FACTOR = 1.15; // hysteresis: newer item must be 15% hotter to evict
-const SOURCE_PREFERRED_ORDER = ["twitch", "x", "kick", "xlive"];
+const SOURCE_PREFERRED_ORDER = ["twitch", "youtube", "x", "kick", "xlive"];
 const FALLBACK_COLORS = {
   twitch: "#9146ff",
+  youtube: "#ff0033",
   x: "#f4f2ea",
   kick: "#53fc18",
   xlive: "#ff6b35",

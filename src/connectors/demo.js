@@ -2,6 +2,7 @@ import { createInjectedMessage } from "../core/messages.js";
 
 const DEMO_AUTHORS = {
   twitch: ["BubbleOps", "chartlurker", "floorBidder", "candleBoss"],
+  youtube: ["ytbull", "clipfarmer", "livechatmax", "redcandle"],
   x: ["MarketBubble", "Ansem", "riskdesk", "liquiditywatch"],
   xlive: ["degenwhale", "solmaxi", "fadethebooks", "perpsgoblin"],
   kick: ["kickwhale", "greenCandle", "mintedagain", "sidebet"]
@@ -13,10 +14,12 @@ const DEMO_AUTHORS = {
 // signal to surface in demo mode.
 const DEMO_LINES = [
   ["twitch", "marketbubble", "HYPE just different, this run is insane PogChamp"],
+  ["youtube", "threadguy", "YouTube chat just found Bubblewire, this is clean"],
   ["x", "challenge-watch", "Ansem is cooking again, $HYPE looking cracked"],
   ["xlive", "ansem-broadcast", "Ansem live rn and $HYPE chart printing, LFG"],
   ["kick", "marketbubble", "thanks for the polymarket picks, absolute W"],
   ["twitch", "marketbubble", "chat moving faster than the candles LETSGO"],
+  ["youtube", "threadguy", "can you show the $SOL levels again?"],
   ["x", "creator-signal", "one feed for Twitch X and Kick is the actual unlock"],
   ["xlive", "ansem-broadcast", "what's the invalidation on this $SOL entry?"],
   ["kick", "marketbubble", "wait how do I add my own channel?"],
@@ -48,6 +51,10 @@ export function createDemoConnector(hub, options = {}) {
     hub.setSourceStatus("twitch", {
       state: "demo",
       detail: "demo feed active; set Twitch EventSub env vars for live chat"
+    });
+    hub.setSourceStatus("youtube", {
+      state: "demo",
+      detail: "demo feed active; set YOUTUBE_API_KEY and a live video or chat id"
     });
     hub.setSourceStatus("x", {
       state: "demo",

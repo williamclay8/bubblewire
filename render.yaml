@@ -22,7 +22,21 @@ services:
       - key: ADMIN_TOKEN
         sync: false
       - key: TWITCH_CHANNELS
-        value: fazebanks,marketbubble,xqc
+        value: threadguy,fazebanks,marketbubble,xqc
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: YOUTUBE_LIVE_CHAT_ID
+        sync: false
+      - key: YOUTUBE_CHANNEL_HANDLE
+        value: ""
+      - key: YOUTUBE_CHANNEL_ID
+        value: ""
+      - key: YOUTUBE_VIDEO_ID
+        sync: false
+      - key: YOUTUBE_POLL_INTERVAL_MS
+        value: "5000"
+      - key: YOUTUBE_MAX_RESULTS
+        value: "200"
       - key: KICK_WEBHOOK_PUBLIC_URL
         value: https://bubblewire-challenge.onrender.com
       - key: KICK_AUTO_SUBSCRIBE

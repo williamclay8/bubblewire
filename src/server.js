@@ -7,6 +7,14 @@ import { createDemoConnector } from "./connectors/demo.js";
 import { resolveKickConfig, shouldRequireKickSignature, startKickConnector, verifyKickWebhookSignature } from "./connectors/kick.js";
 import { startTwitchConnector } from "./connectors/twitch.js";
 import {
+  cleanYouTubeChannelId,
+  cleanYouTubeLiveChatId,
+  extractYouTubeChannelHandle,
+  extractYouTubeVideoId,
+  resolveYouTubeConfig,
+  startYouTubeConnector
+} from "./connectors/youtube.js";
+import {
   clearXLiveBroadcastRules,
   extractXPostId,
   fetchXConnectionHistory,
@@ -66,9 +74,12 @@ if (typeof analysisInterval.unref === "function") analysisInterval.unref();
 
 const twitchChannelsFile = join(dataDir, "twitch-channels.json");
 const xliveFile = process.env.XLIVE_FILE || join(dataDir, "xlive.json");
+const youtubeFile = process.env.YOUTUBE_FILE || join(dataDir, "youtube.json");
 let runtimeTwitchChannels = await loadRuntimeTwitchChannels();
 let runtimeXLiveBroadcastId = await loadRuntimeXLiveBroadcast();
+let runtimeYouTubeTarget = await loadRuntimeYouTubeTarget();
 let twitchConnector = startTwitchConnector(hub, twitchEnv());
+let youtubeConnector = startYouTubeConnector(hub, youtubeEnv());
 let xConnector = startManagedXConnector();
 
 if (demoEnabled) {
@@ -275,6 +286,46 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, { ok: false, error: "admin token required" }, 401);
       }
       return sendJson(response, await clearXLiveBroadcast());
+    }
+
+    if (request.method === "GET" && pathname === "/api/youtube/live") {
+      return sendJson(response, youtubeSnapshot());
+    }
+
+    if (request.method === "POST" && pathname === "/api/youtube/live") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      const payload = await readJsonBody(request);
+      const action = String(payload.action || "").trim().toLowerCase();
+      if (action === "clear") {
+        return sendJson(response, await clearYouTubeTarget());
+      }
+
+      const rawVideo = payload.url || payload.videoId || payload.video || payload.channelHandle || payload.handle || "";
+      const rawChat = payload.liveChatId || payload.chatId || "";
+      const videoId = extractYouTubeVideoId(rawVideo);
+      const liveChatId = cleanYouTubeLiveChatId(rawChat);
+      const channelHandle = videoId ? "" : extractYouTubeChannelHandle(payload.channelHandle || payload.handle || payload.channel || rawVideo || "");
+      const channelId = cleanYouTubeChannelId(payload.channelId || "");
+      if (!videoId && !liveChatId && !channelHandle && !channelId) {
+        return sendJson(response, {
+          ok: false,
+          error: "expected a YouTube watch/live URL, video id, live chat id, channel id, or @handle"
+        }, 400);
+      }
+
+      runtimeYouTubeTarget = { videoId, liveChatId, channelId, channelHandle };
+      await persistRuntimeYouTubeTarget();
+      restartYouTubeConnector();
+      return sendJson(response, { ok: true, ...youtubeSnapshot() });
+    }
+
+    if (request.method === "DELETE" && pathname === "/api/youtube/live") {
+      if (!isAdminAuthorized(request)) {
+        return sendJson(response, { ok: false, error: "admin token required" }, 401);
+      }
+      return sendJson(response, await clearYouTubeTarget());
     }
 
     if (request.method === "GET" && matches(pathname, "/api/export.ndjson", "/export.ndjson")) {
@@ -485,6 +536,16 @@ function xEnv() {
   return { ...process.env, X_LIVE_BROADCAST_ID: runtimeXLiveBroadcastId };
 }
 
+function youtubeEnv() {
+  return {
+    ...process.env,
+    YOUTUBE_VIDEO_ID: runtimeYouTubeTarget.videoId || process.env.YOUTUBE_VIDEO_ID || "",
+    YOUTUBE_LIVE_CHAT_ID: runtimeYouTubeTarget.liveChatId || process.env.YOUTUBE_LIVE_CHAT_ID || "",
+    YOUTUBE_CHANNEL_ID: runtimeYouTubeTarget.channelId || process.env.YOUTUBE_CHANNEL_ID || "",
+    YOUTUBE_CHANNEL_HANDLE: runtimeYouTubeTarget.channelHandle || process.env.YOUTUBE_CHANNEL_HANDLE || process.env.YOUTUBE_HANDLE || ""
+  };
+}
+
 function startManagedXConnector() {
   if (runtimeXPaused) return createPausedXConnector();
   return startXConnector(hub, xEnv());
@@ -497,6 +558,15 @@ function restartXConnector() {
     /* connector already down */
   }
   xConnector = startManagedXConnector();
+}
+
+function restartYouTubeConnector() {
+  try {
+    youtubeConnector?.stop();
+  } catch {
+    /* connector already down */
+  }
+  youtubeConnector = startYouTubeConnector(hub, youtubeEnv());
 }
 
 function createPausedXConnector() {
@@ -576,12 +646,46 @@ async function persistRuntimeXLiveBroadcast() {
   }
 }
 
+async function loadRuntimeYouTubeTarget() {
+  const saved = await readFile(youtubeFile, "utf8")
+    .then((raw) => JSON.parse(raw))
+    .catch(() => null);
+  if (!saved || typeof saved !== "object") return { videoId: "", liveChatId: "", channelId: "", channelHandle: "" };
+  return {
+    videoId: extractYouTubeVideoId(saved.videoId || saved.url || "") || "",
+    liveChatId: cleanYouTubeLiveChatId(saved.liveChatId || saved.chatId || "") || "",
+    channelId: cleanYouTubeChannelId(saved.channelId || "") || "",
+    channelHandle: extractYouTubeChannelHandle(saved.channelHandle || saved.handle || saved.channel || "") || ""
+  };
+}
+
+async function persistRuntimeYouTubeTarget() {
+  try {
+    await mkdir(dataDir, { recursive: true });
+    await writeFile(youtubeFile, JSON.stringify({
+      videoId: runtimeYouTubeTarget.videoId || null,
+      liveChatId: runtimeYouTubeTarget.liveChatId || null,
+      channelId: runtimeYouTubeTarget.channelId || null,
+      channelHandle: runtimeYouTubeTarget.channelHandle || null
+    }, null, 2));
+  } catch {
+    /* persistence is best-effort */
+  }
+}
+
 async function clearXLiveBroadcast() {
   const rules = await clearXLiveBroadcastRules(process.env);
   runtimeXLiveBroadcastId = "";
   await persistRuntimeXLiveBroadcast();
   xConnector?.setXLiveBroadcast?.("");
   return { ok: true, rules, ...xliveSnapshot() };
+}
+
+async function clearYouTubeTarget() {
+  runtimeYouTubeTarget = { videoId: "", liveChatId: "", channelId: "", channelHandle: "" };
+  await persistRuntimeYouTubeTarget();
+  restartYouTubeConnector();
+  return { ok: true, ...youtubeSnapshot() };
 }
 
 function xliveSnapshot() {
@@ -594,10 +698,34 @@ function xliveSnapshot() {
   };
 }
 
+function youtubeSnapshot() {
+  const connector = youtubeConnector?.snapshot?.() || {};
+  const config = resolveYouTubeConfig(youtubeEnv());
+  const videoId = connector.videoId || config.videoId || null;
+  const liveChatId = connector.liveChatId || config.liveChatId || null;
+  const channelId = connector.channelId || config.channelId || null;
+  const channelHandle = connector.channelHandle || config.channelHandle || null;
+  return {
+    videoId,
+    liveChatId,
+    channelId,
+    channelHandle,
+    configured: Boolean(videoId || liveChatId || channelId || channelHandle),
+    status: hub.snapshot().status.youtube || null,
+    diagnostics: connector.diagnostics || null,
+    control: {
+      endpoint: "/api/youtube/live",
+      adminLocked: isAdminLocked()
+    },
+    note: "Uses YouTube Data API liveChat/messages; set @handle, channel id, video URL/id, or direct liveChatId."
+  };
+}
+
 function setupSnapshot(request) {
   const env = process.env;
   const present = (name) => Boolean(env[name] && String(env[name]).trim());
   const kickConfig = resolveKickConfig(env);
+  const youtube = youtubeSnapshot();
   const xSnapshot = xConnector?.snapshot?.() || { rules: resolveXRulesFromEnv(env) };
   const statusSnapshot = hub.snapshot().status;
   const hostHeader = request.headers.host || `${host}:${port}`;
@@ -625,6 +753,23 @@ function setupSnapshot(request) {
           TWITCH_OAUTH_TOKEN: present("TWITCH_OAUTH_TOKEN")
         },
         note: "EventSub needs all four vars. IRC works with channels alone (anonymous read-only)."
+      },
+      youtube: {
+        vars: {
+          YOUTUBE_API_KEY: present("YOUTUBE_API_KEY") || present("GOOGLE_API_KEY"),
+          YOUTUBE_LIVE_CHAT_ID: present("YOUTUBE_LIVE_CHAT_ID"),
+          YOUTUBE_VIDEO_ID: present("YOUTUBE_VIDEO_ID") || present("YOUTUBE_LIVE_VIDEO_ID") || present("YOUTUBE_URL") || present("YOUTUBE_LIVE_URL"),
+          YOUTUBE_CHANNEL_HANDLE: present("YOUTUBE_CHANNEL_HANDLE") || present("YOUTUBE_HANDLE") || present("YOUTUBE_CHANNEL_ID") || present("YOUTUBE_CHANNEL_URL")
+        },
+        videoId: youtube.videoId,
+        liveChatId: youtube.liveChatId,
+        channelId: youtube.channelId,
+        channelHandle: youtube.channelHandle,
+        configured: youtube.configured,
+        status: youtube.status,
+        diagnostics: youtube.diagnostics,
+        control: youtube.control,
+        note: youtube.note
       },
       x: {
         vars: {
@@ -760,6 +905,11 @@ function shutdown() {
   demo.stop();
   try {
     twitchConnector?.stop();
+  } catch {
+    /* already stopped */
+  }
+  try {
+    youtubeConnector?.stop();
   } catch {
     /* already stopped */
   }

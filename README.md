@@ -1,6 +1,6 @@
 # Bubblewire
 
-Bubblewire is a submission-grade unified chat relay for the Market Bubble Vibe Code Challenge: Twitch + X + Kick + X Live (Ansem's broadcast chat) in one real-time feed with source labels.
+Bubblewire is a submission-grade unified chat relay for the Market Bubble Vibe Code Challenge: Twitch + YouTube + X + Kick + X Live broadcast replies in one real-time feed with source labels.
 
 It runs with no package install, starts demo mode automatically, and upgrades to live provider adapters when server-side credentials or public channel config are present.
 
@@ -30,6 +30,8 @@ Health check: `http://localhost:3000/healthz`.
 
 Twitch: EventSub `channel.chat.message` is preferred. Set `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID`. IRC remains available as a fallback: set only `TWITCH_CHANNELS` for anonymous read-only public chat, or add `TWITCH_USERNAME` and `TWITCH_OAUTH_TOKEN` for authenticated IRC.
 
+YouTube: Bubblewire consumes official YouTube Data API live-chat messages. Set `YOUTUBE_API_KEY` (or `GOOGLE_API_KEY`) plus `YOUTUBE_CHANNEL_HANDLE=@notthreadguy`, `YOUTUBE_CHANNEL_ID`, `YOUTUBE_LIVE_CHAT_ID`, or a live video target via `YOUTUBE_VIDEO_ID`, `YOUTUBE_LIVE_VIDEO_ID`, `YOUTUBE_URL`, or the setup panel (`s` → YouTube → Go live). When given a handle, Bubblewire resolves the channel with `channels.list`, searches for an active broadcast with `search.list`, calls `videos.list` for `liveStreamingDetails.activeLiveChatId`, then polls `liveChat/messages` using YouTube's returned `pollingIntervalMillis`. Runtime config persists to `data/youtube.json`.
+
 X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_TOKEN`. Create stream rules in X before starting the app.
 
 **Important:** X integration delivers filtered posts, not live chat messages. This is a current limitation of the X API v2 filtered stream.
@@ -54,7 +56,7 @@ Use `DEMO_MODE=on` locally or for judge-safe demos. Use `DEMO_MODE=off` for prod
 
 Useful local controls:
 
-- `Spike` fires a burst across Twitch, X, and Kick labels.
+- `Spike` fires a burst across Twitch, YouTube, X, X Live, and Kick labels.
 - `Pause` locks the feed and increments unread count.
 - `Pin` saves judge-worthy messages in the inspector (persisted across reloads).
 - `Export` downloads the normalized feed as NDJSON.
@@ -67,7 +69,7 @@ Bubblewire doesn't just display chat — it reads it. A zero-dependency, server-
 
 - **Chat mood** — per-source and overall sentiment (hyped / positive / neutral / restless / negative), via a transparent rule-based lexicon with negation handling and EWMA smoothing. A mood badge sits in the feed header and a tone flip raises a toast ("chat mood turning negative").
 - **Moments** — charged messages during activity spikes are auto-captured with their trigger message; click one to jump straight to it in the feed (the clippable highlight).
-- **Trending now** — frequency-ranked terms with a cross-platform bonus, so a term appearing on Twitch *and* X *and* Kick outranks single-channel spam. Click a term to filter.
+- **Trending now** — frequency-ranked terms with a cross-platform bonus, so a term appearing on Twitch *and* YouTube *and* X outranks single-channel spam. Click a term to filter.
 - **Surfaced questions** — recent interrogatives the streamer may not have answered, deduped, click-to-jump.
 
 It is labeled **heuristic** in the UI on purpose: it is transparent scoring, not a trained model, and it never claims otherwise. Served at `/analysis.json`, pushed live over the SSE `analysis` event, and covered by 9 unit tests.
@@ -106,7 +108,7 @@ In IRC mode, Twitch channels can be joined or left at runtime from the panel —
 
 ## Overlay Configurator
 
-`/overlay-setup.html` builds OBS browser-source URLs with a live transparent-background preview. The overlay accepts `?max=1-12`, `fade=<seconds>`, `scale=0.6-2`, `align=top|bottom`, and `sources=twitch,x,kick`.
+`/overlay-setup.html` builds OBS browser-source URLs with a live transparent-background preview. The overlay accepts `?max=1-12`, `fade=<seconds>`, `scale=0.6-2`, `align=top|bottom`, and `sources=twitch,youtube,x,xlive,kick`.
 
 ## PWA
 
@@ -117,6 +119,7 @@ Bubblewire installs as a PWA (manifest + service worker). The service worker cac
 - Twitch EventSub is the current preferred chat path; anonymous read-only IRC is the no-secret live fallback for public channels.
 - X filtered stream is near real-time posts, not livestream chat, and may require paid/API access.
 - Kick chat ingestion is official webhook-based `chat.message.sent`; localhost needs ngrok, Cloudflare Tunnel, or similar. No official anonymous/public read-only Kick chat stream was found in current Kick docs.
+- YouTube live chat uses the official Data API and needs an API key plus a channel handle/id, live video, or liveChatId.
 - Provider tokens stay server-side. The browser receives only normalized events and status.
 
 ## Verification
@@ -131,7 +134,7 @@ npm run proof:live # with DEMO_MODE=off server running
 npm run test:ui    # browser smoke test; needs playwright-core + Chromium, skips otherwise
 ```
 
-The tests cover Twitch IRC, Twitch EventSub, X filtered stream, X rule visibility, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, proof receipts, source stats, and SSE subscriber behavior.
+The tests cover Twitch IRC, Twitch EventSub, YouTube live chat normalization/config/polling, X filtered stream, X rule visibility, Kick webhooks, Kick event subscription config, optional Kick signature verification, hub dedupe, proof receipts, source stats, and SSE subscriber behavior.
 
 `npm run proof` writes a local evidence receipt to `docs/evidence/logs/proof.json`, posts a Kick webhook-shaped event, records the proof snapshot, and confirms `/status.json` responds.
 

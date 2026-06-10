@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-const SOURCES = ["twitch", "x", "xlive", "kick"];
+const SOURCES = ["twitch", "youtube", "x", "xlive", "kick"];
 const LIVE_EVIDENCE = new Set(["live", "webhook-proof", "signed"]);
 const DEFAULT_RULES = {
   approvedOnly: false,
@@ -211,6 +211,9 @@ function sourcePreflight(source, snapshot, setup) {
   if (source === "kick") {
     return preflightItem(source, kickLooksConfigured(setupSource) ? "warn" : "fail", status.detail || setupSource.webhookUrl || setupSource.note || "waiting");
   }
+  if (source === "youtube") {
+    return preflightItem(source, youtubeLooksConfigured(setupSource) ? "warn" : "fail", status.detail || setupSource.note || "waiting for YouTube live chat");
+  }
   return preflightItem(source, "warn", status.detail || "waiting");
 }
 
@@ -259,6 +262,13 @@ function proofSetupSummary(source, setupSource = {}) {
       webhookPath: setupSource.webhookUrl ? "/kick.webhook" : ""
     };
   }
+  if (source === "youtube") {
+    return {
+      configured: youtubeLooksConfigured(setupSource),
+      videoId: setupSource.videoId || null,
+      liveChatId: setupSource.liveChatId || null
+    };
+  }
   return { configured: false };
 }
 
@@ -272,6 +282,15 @@ function xLooksConfigured(setupSource = {}) {
 
 function kickLooksConfigured(setupSource = {}) {
   return Boolean(setupSource.webhookUrl || setupSource.vars?.KICK_WEBHOOK_PUBLIC_URL);
+}
+
+function youtubeLooksConfigured(setupSource = {}) {
+  return Boolean(
+    setupSource.configured ||
+      setupSource.liveChatId ||
+      setupSource.videoId ||
+      setupSource.vars?.YOUTUBE_API_KEY
+  );
 }
 
 function xDiagnosticDetail(setupSource = {}, status = {}) {

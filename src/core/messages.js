@@ -6,6 +6,11 @@ export const SOURCE_META = {
     color: "#9146ff",
     home: "https://www.twitch.tv"
   },
+  youtube: {
+    label: "YouTube",
+    color: "#ff0033",
+    home: "https://www.youtube.com"
+  },
   x: {
     label: "X",
     color: "#f4f2ea",
@@ -145,6 +150,47 @@ export function normalizeKickWebhook(payload, headers = {}, options = {}) {
     mode: "live",
     evidenceLevel: options.evidenceLevel || (signatureStatus === "verified" ? "signed" : "webhook-proof"),
     raw: { eventType, signature: signatureStatus }
+  });
+}
+
+export function normalizeYouTubeLiveChatMessage(payload, context = {}) {
+  if (!payload || typeof payload !== "object" || !payload.id) return null;
+
+  const snippet = payload.snippet || {};
+  const author = payload.authorDetails || {};
+  const videoId = cleanText(context.videoId || "", 32);
+  const channel = cleanText(
+    context.channel || context.videoTitle || context.channelTitle || videoId || snippet.liveChatId || "youtube",
+    120
+  );
+  const content =
+    snippet.displayMessage ||
+    snippet.textMessageDetails?.messageText ||
+    snippet.superChatDetails?.userComment ||
+    snippet.superStickerDetails?.superStickerMetadata?.altText ||
+    "";
+
+  return createUnifiedMessage({
+    id: `youtube:${payload.id}`,
+    source: "youtube",
+    rawType: snippet.type || "liveChatMessage",
+    author: {
+      id: author.channelId || snippet.authorChannelId || "",
+      name: author.displayName || "YouTube user",
+      handle: author.channelId || "",
+      avatar: author.profileImageUrl || "",
+      verified: Boolean(author.isVerified || author.isChatOwner)
+    },
+    channel,
+    content,
+    receivedAt: coerceDate(snippet.publishedAt),
+    url: videoId ? `${SOURCE_META.youtube.home}/watch?v=${encodeURIComponent(videoId)}` : author.channelUrl || SOURCE_META.youtube.home,
+    badges: formatYouTubeBadges(author),
+    mode: "live",
+    raw: {
+      liveChatId: snippet.liveChatId || context.liveChatId || "",
+      messageType: snippet.type || "liveChatMessage"
+    }
   });
 }
 
@@ -309,6 +355,15 @@ function formatKickBadges(badges = []) {
   return badges
     .filter((badge) => badge?.text)
     .map((badge) => (badge.count ? `${badge.text} x${badge.count}` : badge.text));
+}
+
+function formatYouTubeBadges(author = {}) {
+  return [
+    author.isVerified ? "verified" : "",
+    author.isChatOwner ? "owner" : "",
+    author.isChatModerator ? "moderator" : "",
+    author.isChatSponsor ? "sponsor" : ""
+  ].filter(Boolean);
 }
 
 function fragmentsToText(fragments = []) {

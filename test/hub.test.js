@@ -28,6 +28,7 @@ test("createFeedHub stores each message once and updates source stats", () => {
   );
   assert.equal(snapshot.stats.totalMessages, 4);
   assert.equal(snapshot.stats.sources.twitch.count, 1);
+  assert.equal(snapshot.stats.sources.youtube.count, 0);
   assert.equal(snapshot.stats.sources.x.count, 1);
   assert.equal(snapshot.stats.sources.kick.count, 2);
 });
@@ -65,6 +66,7 @@ test("createFeedHub exposes per-source proof receipts from the latest accepted m
   assert.equal(snapshot.proof.sources.twitch.rawType, "PRIVMSG");
   assert.equal(snapshot.proof.sources.kick.evidenceLevel, "signed");
   assert.equal(snapshot.proof.sources.kick.lastMessageAt, "2026-06-04T17:01:00.000Z");
+  assert.equal(snapshot.proof.sources.youtube.evidenceLevel, "waiting");
   assert.equal(snapshot.proof.sources.x.evidenceLevel, "waiting");
 });
 

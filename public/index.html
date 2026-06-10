@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bubblewire — One feed for Twitch, X, and Kick</title>
-    <meta name="description" content="Unified real-time chat for Twitch, X, and Kick with source labels, watchlist alerts, history, and an OBS overlay.">
+    <title>Bubblewire — One feed for Twitch, YouTube, X, and Kick</title>
+    <meta name="description" content="Unified real-time chat for Twitch, YouTube, X, and Kick with source labels, watchlist alerts, history, and an OBS overlay.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
     <link rel="manifest" href="/manifest.webmanifest">
@@ -46,7 +46,7 @@
 
       <section class="product-command" id="productCommand" aria-label="Bubblewire product masthead">
         <div class="command-copy">
-          <h1>One real-time feed for Twitch, X, and Kick</h1>
+          <h1>One real-time feed for Twitch, YouTube, X, and Kick</h1>
           <p>Source-labeled live chat with watchlist alerts, history, and an OBS overlay.</p>
         </div>
         <div class="command-actions">
@@ -82,9 +82,10 @@
             <div class="segmented" role="group" aria-label="Source filter">
               <button data-source-filter="all" class="active" aria-pressed="true" title="Show all sources [1]">All <small data-count>0</small></button>
               <button data-source-filter="twitch" aria-pressed="false" title="Twitch only [2]">Twitch <small data-count>0</small></button>
-              <button data-source-filter="x" aria-pressed="false" title="X only [3]">X <small data-count>0</small></button>
-              <button data-source-filter="kick" aria-pressed="false" title="Kick only [4]">Kick <small data-count>0</small></button>
+              <button data-source-filter="youtube" aria-pressed="false" title="YouTube only [3]">YouTube <small data-count>0</small></button>
+              <button data-source-filter="x" aria-pressed="false" title="X only [4]">X <small data-count>0</small></button>
               <button data-source-filter="xlive" aria-pressed="false" title="X Live only [5]">X Live <small data-count>0</small></button>
+              <button data-source-filter="kick" aria-pressed="false" title="Kick only [6]">Kick <small data-count>0</small></button>
             </div>
           </section>
 
@@ -150,7 +151,7 @@
             </div>
           </section>
 
-          <p class="rail-hint">[/] search · [p] pause · [1-4] filter · [esc] clear</p>
+          <p class="rail-hint">[/] search · [p] pause · [1-6] filter · [esc] clear</p>
         </aside>
 
         <section class="feed-panel" id="feedPanel" aria-label="Unified feed">
@@ -213,6 +214,7 @@
             </div>
             <div class="radar-legend" aria-hidden="true">
               <span><i style="background:#9146ff"></i>twitch</span>
+              <span><i style="background:#ff0033"></i>youtube</span>
               <span><i style="background:#f4f2ea"></i>x</span>
               <span><i style="background:#53fc18"></i>kick</span>
               <span><i style="background:#ff5c5c"></i>x live</span>
@@ -260,6 +262,6 @@
       </div>
     </div>
 
-    <script type="module" src="/app.js?v=audit-fixes-20260610b"></script>
+    <script type="module" src="/app.js?v=youtube-live-20260610"></script>
   </body>
 </html>

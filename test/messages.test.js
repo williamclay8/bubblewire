@@ -5,6 +5,7 @@ import {
   normalizeKickWebhook,
   normalizeTwitchEventSubNotification,
   normalizeTwitchLine,
+  normalizeYouTubeLiveChatMessage,
   normalizeXStreamEvent,
   parseIrcTags
 } from "../src/core/messages.js";
@@ -122,6 +123,48 @@ test("normalizeKickWebhook labels verified signed webhook evidence", () => {
 
   assert.equal(message.evidenceLevel, "signed");
   assert.equal(message.raw.signature, "verified");
+});
+
+test("normalizeYouTubeLiveChatMessage maps text chat into the unified contract", () => {
+  const message = normalizeYouTubeLiveChatMessage(
+    {
+      id: "LCC.EhwKGkNPUF9sdGJ6",
+      snippet: {
+        type: "textMessageEvent",
+        liveChatId: "Cg0KC2xpdmVfY2hhdA",
+        publishedAt: "2026-06-10T19:05:13.000Z",
+        displayMessage: "Threadguy chat is moving on YouTube too",
+        textMessageDetails: {
+          messageText: "Threadguy chat is moving on YouTube too"
+        }
+      },
+      authorDetails: {
+        channelId: "UCviewer42",
+        channelUrl: "https://www.youtube.com/channel/UCviewer42",
+        displayName: "YouTube Bull",
+        profileImageUrl: "https://yt.example/avatar.jpg",
+        isVerified: true,
+        isChatOwner: false,
+        isChatSponsor: true,
+        isChatModerator: false
+      }
+    },
+    { videoId: "dQw4w9WgXcQ", channel: "threadguy" }
+  );
+
+  assert.equal(message.id, "youtube:LCC.EhwKGkNPUF9sdGJ6");
+  assert.equal(message.source, "youtube");
+  assert.equal(message.sourceLabel, "YouTube");
+  assert.equal(message.rawType, "textMessageEvent");
+  assert.equal(message.author.name, "YouTube Bull");
+  assert.equal(message.author.handle, "UCviewer42");
+  assert.equal(message.author.avatar, "https://yt.example/avatar.jpg");
+  assert.equal(message.author.verified, true);
+  assert.equal(message.channel, "threadguy");
+  assert.equal(message.content, "Threadguy chat is moving on YouTube too");
+  assert.equal(message.receivedAt, "2026-06-10T19:05:13.000Z");
+  assert.equal(message.url, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  assert.deepEqual(message.badges, ["verified", "sponsor"]);
 });
 
 test("normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels", () => {

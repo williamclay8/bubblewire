@@ -1,9 +1,9 @@
 const PRESETS = {
-  broadcast: { preset: "broadcast", label: "broadcast", mode: "feed", max: 6, fade: 0, scale: 1, align: "top", sources: ["twitch", "x", "kick"] },
-  ticker: { preset: "ticker", label: "ticker", mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "kick", "twitch"] },
-  approved: { preset: "approved", label: "approved", mode: "approved", approvedOnly: true, max: 8, fade: 0, scale: 1.05, align: "top", sources: ["twitch", "x", "kick"] },
-  moments: { preset: "moments", label: "moments", mode: "moments", max: 5, fade: 0, scale: 1.08, align: "top", sources: ["twitch", "x", "kick"] },
-  questions: { preset: "questions", label: "questions", mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
+  broadcast: { preset: "broadcast", label: "broadcast", mode: "feed", max: 6, fade: 0, scale: 1, align: "top", sources: ["twitch", "youtube", "x", "kick"] },
+  ticker: { preset: "ticker", label: "ticker", mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "youtube", "kick", "twitch"] },
+  approved: { preset: "approved", label: "approved", mode: "approved", approvedOnly: true, max: 8, fade: 0, scale: 1.05, align: "top", sources: ["twitch", "youtube", "x", "kick"] },
+  moments: { preset: "moments", label: "moments", mode: "moments", max: 5, fade: 0, scale: 1.08, align: "top", sources: ["twitch", "youtube", "x", "kick"] },
+  questions: { preset: "questions", label: "questions", mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "youtube", "kick", "x"] }
 };
 
 const els = {

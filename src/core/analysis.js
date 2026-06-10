@@ -3,7 +3,7 @@
 // text. It is intentionally labeled "heuristic" in the UI; it does not claim
 // to be a trained model. Pure functions where possible so it is unit-testable.
 
-const SOURCES = ["twitch", "x", "xlive", "kick"];
+const SOURCES = ["twitch", "youtube", "x", "xlive", "kick"];
 
 // Compact sentiment lexicon tuned for livestream chat, not prose. Weighted.
 const POSITIVE = {

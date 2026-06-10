@@ -14,11 +14,13 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   const publicText = `${html}\n${app}\n${css}`;
 
   assert.doesNotMatch(publicText, /Y Combinator|\byc\b|ycombinator/i);
-  assert.match(html, /One real-time feed for Twitch, X, and Kick/);
+  assert.match(html, /One real-time feed for Twitch, YouTube, X, and Kick/);
   assert.match(html, /id="productCommand"/);
   assert.match(html, /id="productDemoButton"/);
   assert.match(html, /id="connectSourcesButton"/);
-  assert.match(html, /src="\/app\.js\?v=audit-fixes-20260610b"/);
+  assert.match(html, /data-source-filter="youtube"/);
+  assert.match(app, /SOURCE_ORDER = \["twitch", "youtube", "x", "xlive", "kick"\]/);
+  assert.match(html, /src="\/app\.js\?v=youtube-live-20260610"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
   assert.match(app, /productDemoButton:\s*document\.querySelector\("#productDemoButton"\)/);
@@ -30,6 +32,16 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   assert.match(css, /\.product-command\s*{/);
   assert.match(css, /\.command-copy h1\s*{/);
   assert.match(css, /body\[data-judge="1"\]\s+\.product-command\s*{[\s\S]*display:\s*none\s*!important;/);
+});
+
+test("overlay configurator exposes YouTube as a source", async () => {
+  const [html, app] = await Promise.all([
+    readFile(`${repoRoot}/public/overlay-setup.html`, "utf8"),
+    readFile(`${repoRoot}/public/overlay-setup.js`, "utf8")
+  ]);
+
+  assert.match(html, /data-cfg-source="youtube"/);
+  assert.match(app, /sources:\s*\["twitch", "youtube", "x", "kick"\]/);
 });
 
 test("mobile product shell stays compact and feed-first in judge mode", async () => {
