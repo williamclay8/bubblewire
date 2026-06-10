@@ -28,7 +28,7 @@ Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-0
 
 New public YouTube upload: `https://youtu.be/kwUZgMBtK48`.
 
-Resubmission script and local narrated draft manifest: `docs/submission-video-script-2026-06-10.md` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. After push/deploy, the intended public MP4 mirror is `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
+Resubmission script and local narrated draft manifest: `docs/submission-video-script-2026-06-10.md` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The public MP4 mirror is `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 
 ## Latest Resubmission Receipt
 

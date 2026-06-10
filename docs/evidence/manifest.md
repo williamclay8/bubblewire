@@ -16,7 +16,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Next resubmission script: `docs/submission-video-script-2026-06-10.md`
 - Next narrated draft manifest: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`
 - Next narrated local draft: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4`
-- Next intended public MP4 URL after push/deploy: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`
+- Public MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`
 - Public health check: `https://bubblewire.xyz/healthz`
 - Local overlay: `http://127.0.0.1:3000/overlay.html`
 - Health check: `http://127.0.0.1:3000/healthz`
@@ -60,7 +60,7 @@ Note: screenshots and video frames were re-captured on 2026-06-05 after adding t
 
 The final-cut demo video is uploaded to YouTube as `https://youtu.be/hLerxCevS2w`, with hosted MP4 mirror `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`. The local source is `docs/evidence/video/bubblewire-final-cut-2026-06-05.mp4`, rendered at 1920 x 1080, 30fps, H.264/AAC, with 79.97s duration. Source frames live in `docs/evidence/video-frames/final-cut/`, with `contact-sheet.png`, `shot-manifest.json`, and `docs/evidence/video/bubblewire-final-cut-preview.png` for QA review. Public proof content avoids secrets and private dashboards.
 
-The next resubmission script is `docs/submission-video-script-2026-06-10.md`. Its local narrated-video recipe is `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The first local narrated draft rendered to `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4` with caption sidecars at `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt`. The narrated cut was uploaded publicly to YouTube as `https://youtu.be/kwUZgMBtK48`. Google Forms recorded the refreshed public-video resubmission on 2026-06-09 at 20:37 CDT. A deployable MP4 copy lives under `public/assets/` and should be reachable at `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4` after push/deploy.
+The next resubmission script is `docs/submission-video-script-2026-06-10.md`. Its local narrated-video recipe is `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The first local narrated draft rendered to `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4` with caption sidecars at `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt`. The narrated cut was uploaded publicly to YouTube as `https://youtu.be/kwUZgMBtK48`. Google Forms recorded the refreshed public-video resubmission on 2026-06-09 at 20:37 CDT. A deployable MP4 copy lives under `public/assets/` and is reachable at `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 
 ## 2026-06-05 Tranche Receipts
 
@@ -94,7 +94,7 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 - Local changes: tracked in the active release run until committed
 - Committed: tracked in the final Lumi closeout for the release run
 - Pushed: tracked in the final Lumi closeout for the release run
-- Deployed/live: `https://bubblewire.xyz` live proof passed on 2026-06-09; active branch source changes still need commit/push/deploy closeout
+- Deployed/live: release commit `c8303a2` is pushed to `main`, Render deploy `dep-d8kc2jdckfvc739hasjg` is live, `https://bubblewire.xyz` health check passes, and the public MP4 mirror returns HTTP 200
 - Entry submitted: yes, latest Google Form confirmation recorded 2026-06-09 20:37 CDT
 - Local server: used for demo-mode and live-only evidence capture, then stopped
 
@@ -134,4 +134,4 @@ Latest live source evidence from that proof:
 
 ## Submission Closeout
 
-Historical form steps are complete for prior submissions. The refreshed public-video resubmission was recorded by Google Forms on 2026-06-09 at 20:37 CDT. The active branch still needs final verification, commit/push, deployment, and live proof rerun before this repo can claim the new website/video-asset changes are live.
+Historical form steps are complete for prior submissions. The refreshed public-video resubmission was recorded by Google Forms on 2026-06-09 at 20:37 CDT. Release commit `c8303a2` is pushed to `main`; Render deploy `dep-d8kc2jdckfvc739hasjg` is live; `https://bubblewire.xyz` serves the refreshed demo-video link and public MP4 mirror.

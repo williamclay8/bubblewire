@@ -90,7 +90,7 @@ Bubblewire solves the real problem of live social attention: the important signa
 ## Submission Checklist
 
 - Rendered local narrated draft: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4`.
-- Intended deployed MP4 URL after push/deploy: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
+- Deployed MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 - Caption sidecars: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt`.
 - Render recipe: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`.
 - Review the MP4, SRT, VTT, and representative frames for secrets.

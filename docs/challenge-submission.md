@@ -46,7 +46,7 @@ The refreshed final cut was recorded from `https://bubblewire.xyz` on 2026-06-05
 
 Next resubmission draft manifest: `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The new narrated cut has been uploaded publicly to YouTube at `https://youtu.be/kwUZgMBtK48`.
 
-Intended deployed MP4 URL after push/deploy: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
+Deployed MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 
 ## Deployment Handoff
 
@@ -83,4 +83,4 @@ Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 
 
 ## Lumi Hygiene
 
-Historical verified app-code commit `fef9b96` is pushed, Render deploy `dep-d8hemdjrjlhs7384o2kg` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, and the previous YouTube demo `https://youtu.be/hLerxCevS2w` was reachable. Current public YouTube demo for the refreshed resubmission: `https://youtu.be/kwUZgMBtK48`. Public live proof passed on 2026-06-09 with Twitch, X, and Kick. Active branch changes remain local until the final Lumi closeout records commit, push, and deployment status.
+Current release commit `c8303a2` is pushed to `main`, Render deploy `dep-d8kc2jdckfvc739hasjg` is live, `https://bubblewire.xyz` is verified on Render and Cloudflare, and the deployed MP4 mirror is reachable. Current public YouTube demo for the refreshed resubmission: `https://youtu.be/kwUZgMBtK48`. Public live proof passed on 2026-06-09 with Twitch, X, and Kick.
