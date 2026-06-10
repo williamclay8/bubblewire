@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-06T16:29:55.275Z",
-  "baseUrl": "http://127.0.0.1:3000",
+  "generatedAt": "2026-06-10T01:40:05.693Z",
+  "baseUrl": "http://127.0.0.1:3100",
   "commands": [
     {
       "command": "npm test",
       "exitCode": 0,
-      "stdout": "\n> bubblewire@0.1.0 test\n> node --test\n\n✔ tokenize strips urls, punctuation, and lowercases (1.659209ms)\n✔ scoreSentiment separates positive, negative, and neutral (10.9915ms)\n✔ negation flips polarity (2.734541ms)\n✔ moodForScore bands map to labels (0.259333ms)\n✔ analyzer reports per-source mood and overall (3.055625ms)\n✔ analyzer detects a moment during a charged spike (0.98ms)\n✔ analyzer surfaces questions and dedupes them (0.919792ms)\n✔ analyzer ranks cross-platform trends above single-source terms (0.914958ms)\n✔ analyzer ignores demo and unknown sources (0.216ms)\n✔ history log appends and queries messages older than a cutoff (26.516416ms)\n✔ history log dedupes ids and rotates past max size (24.464625ms)\n✔ disabled history returns empty exhausted pages (0.485834ms)\n✔ createFeedHub stores each message once and updates source stats (4.872458ms)\n✔ createFeedHub exposes per-source proof receipts from the latest accepted message (0.318833ms)\n✔ createFeedHub broadcasts messages and status updates to subscribers (0.289084ms)\n✔ resolveKickConfig stays webhook-only unless auto subscribe is enabled (6.649583ms)\n✔ resolveKickConfig requires official Kick subscription credentials when enabled (0.118292ms)\n✔ createKickSubscriptionPayload targets chat.message.sent webhooks (0.092667ms)\n✔ shouldRequireKickSignature is opt-in (0.990208ms)\n✔ verifyKickWebhookSignature verifies Kick signed payload format (101.253125ms)\n✔ verifyKickWebhookSignature rejects missing or invalid signatures (0.067125ms)\n✔ DEMO_MODE=off blocks synthetic routes while keeping Kick webhooks live (228.854458ms)\n✔ setup.json exposes configured X rule labels without credentials (113.524792ms)\n✔ X connector control endpoint pauses and resumes runtime state (113.183625ms)\n✔ Render production locks admin endpoints when ADMIN_TOKEN is missing (112.118375ms)\n✔ parseIrcTags decodes Twitch IRC tag escapes (3.422875ms)\n✔ normalizeTwitchLine maps a PRIVMSG into the unified message contract (2.833708ms)\n✔ normalizeTwitchEventSubNotification maps channel.chat.message notifications (0.178041ms)\n✔ normalizeKickWebhook maps chat.message.sent webhook payloads (1.382875ms)\n✔ normalizeKickWebhook labels verified signed webhook evidence (0.257958ms)\n✔ normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels (0.317292ms)\n✔ homepage presents Bubblewire as a self-serve live audience command center (9.54275ms)\n✔ mobile product shell stays compact and feed-first in judge mode (1.097125ms)\n✔ resolveTwitchIrcConfig uses anonymous read-only IRC when only channels are configured (2.941916ms)\n✔ resolveTwitchIrcConfig keeps authenticated IRC credentials when present (0.301708ms)\n✔ dashboard exposes moment engine, proof console, workspace, and judge surfaces (15.709209ms)\n✔ overlay configurator includes broadcast presets with preset-aware URLs (3.192834ms)\n✔ mobile channel hero stacks input before the watch action (5.549333ms)\n✔ judge mode makes the mobile feed the first visible work surface (2.331959ms)\n✔ mobile dashboard keeps a phone-width startup layout with a denser feed (3.984167ms)\n✔ dashboard exposes a live proof receipt bound to status snapshots (3.759292ms)\n✔ setup drawer renders sanitized X stream rules (6.607875ms)\n✔ resolveXRulesFromEnv parses local X rule snapshots for setup visibility (2.164959ms)\n✔ summarizeXRules sanitizes X API rule payloads (0.1185ms)\n✔ summarizeXStreamFailure captures X problem details without leaking tokens (24.074875ms)\n✔ startXConnector reports redacted stream diagnostics in status and logs (12.18375ms)\n✔ startXConnector stays disabled by default outside Render production (0.134791ms)\n✔ X auto-terminate defaults on only for Render production (0.046958ms)\n✔ startXConnector uses a long backoff for TooManyConnections (12.295916ms)\n✔ startXConnector can auto-clear stale X connections after TooManyConnections (13.27225ms)\n✔ fetchXConnectionHistory summarizes active X connections without leaking tokens (0.382583ms)\n✔ terminateAllXConnections summarizes X termination results without leaking tokens (0.476083ms)\n✔ X connection management reports missing bearer token without calling fetch (0.199125ms)\nℹ tests 53\nℹ suites 0\nℹ pass 53\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1849.328666\n",
+      "stdout": "s)\n✔ analyzer detects a moment during a charged spike (6.728917ms)\n✔ analyzer surfaces questions and dedupes them (1.552083ms)\n✔ analyzer ranks cross-platform trends above single-source terms (1.670334ms)\n✔ analyzer ignores demo and unknown sources (0.156042ms)\n✔ history log appends and queries messages older than a cutoff (37.825625ms)\n✔ history log dedupes ids and rotates past max size (12.281625ms)\n✔ disabled history returns empty exhausted pages (0.321625ms)\n✔ createFeedHub stores each message once and updates source stats (8.665083ms)\n✔ createFeedHub exposes per-source proof receipts from the latest accepted message (0.115917ms)\n✔ createFeedHub broadcasts messages and status updates to subscribers (0.458042ms)\n✔ resolveKickConfig stays webhook-only unless auto subscribe is enabled (1.176417ms)\n✔ resolveKickConfig requires official Kick subscription credentials when enabled (0.065709ms)\n✔ createKickSubscriptionPayload targets chat.message.sent webhooks (0.065166ms)\n✔ shouldRequireKickSignature is opt-in (0.057792ms)\n✔ verifyKickWebhookSignature verifies Kick signed payload format (108.667084ms)\n✔ verifyKickWebhookSignature rejects missing or invalid signatures (0.2ms)\n✔ DEMO_MODE=off blocks synthetic routes while keeping Kick webhooks live (180.631291ms)\n✔ setup.json exposes configured X rule labels without credentials (110.481625ms)\n✔ X connector control endpoint pauses and resumes runtime state (109.279917ms)\n✔ Render production locks admin endpoints when ADMIN_TOKEN is missing (111.058875ms)\n✔ parseIrcTags decodes Twitch IRC tag escapes (2.4285ms)\n✔ normalizeTwitchLine maps a PRIVMSG into the unified message contract (12.778708ms)\n✔ normalizeTwitchEventSubNotification maps channel.chat.message notifications (0.1745ms)\n✔ normalizeKickWebhook maps chat.message.sent webhook payloads (0.985667ms)\n✔ normalizeKickWebhook labels verified signed webhook evidence (0.082167ms)\n✔ normalizeXStreamEvent maps filtered stream payloads with user expansions and rule labels (0.149166ms)\n✔ homepage presents Bubblewire as a self-serve live audience command center (6.467208ms)\n✔ mobile product shell stays compact and feed-first in judge mode (9.387ms)\n✔ createSessionSnapshot returns a stream-session spine with preflight and usefulness metrics (8.151875ms)\n✔ createProofPacket creates a redacted deterministic proof bundle (0.953583ms)\n✔ createReplayBundle captures a target moment with surrounding context (0.807541ms)\n✔ applySafetyRules hides unapproved overlay rows and redacts blocked content (1.156167ms)\n✔ resolveTwitchIrcConfig uses anonymous read-only IRC when only channels are configured (1.281666ms)\n✔ resolveTwitchIrcConfig keeps authenticated IRC credentials when present (0.069125ms)\n✔ dashboard exposes moment engine, proof console, workspace, and judge surfaces (10.051334ms)\n✔ overlay configurator includes broadcast presets with preset-aware URLs (1.777875ms)\n✔ mobile channel hero stacks input before the watch action (4.928375ms)\n✔ judge mode makes the mobile feed the first visible work surface (2.296708ms)\n✔ mobile dashboard keeps a phone-width startup layout with a denser feed (4.958916ms)\n✔ dashboard exposes a live proof receipt bound to status snapshots (4.297833ms)\n✔ setup drawer renders sanitized X stream rules (4.517625ms)\n✔ server exposes stream session, proof packet, and replay surfaces (2.918958ms)\n✔ dashboard contains the full usefulness build order surfaces (1.132291ms)\n✔ overlay supports approved, moment, question, and featured modes (0.741042ms)\n✔ resolveXRulesFromEnv parses local X rule snapshots for setup visibility (3.176417ms)\n✔ summarizeXRules sanitizes X API rule payloads (0.118167ms)\n✔ summarizeXStreamFailure captures X problem details without leaking tokens (22.775541ms)\n✔ startXConnector reports redacted stream diagnostics in status and logs (11.367875ms)\n✔ startXConnector stays disabled by default outside Render production (0.132708ms)\n✔ X auto-terminate defaults on only for Render production (0.043625ms)\n✔ startXConnector uses a long backoff for TooManyConnections (11.119ms)\n✔ startXConnector treats depleted X API credits as a blocked state with a long retry (11.211875ms)\n✔ startXConnector can auto-clear stale X connections after TooManyConnections (11.376667ms)\n✔ fetchXConnectionHistory summarizes active X connections without leaking tokens (0.292084ms)\n✔ terminateAllXConnections summarizes X termination results without leaking tokens (0.152958ms)\n✔ X connection management reports missing bearer token without calling fetch (0.045375ms)\n✔ extractXPostId accepts x.com and twitter.com status URLs, query params, and bare ids (0.809625ms)\n✔ extractXPostId rejects invalid input (0.087584ms)\n✔ xliveRuleForBroadcast builds the conversation_id rule with the xlive tag (0.636459ms)\n✔ SOURCE_META registers xlive as its own labeled source (0.060125ms)\n✔ normalizeXStreamEvent routes xlive-tagged matching_rules to the xlive source (0.85975ms)\n✔ normalizeXStreamEvent prefers xlive when a payload matches xlive and regular rules (0.090292ms)\n✔ normalizeXStreamEvent keeps untagged payloads on the x source (0.075166ms)\n✔ normalizeXLiveStreamEvent forces the xlive source (0.065875ms)\n✔ setXLiveBroadcastRule replaces stale xlive rules and adds the conversation rule (20.807083ms)\n✔ setXLiveBroadcastRule reports missing bearer token and invalid ids without fetching (0.135625ms)\n✔ clearXLiveBroadcastRules deletes only xlive-tagged rules (0.375041ms)\n✔ xliveStatusForStreamState maps shared-stream states to xlive source status (0.106ms)\n✔ startXConnector publishes xlive status alongside x and supports runtime broadcast updates (0.209709ms)\n✔ startXConnector seeds the broadcast from X_LIVE_BROADCAST_ID (0.05775ms)\n✔ demo connector emits xlive-labeled messages and marks the xlive source (10.837375ms)\n✔ POST /api/xlive/broadcast gates on admin token, persists, and updates xlive status (138.018083ms)\nℹ tests 77\nℹ suites 0\nℹ pass 77\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1662.406334\n",
       "stderr": "npm warn Unknown env config \"minimum-release-age\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nnpm warn Unknown user config \"minimum-release-age\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
     },
     {
@@ -17,18 +17,18 @@
   ],
   "smoke": {
     "before": {
-      "totalMessages": 2003,
+      "totalMessages": 18,
       "duplicatesDropped": 0,
       "status": {
         "twitch": {
           "state": "demo",
           "detail": "demo feed active; set Twitch EventSub env vars for live chat",
-          "updatedAt": "2026-06-06T15:47:00.930Z"
+          "updatedAt": "2026-06-10T01:39:50.561Z"
         },
         "x": {
           "state": "demo",
           "detail": "demo feed active; set X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-06T15:47:00.930Z",
+          "updatedAt": "2026-06-10T01:39:50.561Z",
           "diagnostics": null,
           "stream": {
             "enabled": false,
@@ -37,73 +37,91 @@
             "paused": false
           }
         },
+        "xlive": {
+          "state": "demo",
+          "detail": "demo feed active; set a live broadcast via /api/xlive/broadcast",
+          "updatedAt": "2026-06-10T01:39:50.561Z",
+          "broadcastId": "1234567890123456789",
+          "ruleTag": "xlive:1234567890123456789",
+          "diagnostics": null
+        },
         "kick": {
-          "state": "connected",
-          "detail": "last webhook accepted",
-          "updatedAt": "2026-06-06T15:49:26.864Z"
+          "state": "webhook-ready",
+          "detail": "waiting for chat.message.sent webhooks",
+          "updatedAt": "2026-06-10T01:39:50.561Z"
         }
       },
       "proof": {
-        "updatedAt": "2026-06-06T16:29:56.972Z",
+        "updatedAt": "2026-06-10T01:40:07.476Z",
         "sources": {
           "twitch": {
             "label": "Twitch",
-            "count": 668,
+            "count": 5,
             "evidenceLevel": "demo",
-            "lastMessageAt": "2026-06-06T16:29:56.972Z",
-            "lastMessageId": "twitch:7f2444ff3b53f489",
+            "lastMessageAt": "2026-06-10T01:40:06.175Z",
+            "lastMessageId": "twitch:5cf9d17eb516dc87",
             "mode": "demo",
             "rawType": "manual-injection"
           },
           "x": {
             "label": "X",
-            "count": 667,
+            "count": 5,
             "evidenceLevel": "demo",
-            "lastMessageAt": "2026-06-06T16:29:54.368Z",
-            "lastMessageId": "x:d4e65883772ab01c",
+            "lastMessageAt": "2026-06-10T01:40:07.476Z",
+            "lastMessageId": "x:fec77214ad43099d",
+            "mode": "demo",
+            "rawType": "manual-injection"
+          },
+          "xlive": {
+            "label": "X Live",
+            "count": 4,
+            "evidenceLevel": "demo",
+            "lastMessageAt": "2026-06-10T01:40:03.573Z",
+            "lastMessageId": "xlive:63cd3a81e47ac27a",
             "mode": "demo",
             "rawType": "manual-injection"
           },
           "kick": {
             "label": "Kick",
-            "count": 668,
+            "count": 4,
             "evidenceLevel": "demo",
-            "lastMessageAt": "2026-06-06T16:29:55.671Z",
-            "lastMessageId": "kick:17fce33d627dd21a",
+            "lastMessageAt": "2026-06-10T01:40:04.874Z",
+            "lastMessageId": "kick:0046e83f6a22f5ab",
             "mode": "demo",
             "rawType": "manual-injection"
           }
         }
       },
       "sourceCounts": {
-        "twitch": 668,
-        "x": 667,
-        "kick": 668
+        "twitch": 5,
+        "x": 5,
+        "xlive": 4,
+        "kick": 4
       }
     },
     "healthz": {
       "ok": true,
       "service": "bubblewire",
-      "uptimeSeconds": 2577,
-      "checkedAt": "2026-06-06T16:29:58.030Z"
+      "uptimeSeconds": 17,
+      "checkedAt": "2026-06-10T01:40:07.835Z"
     },
     "kickWebhook": {
       "ok": true,
-      "id": "kick:proof-1780763398031"
+      "id": "kick:proof-1781055607835"
     },
     "after": {
-      "totalMessages": 2004,
+      "totalMessages": 19,
       "duplicatesDropped": 0,
       "status": {
         "twitch": {
           "state": "demo",
           "detail": "demo feed active; set Twitch EventSub env vars for live chat",
-          "updatedAt": "2026-06-06T15:47:00.930Z"
+          "updatedAt": "2026-06-10T01:39:50.561Z"
         },
         "x": {
           "state": "demo",
           "detail": "demo feed active; set X_BEARER_TOKEN for filtered stream",
-          "updatedAt": "2026-06-06T15:47:00.930Z",
+          "updatedAt": "2026-06-10T01:39:50.561Z",
           "diagnostics": null,
           "stream": {
             "enabled": false,
@@ -112,52 +130,70 @@
             "paused": false
           }
         },
+        "xlive": {
+          "state": "demo",
+          "detail": "demo feed active; set a live broadcast via /api/xlive/broadcast",
+          "updatedAt": "2026-06-10T01:39:50.561Z",
+          "broadcastId": "1234567890123456789",
+          "ruleTag": "xlive:1234567890123456789",
+          "diagnostics": null
+        },
         "kick": {
           "state": "connected",
           "detail": "last webhook accepted",
-          "updatedAt": "2026-06-06T16:29:58.033Z"
+          "updatedAt": "2026-06-10T01:40:07.838Z"
         }
       },
       "proof": {
-        "updatedAt": "2026-06-06T16:29:58.033Z",
+        "updatedAt": "2026-06-10T01:40:07.837Z",
         "sources": {
           "twitch": {
             "label": "Twitch",
-            "count": 668,
+            "count": 5,
             "evidenceLevel": "demo",
-            "lastMessageAt": "2026-06-06T16:29:56.972Z",
-            "lastMessageId": "twitch:7f2444ff3b53f489",
+            "lastMessageAt": "2026-06-10T01:40:06.175Z",
+            "lastMessageId": "twitch:5cf9d17eb516dc87",
             "mode": "demo",
             "rawType": "manual-injection"
           },
           "x": {
             "label": "X",
-            "count": 667,
+            "count": 5,
             "evidenceLevel": "demo",
-            "lastMessageAt": "2026-06-06T16:29:54.368Z",
-            "lastMessageId": "x:d4e65883772ab01c",
+            "lastMessageAt": "2026-06-10T01:40:07.476Z",
+            "lastMessageId": "x:fec77214ad43099d",
+            "mode": "demo",
+            "rawType": "manual-injection"
+          },
+          "xlive": {
+            "label": "X Live",
+            "count": 4,
+            "evidenceLevel": "demo",
+            "lastMessageAt": "2026-06-10T01:40:03.573Z",
+            "lastMessageId": "xlive:63cd3a81e47ac27a",
             "mode": "demo",
             "rawType": "manual-injection"
           },
           "kick": {
             "label": "Kick",
-            "count": 669,
+            "count": 5,
             "evidenceLevel": "webhook-proof",
-            "lastMessageAt": "2026-06-06T16:29:58.031Z",
-            "lastMessageId": "kick:proof-1780763398031",
+            "lastMessageAt": "2026-06-10T01:40:07.835Z",
+            "lastMessageId": "kick:proof-1781055607835",
             "mode": "live",
             "rawType": "chat.message.sent"
           }
         }
       },
       "sourceCounts": {
-        "twitch": 668,
-        "x": 667,
-        "kick": 669
+        "twitch": 5,
+        "x": 5,
+        "xlive": 4,
+        "kick": 5
       }
     },
     "latestMessage": {
-      "id": "kick:proof-1780763398031",
+      "id": "kick:proof-1781055607835",
       "source": "kick",
       "sourceLabel": "Kick",
       "sourceColor": "#53fc18",
@@ -172,7 +208,7 @@
       },
       "channel": "marketbubble",
       "content": "Kick webhook proof event",
-      "receivedAt": "2026-06-06T16:29:58.031Z",
+      "receivedAt": "2026-06-10T01:40:07.835Z",
       "url": "https://kick.com/marketbubble",
       "badges": [
         "Reviewer"

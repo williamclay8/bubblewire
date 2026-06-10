@@ -244,6 +244,81 @@ test("startXConnector uses a long backoff for TooManyConnections", async (t) => 
   assert.match(reconnectingStatus.detail, /TooManyConnections|ConnectionException/);
 });
 
+test("startXConnector treats depleted X API credits as a blocked state with a long retry", async (t) => {
+  const statuses = [];
+  const timers = [];
+  const originalFetch = globalThis.fetch;
+  const originalWarn = console.warn;
+
+  globalThis.fetch = async (url) => {
+    const href = String(url);
+    if (href.endsWith("/rules")) {
+      return new Response(JSON.stringify({ data: [{ id: "1", tag: "marketbubble-live", value: "Bubblewire" }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        account_id: 1553086854915936256,
+        title: "CreditsDepleted",
+        detail: "Your enrolled account [1553086854915936256] does not have any credits to fulfill this request.",
+        type: "https://api.twitter.com/2/problems/credits"
+      }),
+      {
+        status: 402,
+        statusText: "Payment Required",
+        headers: {
+          "x-rate-limit-limit": "40000",
+          "x-rate-limit-remaining": "39984",
+          "x-rate-limit-reset": "1781049099"
+        }
+      }
+    );
+  };
+  console.warn = () => {};
+
+  const connector = startXConnector(
+    {
+      setSourceStatus(source, status) {
+        statuses.push({ source, status });
+      },
+      addMessage() {}
+    },
+    {
+      X_BEARER_TOKEN: "SECRET_TOKEN",
+      X_STREAM_ENABLED: "on",
+      X_USAGE_CAP_BACKOFF_MS: "1800000",
+      X_LIVE_BROADCAST_ID: "1930412345678901234"
+    },
+    {
+      setTimeout(fn, ms) {
+        timers.push(ms);
+        return { fn, ms };
+      },
+      clearTimeout() {}
+    }
+  );
+
+  t.after(() => {
+    connector.stop();
+    globalThis.fetch = originalFetch;
+    console.warn = originalWarn;
+  });
+
+  await waitFor(() => statuses.some((entry) => entry.source === "x" && entry.status.state === "blocked"));
+  const blockedStatus = statuses.find((entry) => entry.source === "x" && entry.status.state === "blocked")?.status;
+  const blockedLiveStatus = statuses.find((entry) => entry.source === "xlive" && entry.status.state === "blocked")?.status;
+
+  assert.equal(blockedStatus.diagnostics.httpStatus, 402);
+  assert.equal(blockedStatus.diagnostics.problemTitle, "CreditsDepleted");
+  assert.match(blockedStatus.detail, /retrying in 30m/);
+  assert.match(blockedStatus.detail, /CreditsDepleted/);
+  assert.equal(timers[0], 1800000);
+  assert.equal(blockedLiveStatus.broadcastId, "1930412345678901234");
+});
+
 test("startXConnector can auto-clear stale X connections after TooManyConnections", async (t) => {
   const statuses = [];
   const timers = [];

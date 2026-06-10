@@ -20,7 +20,7 @@ Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewir
 
 Fallback Render URL: `https://bubblewire-challenge.onrender.com`.
 
-Demo video: `https://youtu.be/hLerxCevS2w`.
+Demo video: `https://youtu.be/kwUZgMBtK48`.
 
 Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
 
@@ -37,6 +37,8 @@ X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_T
 X Live (Ansem's chat): comments on an X live video broadcast are replies to the broadcast post, so Bubblewire ingests them officially by adding a `conversation_id:<post id>` rule (tagged `xlive:<id>`) to the same shared filtered stream — X allows only one stream connection per app, so no second connection is opened. Paste the live post URL in the setup panel (`s` → X Live → Go live) when the stream starts, or set `X_LIVE_BROADCAST_ID` at boot; runtime config persists to `data/xlive.json`. Matching messages surface as the distinct `xlive` source ("X Live", red) across the feed, filters, analysis, overlay, and Streamer Mode.
 
 Render deployments can briefly overlap old and new instances. Bubblewire auto-clears stale filtered-stream sessions by default in Render production after X returns `TooManyConnections`; set `X_AUTO_TERMINATE_CONNECTIONS=off` if the same X app is intentionally shared with another stream consumer.
+
+If X returns `CreditsDepleted` or another usage-cap error, Bubblewire marks the source as `blocked` and backs off with `X_USAGE_CAP_BACKOFF_MS` (default 30 minutes). Replenish X API credits or move the deployment to a project/app with available usage before expecting X posts to resume.
 
 Kick: Kick's official read-side chat path is the Events API. It delivers `chat.message.sent` events by webhook. Expose this app with a public tunnel or deployed URL and point Kick to `/kick.webhook`; `/webhooks/kick` is kept for local/backward-compatible ingestion. The endpoint accepts `chat.message.sent` payloads and normalizes them into the shared feed.
 

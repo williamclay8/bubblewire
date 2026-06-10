@@ -1,5 +1,7 @@
 # Bubblewire Demo Video Storyboard
 
+Current public demo: `https://youtu.be/kwUZgMBtK48`
+
 Final-cut demo: `https://youtu.be/hLerxCevS2w`
 
 Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`

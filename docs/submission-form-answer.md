@@ -22,9 +22,22 @@ Verified Render deploy: see `docs/evidence/manifest.md` and final Lumi closeout 
 
 ## Demo Video
 
-https://youtu.be/hLerxCevS2w
+https://youtu.be/kwUZgMBtK48
 
 Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
+
+New public YouTube upload: `https://youtu.be/kwUZgMBtK48`.
+
+Resubmission script and local narrated draft manifest: `docs/submission-video-script-2026-06-10.md` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. After push/deploy, the intended public MP4 mirror is `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
+
+## Latest Resubmission Receipt
+
+Google Forms recorded the refreshed resubmission on 2026-06-09 at 20:37 CDT with:
+
+- X handle: `@williamclay`
+- Demo video: `https://youtu.be/kwUZgMBtK48`
+- GitHub repo: `https://github.com/williamclay8/bubblewire`
+- Live app note: `https://bubblewire.xyz`
 
 ## Overlay
 
@@ -32,46 +45,47 @@ https://bubblewire.xyz/overlay.html
 
 ## Short Description
 
-Bubblewire is a unified real-time operator feed for Twitch + X + Kick. It merges all three sources into one fast dashboard with unmistakable source labels, per-provider health, demo-safe events, raw payload provenance, and an OBS/browser-source overlay.
+Bubblewire is a live social command center for streamers and market operators. It brings Twitch chat, X filtered-stream posts, Kick webhook events, and X Live broadcast replies into one source-labeled feed with proof receipts, raw payload provenance, search/filter/pin/watchlist workflows, Streamer Mode, and OBS-ready overlays. Operators can shape it into the aggregator they want: choose sources, rules, themes, watchlists, overlay behavior, and proof views while credentials stay server-side.
 
 ## What To Try First
 
-1. Open the app.
-2. Watch the live feed populate from Twitch and X, with Kick marked connected after webhook proof.
-3. Filter by source, pause the feed, pin a message, and select a message to inspect its normalized payload.
-4. Open `/overlay.html` to see the stream-ready view.
-5. Demo routes remain disabled on the public live app; local/demo-mode proof is recorded in the evidence manifest.
+1. Open `https://bubblewire.xyz?judge=1`.
+2. Watch the source-labeled feed and provider proof strip.
+3. Search, filter by source, click an author, pin a row, and inspect raw provenance.
+4. Add a watchlist term and watch matching rows surface.
+5. Open `/streamer.html` for the second-screen view.
+6. Open `/overlay-setup.html` or `/overlay.html` for OBS/browser-source output.
 
 ## Why It Wins
 
-- It is not just a scrolling mock feed; it is a streamer command surface.
-- It is honest about provider reality: Twitch is EventSub-first, X is filtered-stream posts, and Kick is webhook-based.
-- It is judgeable with no secrets because demo mode is clearly labeled.
-- It has live-capable server-side adapter paths and keeps credentials out of the browser.
-- It includes proof artifacts: tests, local smoke proof, desktop screenshot, mobile screenshot, overlay screenshot, and an evidence manifest.
+- It is not just a scrolling feed; it is a customizable command surface for fragmented live social signal.
+- It puts Twitch, X, Kick, and X Live into one operator view without erasing each platform's source identity.
+- It is honest about provider reality: Twitch is EventSub/IRC, X is filtered-stream posts, X Live replies ride an X conversation rule, and Kick is webhook-based.
+- It gives judges and operators proof, not vibes: per-source status, evidence levels, raw payload inspection, proof packets, live-only route behavior, and server-side credentials.
+- It is interactive enough to become the aggregator each operator wants: source filters, search, author drill-down, pause, pins, watchlists, themes, deep links, recaps, Streamer Mode, and configurable OBS overlays.
 
 ## Live Adapter Notes
 
 Twitch uses EventSub `channel.chat.message` when `TWITCH_CLIENT_ID`, `TWITCH_BOT_USER_ACCESS_TOKEN`, `TWITCH_BOT_USER_ID`, and `TWITCH_BROADCASTER_USER_ID` are present. For no-secret live monitoring, `TWITCH_CHANNELS` alone enables anonymous read-only IRC for public Twitch channels; authenticated IRC remains available with `TWITCH_USERNAME` and `TWITCH_OAUTH_TOKEN`.
 
-X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`.
+X uses API v2 filtered stream from the server with `X_BEARER_TOKEN`; X Live broadcast replies use a `conversation_id:<post id>` rule on that same shared stream. If X API credits are depleted, Bubblewire reports the blocked provider state honestly instead of pretending posts are flowing.
 
 Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick` and `/kick.webhook`; a public tunnel or deployed URL is required for real Kick chat. Bubblewire can also register the official Kick event subscription at startup when `KICK_AUTO_SUBSCRIBE=1`, `KICK_ACCESS_TOKEN`, and `KICK_BROADCASTER_USER_ID` are set, and can require Kick signature verification with `KICK_REQUIRE_SIGNATURE=1`.
 
 ## Proof Checklist
 
-- `npm test`: 42/42 passing
+- `npm test`: current active-branch suite passed locally with 77/77 tests on 2026-06-09.
 - `npm run check`: passing
 - `npm run proof`: passing
-- Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/demo-spike.json`, `/demo-start.json`, `/inject.json`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` passing
-- Public live proof on `https://bubblewire.xyz`: `twitch,x,kick` expected sources passed; Twitch and X connected automatically, Kick connected after webhook proof
-- YouTube demo: uploaded as unlisted at `https://youtu.be/hLerxCevS2w`
+- Live smoke on `https://bubblewire.xyz`: `/healthz`, `/status.json`, `/events.stream`, `/export.ndjson`, `/kick.webhook`, and `/overlay.html` should return expected public-safe responses; `/demo-spike.json`, `/demo-start.json`, and `/inject.json` should reject in live-only production.
+- Public live proof on `https://bubblewire.xyz`: passed on 2026-06-09 with expected sources `twitch,x,kick`; live X status was `connected` with the `marketbubble-live` filtered-stream rule.
+- YouTube demo: uploaded public at `https://youtu.be/kwUZgMBtK48`
 - Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
-- Challenge form: YouTube resubmission recorded by Google Forms on 2026-06-06 at 09:46 CDT.
+- Challenge form: refreshed public-video resubmission recorded by Google Forms on 2026-06-09 at 20:37 CDT.
 - Evidence manifest: `docs/evidence/manifest.md`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`
 
 ## Suggested Demo Video Script
 
-“Here is Bubblewire live on bubblewire.xyz, a unified feed for Twitch, X, and Kick. The source strip shows Twitch and X connected automatically, and Kick connected from an official webhook proof event. Every message carries a source label plus normalized metadata. I’ll filter by source, search the feed, pin the Kick proof, and inspect the raw normalized payload. Now here is the overlay route, designed for OBS or a browser source. The public app is live-only, and demo routes are disabled.”
+“This is Bubblewire: a live social command center for the places market culture actually happens. Instead of four tabs and four kinds of chaos, Bubblewire brings Twitch, X, Kick, and X Live into one labeled stream. The label is not cosmetic: every item keeps its source, author, timestamp, mode, raw payload, and proof state. I can filter by platform, search the room, drill into an author, pin the signal, and add watchlist alerts. Streamer Mode turns the feed into a glanceable second screen, and the overlay configurator gives me an OBS-ready URL with source filters, scale, fade, and alignment. Bubblewire captures the moment, the proof, and the broadcast in one customizable aggregator.”

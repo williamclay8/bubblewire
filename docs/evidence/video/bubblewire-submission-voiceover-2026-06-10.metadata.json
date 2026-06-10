@@ -1,0 +1,104 @@
+{
+  "audio": {
+    "channels": 2,
+    "codec": "aac",
+    "count": 1,
+    "sample_rate": "44100"
+  },
+  "audio_polish": {
+    "fade_in": 0.04,
+    "fade_out": 0.08,
+    "filters": [
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=8.420:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=10.920:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=9.920:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=8.420:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=6.920:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=8.920:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=8.420:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=9.920:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=10.420:d=0.080"
+      ],
+      [
+        "loudnorm=I=-16:TP=-1.5:LRA=11",
+        "apad",
+        "afade=t=in:st=0:d=0.040",
+        "afade=t=out:st=8.920:d=0.080"
+      ]
+    ],
+    "loudnorm": true,
+    "loudnorm_i": -16.0,
+    "loudnorm_lra": 11.0,
+    "loudnorm_tp": -1.5,
+    "tail_pad": 0.25
+  },
+  "caption_path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt",
+  "duration": 89.7,
+  "exists": true,
+  "format": "mov,mp4,m4a,3gp,3g2,mj2",
+  "has_audio": true,
+  "network_used": false,
+  "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4",
+  "rate": 172,
+  "secret_text_scan": "passed",
+  "shots": 10,
+  "size_bytes": 3547125,
+  "transition": {
+    "applied": true,
+    "name": "fade",
+    "seconds": 0.28
+  },
+  "video": {
+    "avg_frame_rate": "30/1",
+    "codec": "h264",
+    "count": 1,
+    "height": 1080,
+    "width": 1920
+  },
+  "voice": "Samantha",
+  "vtt_caption_path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt"
+}

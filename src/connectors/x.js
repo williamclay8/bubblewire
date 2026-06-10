@@ -7,6 +7,7 @@ const DEFAULT_RECONNECT_MS = 1000;
 const MAX_RECONNECT_MS = 45000;
 const DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS = 5 * 60 * 1000;
 const DEFAULT_X_RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
+const DEFAULT_X_USAGE_CAP_BACKOFF_MS = 30 * 60 * 1000;
 const DEFAULT_X_AUTO_TERMINATE_RECONNECT_MS = 2000;
 
 export function startXConnector(hub, env = process.env, options = {}) {
@@ -144,18 +145,23 @@ export function startXConnector(hub, env = process.env, options = {}) {
         }
       }
       console.warn("[bubblewire:x]", JSON.stringify(diagnostics));
-      setStatuses("error", {
-        detail: diagnostics.summary,
-        diagnostics: clone(diagnostics)
-      });
+      if (!isXUsageCapDiagnostic(diagnostics)) {
+        setStatuses("error", {
+          detail: diagnostics.summary,
+          diagnostics: clone(diagnostics)
+        });
+      }
     }
 
     if (!stopped) {
       const delayMs = nextReconnectOverrideMs || reconnectDelayForDiagnostics(diagnostics, reconnectMs, env);
       nextReconnectOverrideMs = 0;
       const last = diagnostics?.summary ? ` · last ${diagnostics.summary}` : "";
-      setStatuses("reconnecting", {
-        detail: `retrying in ${formatReconnectDelay(delayMs)}${last}`,
+      const blockedByUsageCap = isXUsageCapDiagnostic(diagnostics);
+      setStatuses(blockedByUsageCap ? "blocked" : "reconnecting", {
+        detail: blockedByUsageCap
+          ? `X API credits depleted; retrying in ${formatReconnectDelay(delayMs)}${last}`
+          : `retrying in ${formatReconnectDelay(delayMs)}${last}`,
         diagnostics: diagnostics ? clone(diagnostics) : null,
         stream
       });
@@ -353,6 +359,8 @@ export function xliveStatusForStreamState(state, broadcastId, extra = {}) {
       return { ...base, state: "disabled", detail: `X stream disabled · broadcast ${broadcastId} queued` };
     case "paused":
       return { ...base, state: "paused", detail: `shared X stream paused · broadcast ${broadcastId} queued` };
+    case "blocked":
+      return { ...base, state: "blocked", detail: extra.detail || `shared X stream blocked · broadcast ${broadcastId}` };
     case "stopped":
       return { ...base, state: "stopped", detail: "connector stopped" };
     case "error":
@@ -705,6 +713,9 @@ export function reconnectDelayForDiagnostics(diagnostic, currentMs, env = proces
   if (isXTooManyConnectionsDiagnostic(diagnostic)) {
     return positiveInteger(env.X_TOO_MANY_CONNECTIONS_BACKOFF_MS, DEFAULT_X_TOO_MANY_CONNECTIONS_BACKOFF_MS);
   }
+  if (isXUsageCapDiagnostic(diagnostic)) {
+    return positiveInteger(env.X_USAGE_CAP_BACKOFF_MS, DEFAULT_X_USAGE_CAP_BACKOFF_MS);
+  }
   if (isXRateLimitDiagnostic(diagnostic)) {
     return positiveInteger(env.X_RATE_LIMIT_BACKOFF_MS, DEFAULT_X_RATE_LIMIT_BACKOFF_MS);
   }
@@ -912,6 +923,22 @@ function isXTooManyConnectionsDiagnostic(diagnostic) {
 
 function isXRateLimitDiagnostic(diagnostic) {
   return Number(diagnostic?.httpStatus) === 429 && diagnostic?.rateLimit?.remaining === "0";
+}
+
+function isXUsageCapDiagnostic(diagnostic) {
+  const text = [
+    diagnostic?.problemTitle,
+    diagnostic?.problemType,
+    diagnostic?.problemDetail,
+    diagnostic?.bodySnippet,
+    diagnostic?.summary
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return (
+    /CreditsDepleted|credits? depleted|does not have any credits|usage[-_\s]?capped|usage cap exceeded/i.test(text) ||
+    (Number(diagnostic?.httpStatus) === 402 && /credits?|usage|payment required/i.test(text))
+  );
 }
 
 function positiveInteger(value, fallback) {

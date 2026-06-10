@@ -1,0 +1,91 @@
+{
+  "title": "Bubblewire Resubmission Narrated Draft",
+  "voice": "Samantha",
+  "rate": 172,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "background": "#0a0a09",
+  "redaction_reviewed": true,
+  "audio_fade_in": 0.04,
+  "audio_fade_out": 0.08,
+  "audio_tail_pad": 0.25,
+  "audio_loudnorm": true,
+  "loudnorm_i": -16,
+  "loudnorm_tp": -1.5,
+  "loudnorm_lra": 11,
+  "transition": "fade",
+  "transition_seconds": 0.28,
+  "shots": [
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/01-boot.png",
+      "duration": 8.5,
+      "pause_after": 0.25,
+      "caption": "Bubblewire: one live social command center.",
+      "narration": "This is Bubblewire: a live social command center for the places market culture actually happens."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/02-live-feed.png",
+      "duration": 11,
+      "pause_after": 0.25,
+      "caption": "Twitch, X, Kick, and X Live in one feed.",
+      "narration": "Instead of four tabs and four kinds of chaos, Bubblewire brings Twitch, X, Kick, and X Live into one labeled stream."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/03-proof-inspector.png",
+      "duration": 10,
+      "pause_after": 0.25,
+      "caption": "The source label is not cosmetic.",
+      "narration": "The label is not cosmetic. Every item keeps its source, author, timestamp, mode, raw payload, and proof state."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/04-search-filter.png",
+      "duration": 8.5,
+      "pause_after": 0.2,
+      "caption": "Filter by platform and search the room.",
+      "narration": "Now it becomes an operator surface. Filter by platform, search the room, and keep the whole audience in context."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/05-author-drilldown.png",
+      "duration": 7,
+      "pause_after": 0.2,
+      "caption": "Author drill-down without losing context.",
+      "narration": "Click any author to isolate their signal, then clear back to the full cross-platform flow."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/06-watchlist.png",
+      "duration": 9,
+      "pause_after": 0.25,
+      "caption": "Watchlists catch moments before they pass.",
+      "narration": "Watchlist terms flag matching rows, raise toasts, and help moderators catch the moments that matter."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/07-volume-theme.png",
+      "duration": 8.5,
+      "pause_after": 0.25,
+      "caption": "Heat, mood, trends, and questions surface signal.",
+      "narration": "The app reads the room too: volume spikes, heat, mood, trends, and questions surface before they scroll away."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/08-setup-honesty.png",
+      "duration": 10,
+      "pause_after": 0.3,
+      "caption": "Provider reality, not demo theater.",
+      "narration": "Bubblewire is honest about provider reality: X is filtered posts, Kick is webhook events, and credentials stay server-side."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/09-overlay-config.png",
+      "duration": 10.5,
+      "pause_after": 0.3,
+      "caption": "Make the aggregator you actually want.",
+      "narration": "Then you make it yours: choose sources, themes, watchlists, overlay size, fade, alignment, and filters."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video-frames/final-cut/10-recap-close.png",
+      "duration": 9,
+      "pause_after": 0.4,
+      "caption": "The moment, the proof, the broadcast.",
+      "narration": "Bubblewire captures the moment, the proof, and the broadcast in one customizable aggregator."
+    }
+  ]
+}
