@@ -22,7 +22,7 @@ services:
       - key: ADMIN_TOKEN
         sync: false
       - key: TWITCH_CHANNELS
-        value: threadguy,fazebanks,marketbubble,xqc
+        value: threadguy,fazebanks,marketbubble
       - key: YOUTUBE_API_KEY
         sync: false
       - key: YOUTUBE_LIVE_CHAT_ID

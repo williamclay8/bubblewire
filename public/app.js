@@ -1490,7 +1490,7 @@ function renderSetup() {
 
   const channelChips = twitch.channels.length
     ? twitch.channels
-        .map((channel) => `<button type="button" class="watch-chip" data-channel-remove="${escapeAttr(channel)}" title="Remove #${escapeAttr(channel)}">#${escapeHtml(channel)} ×</button>`)
+        .map((channel) => twitchChannelChip(channel, setup.adminLocked))
         .join("")
     : `<span class="watch-empty">no channels yet</span>`;
 
@@ -1555,6 +1555,14 @@ function renderSetup() {
       </div>
     </section>
   `;
+}
+
+function twitchChannelChip(channel, adminLocked) {
+  const safeChannel = String(channel || "").trim().toLowerCase().replace(/^#/, "");
+  if (adminLocked) {
+    return `<span class="watch-chip watch-chip-locked" title="Admin token required to change Render-hosted Twitch channels">#${escapeHtml(safeChannel)} <small>locked</small></span>`;
+  }
+  return `<button type="button" class="watch-chip" data-channel-remove="${escapeAttr(safeChannel)}" title="Remove #${escapeAttr(safeChannel)}">#${escapeHtml(safeChannel)} ×</button>`;
 }
 
 function youtubeSection(youtube) {

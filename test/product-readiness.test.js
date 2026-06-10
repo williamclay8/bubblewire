@@ -20,8 +20,8 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   assert.match(html, /id="connectSourcesButton"/);
   assert.match(html, /data-source-filter="youtube"/);
   assert.match(app, /SOURCE_ORDER = \["twitch", "youtube", "x", "xlive", "kick"\]/);
-  assert.match(html, /src="\/app\.js\?v=channel-labels-20260610"/);
-  assert.match(html, /href="\/styles\.css\?v=channel-labels-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=twitch-lock-20260610"/);
+  assert.match(html, /href="\/styles\.css\?v=twitch-lock-20260610"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
   assert.match(app, /productDemoButton:\s*document\.querySelector\("#productDemoButton"\)/);
@@ -53,7 +53,7 @@ test("live message source chips carry channel context where sources can fan out"
     readFile(`${repoRoot}/public/streamer.js`, "utf8")
   ]);
 
-  assert.match(html, /src="\/app\.js\?v=channel-labels-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=twitch-lock-20260610"/);
   assert.match(streamerHtml, /src="\/streamer\.js\?v=channel-labels-20260610"/);
   assert.match(app, /const CHANNEL_LABELED_SOURCES = new Set\(\["twitch", "youtube", "kick"\]\);/);
   assert.match(app, /function sourceChipLabel\(message\)/);
@@ -62,6 +62,21 @@ test("live message source chips carry channel context where sources can fan out"
   assert.match(app, /<span class="src-tag">\$\{escapeHtml\(sourceChipLabel\(safeMessage\)\)\}<\/span>/);
   assert.match(streamer, /function sourceChipLabel\(message\)/);
   assert.match(streamer, /sourceChipLabel\(message\)/);
+});
+
+test("production Twitch channel controls do not pretend locked env channels are removable", async () => {
+  const [app, css, renderConfig] = await Promise.all([
+    readFile(`${repoRoot}/public/app.js`, "utf8"),
+    readFile(`${repoRoot}/public/styles.css`, "utf8"),
+    readFile(`${repoRoot}/render.yaml`, "utf8")
+  ]);
+
+  assert.match(renderConfig, /value:\s*threadguy,fazebanks,marketbubble\b/);
+  assert.doesNotMatch(renderConfig, /\bxqc\b/);
+  assert.match(app, /function twitchChannelChip\(channel,\s*adminLocked\)/);
+  assert.match(app, /twitchChannelChip\(channel,\s*setup\.adminLocked\)/);
+  assert.match(app, /watch-chip-locked/);
+  assert.match(css, /\.watch-chip-locked\s*{/);
 });
 
 test("mobile product shell stays compact and feed-first in judge mode", async () => {
