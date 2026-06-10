@@ -20,7 +20,7 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   assert.match(html, /id="connectSourcesButton"/);
   assert.match(html, /data-source-filter="youtube"/);
   assert.match(app, /SOURCE_ORDER = \["twitch", "youtube", "x", "xlive", "kick"\]/);
-  assert.match(html, /src="\/app\.js\?v=twitch-lock-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=stream-targets-20260610"/);
   assert.match(html, /href="\/styles\.css\?v=twitch-lock-20260610"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
@@ -53,14 +53,19 @@ test("live message source chips carry channel context where sources can fan out"
     readFile(`${repoRoot}/public/streamer.js`, "utf8")
   ]);
 
-  assert.match(html, /src="\/app\.js\?v=twitch-lock-20260610"/);
-  assert.match(streamerHtml, /src="\/streamer\.js\?v=channel-labels-20260610"/);
-  assert.match(app, /const CHANNEL_LABELED_SOURCES = new Set\(\["twitch", "youtube", "kick"\]\);/);
+  assert.match(html, /src="\/app\.js\?v=stream-targets-20260610"/);
+  assert.match(streamerHtml, /src="\/streamer\.js\?v=stream-targets-20260610"/);
+  assert.match(app, /const INLINE_CHANNEL_SOURCES = new Set\(SOURCE_ORDER\);/);
+  assert.doesNotMatch(app, /CHANNEL_LABELED_SOURCES/);
   assert.match(app, /function sourceChipLabel\(message\)/);
-  assert.match(app, /return `\$\{label\} \u00b7 #\$\{channel\}`;/);
+  assert.match(app, /function sourceChannelTarget\(source,\s*channel\)/);
+  assert.match(app, /if \(source === "xlive"\) return clean\.replace\(\//);
+  assert.match(app, /return `\$\{label\} \u00b7 \$\{sourceChannelTarget\(source,\s*channel\)\}`;/);
   assert.match(app, /<span class="src-tag">\$\{escapeHtml\(sourceChipLabel\(message\)\)\}<\/span>/);
   assert.match(app, /<span class="src-tag">\$\{escapeHtml\(sourceChipLabel\(safeMessage\)\)\}<\/span>/);
+  assert.match(streamer, /const INLINE_CHANNEL_SOURCES = new Set\(SOURCE_PREFERRED_ORDER\);/);
   assert.match(streamer, /function sourceChipLabel\(message\)/);
+  assert.match(streamer, /function sourceChannelTarget\(source,\s*channel\)/);
   assert.match(streamer, /sourceChipLabel\(message\)/);
 });
 

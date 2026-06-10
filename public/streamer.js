@@ -11,7 +11,7 @@ const ANSWERED_KEY = "bubblewire:streamer:answered:v1";
 const NOW_TTL_MS = 90000; // items decay out of the NOW slot after ~90s
 const NOW_SWAP_FACTOR = 1.15; // hysteresis: newer item must be 15% hotter to evict
 const SOURCE_PREFERRED_ORDER = ["twitch", "youtube", "x", "kick", "xlive"];
-const CHANNEL_LABELED_SOURCES = new Set(["twitch", "youtube", "kick"]);
+const INLINE_CHANNEL_SOURCES = new Set(SOURCE_PREFERRED_ORDER);
 const FALLBACK_COLORS = {
   twitch: "#9146ff",
   youtube: "#ff0033",
@@ -611,8 +611,17 @@ function sourceChipLabel(message) {
   const source = String(message?.source || "").toLowerCase();
   const label = String(message?.sourceLabel || sourceLabel(source)).trim();
   const channel = String(message?.channel || "").trim().replace(/^#/, "");
-  if (!channel || !CHANNEL_LABELED_SOURCES.has(source)) return label;
-  return `${label} · #${channel}`;
+  if (!channel || !INLINE_CHANNEL_SOURCES.has(source)) return label;
+  return `${label} · ${sourceChannelTarget(source, channel)}`;
+}
+
+function sourceChannelTarget(source, channel) {
+  const clean = String(channel || "").trim().replace(/^#/, "");
+  if (!clean) return "";
+  if (source === "xlive") return clean.replace(/^xlive:/, "live ");
+  if (source === "x") return clean;
+  if (source === "youtube" && clean.startsWith("@")) return clean;
+  return `#${clean}`;
 }
 
 function chipHtml(source) {

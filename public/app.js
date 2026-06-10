@@ -21,7 +21,7 @@ const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
 const SOURCE_ORDER = ["twitch", "youtube", "x", "xlive", "kick"];
-const CHANNEL_LABELED_SOURCES = new Set(["twitch", "youtube", "kick"]);
+const INLINE_CHANNEL_SOURCES = new Set(SOURCE_ORDER);
 const OVERLAY_PRESETS = {
   broadcast: { mode: "feed", max: OVERLAY_RENDERED, fade: 0, scale: 1, align: "top", sources: SOURCE_ORDER },
   ticker: { mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "youtube", "kick", "twitch"] },
@@ -2491,11 +2491,20 @@ function escapeRegex(value) {
 }
 
 function sourceUsesInlineChannel(source) {
-  return CHANNEL_LABELED_SOURCES.has(String(source || "").toLowerCase());
+  return INLINE_CHANNEL_SOURCES.has(String(source || "").toLowerCase());
 }
 
 function messageChannelName(message) {
   return String(message?.channel || "").trim().replace(/^#/, "");
+}
+
+function sourceChannelTarget(source, channel) {
+  const clean = String(channel || "").trim().replace(/^#/, "");
+  if (!clean) return "";
+  if (source === "xlive") return clean.replace(/^xlive:/, "live ");
+  if (source === "x") return clean;
+  if (source === "youtube" && clean.startsWith("@")) return clean;
+  return `#${clean}`;
 }
 
 function sourceChipLabel(message) {
@@ -2503,7 +2512,7 @@ function sourceChipLabel(message) {
   const label = String(message?.sourceLabel || message?.source || "source").trim();
   const channel = messageChannelName(message);
   if (!channel || !sourceUsesInlineChannel(source)) return label;
-  return `${label} · #${channel}`;
+  return `${label} · ${sourceChannelTarget(source, channel)}`;
 }
 
 function sourceColor(source) {
