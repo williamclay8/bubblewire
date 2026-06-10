@@ -11,6 +11,7 @@ const ANSWERED_KEY = "bubblewire:streamer:answered:v1";
 const NOW_TTL_MS = 90000; // items decay out of the NOW slot after ~90s
 const NOW_SWAP_FACTOR = 1.15; // hysteresis: newer item must be 15% hotter to evict
 const SOURCE_PREFERRED_ORDER = ["twitch", "youtube", "x", "kick", "xlive"];
+const CHANNEL_LABELED_SOURCES = new Set(["twitch", "youtube", "kick"]);
 const FALLBACK_COLORS = {
   twitch: "#9146ff",
   youtube: "#ff0033",
@@ -542,7 +543,7 @@ function showPulse(message) {
   row.className = "st-pulse-msg";
   row.style.setProperty("--src", sourceColor(message.source));
   row.innerHTML = `
-    <span class="st-pulse-author">${escapeHtml(sourceLabel(message.source))} · ${escapeHtml(message.author?.name || "unknown")}</span>
+    <span class="st-pulse-author">${escapeHtml(sourceChipLabel(message))} · ${escapeHtml(message.author?.name || "unknown")}</span>
     <span class="st-pulse-text">${escapeHtml(clip(message.content, 160))}</span>
   `;
   els.pulseLine.appendChild(row);
@@ -604,6 +605,14 @@ function sourceColor(source) {
 
 function sourceLabel(source) {
   return state.sources?.[source]?.label || String(source || "?").toUpperCase();
+}
+
+function sourceChipLabel(message) {
+  const source = String(message?.source || "").toLowerCase();
+  const label = String(message?.sourceLabel || sourceLabel(source)).trim();
+  const channel = String(message?.channel || "").trim().replace(/^#/, "");
+  if (!channel || !CHANNEL_LABELED_SOURCES.has(source)) return label;
+  return `${label} · #${channel}`;
 }
 
 function chipHtml(source) {

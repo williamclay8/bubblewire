@@ -20,7 +20,8 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   assert.match(html, /id="connectSourcesButton"/);
   assert.match(html, /data-source-filter="youtube"/);
   assert.match(app, /SOURCE_ORDER = \["twitch", "youtube", "x", "xlive", "kick"\]/);
-  assert.match(html, /src="\/app\.js\?v=youtube-live-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=channel-labels-20260610"/);
+  assert.match(html, /href="\/styles\.css\?v=channel-labels-20260610"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
   assert.match(app, /productDemoButton:\s*document\.querySelector\("#productDemoButton"\)/);
@@ -42,6 +43,25 @@ test("overlay configurator exposes YouTube as a source", async () => {
 
   assert.match(html, /data-cfg-source="youtube"/);
   assert.match(app, /sources:\s*\["twitch", "youtube", "x", "kick"\]/);
+});
+
+test("live message source chips carry channel context where sources can fan out", async () => {
+  const [html, streamerHtml, app, streamer] = await Promise.all([
+    readFile(`${repoRoot}/public/index.html`, "utf8"),
+    readFile(`${repoRoot}/public/streamer.html`, "utf8"),
+    readFile(`${repoRoot}/public/app.js`, "utf8"),
+    readFile(`${repoRoot}/public/streamer.js`, "utf8")
+  ]);
+
+  assert.match(html, /src="\/app\.js\?v=channel-labels-20260610"/);
+  assert.match(streamerHtml, /src="\/streamer\.js\?v=channel-labels-20260610"/);
+  assert.match(app, /const CHANNEL_LABELED_SOURCES = new Set\(\["twitch", "youtube", "kick"\]\);/);
+  assert.match(app, /function sourceChipLabel\(message\)/);
+  assert.match(app, /return `\$\{label\} \u00b7 #\$\{channel\}`;/);
+  assert.match(app, /<span class="src-tag">\$\{escapeHtml\(sourceChipLabel\(message\)\)\}<\/span>/);
+  assert.match(app, /<span class="src-tag">\$\{escapeHtml\(sourceChipLabel\(safeMessage\)\)\}<\/span>/);
+  assert.match(streamer, /function sourceChipLabel\(message\)/);
+  assert.match(streamer, /sourceChipLabel\(message\)/);
 });
 
 test("mobile product shell stays compact and feed-first in judge mode", async () => {

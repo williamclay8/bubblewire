@@ -898,7 +898,11 @@ h1::before {
 }
 
 .src-tag {
-  flex: none;
+  flex: 0 1 auto;
+  max-width: min(230px, 52vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 1px 6px;
   border-radius: 2px;
   background: var(--src);
@@ -906,8 +910,7 @@ h1::before {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .author {
@@ -2692,6 +2695,7 @@ body[data-density="compact"] .pin-btn {
   }
 
   .src-tag {
+    max-width: min(180px, 46vw);
     padding: 1px 5px;
     font-size: 9px;
   }
@@ -2818,6 +2822,7 @@ body[data-density="compact"] .pin-btn {
   }
 
   .src-tag {
+    max-width: min(150px, 44vw);
     padding: 1px 4px;
     font-size: 8px;
   }

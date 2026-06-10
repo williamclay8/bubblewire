@@ -21,6 +21,7 @@ const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
 const RADAR_BUCKET_MS = 2000;
 const SOURCE_ORDER = ["twitch", "youtube", "x", "xlive", "kick"];
+const CHANNEL_LABELED_SOURCES = new Set(["twitch", "youtube", "kick"]);
 const OVERLAY_PRESETS = {
   broadcast: { mode: "feed", max: OVERLAY_RENDERED, fade: 0, scale: 1, align: "top", sources: SOURCE_ORDER },
   ticker: { mode: "feed", max: 3, fade: 35, scale: 0.8, align: "bottom", sources: ["x", "youtube", "kick", "twitch"] },
@@ -1132,7 +1133,10 @@ function messageMarkup(message, dupes = 1) {
   const evidence = message.evidenceLevel && message.evidenceLevel !== message.mode
     ? `<span class="mode-tag evidence-tag">${escapeHtml(message.evidenceLevel)}</span>`
     : "";
-  const channel = message.channel ? `<span class="channel">#${escapeHtml(message.channel)}</span>` : "";
+  const channelName = messageChannelName(message);
+  const channel = channelName && !sourceUsesInlineChannel(message.source)
+    ? `<span class="channel">#${escapeHtml(channelName)}</span>`
+    : "";
   const authorQ = message.author.handle || message.author.name;
   const watchTag = watchTerm ? `<span class="watch-tag" title="Watchlist hit">⚑ ${escapeHtml(watchTerm)}</span>` : "";
   const dupeBadge = dupes > 1 ? `<span class="dupe-badge" title="${dupes} repeats collapsed">×${dupes}</span>` : "";
@@ -1145,7 +1149,7 @@ function messageMarkup(message, dupes = 1) {
   return `
     <li class="message${selected}${pinnedState ? " pinned-state" : ""}${watchTerm ? " watch-hit" : ""}" data-message-id="${escapeAttr(message.id)}" data-collapse-key="${escapeAttr(collapseKey(message))}" data-dupes="${dupes}" style="--src:${escapeAttr(message.sourceColor)}">
       <div class="msg-head">
-        <span class="src-tag">${escapeHtml(message.sourceLabel)}</span>
+        <span class="src-tag">${escapeHtml(sourceChipLabel(message))}</span>
         ${avatar}
         <span class="author" role="button" tabindex="0" data-author-q="${escapeAttr(authorQ)}" title="Filter feed to ${escapeAttr(authorQ)}" style="color:${escapeAttr(visibleColor(message.author.color || message.sourceColor))}">${escapeHtml(message.author.name)}</span>
         ${verified}
@@ -1171,7 +1175,7 @@ function overlayMarkup(message) {
   const safeMessage = checked.message;
   return `
     <li class="overlay-item" style="--src:${escapeAttr(safeMessage.sourceColor)}">
-      <span class="src-tag">${escapeHtml(safeMessage.sourceLabel)}</span>
+      <span class="src-tag">${escapeHtml(sourceChipLabel(safeMessage))}</span>
       <div>
         <strong style="color:${escapeAttr(visibleColor(safeMessage.author.color || safeMessage.sourceColor))}">${escapeHtml(safeMessage.author.name)}</strong>
         <p class="msg-content">${enrichContent(safeMessage.content, "")}</p>
@@ -1223,7 +1227,7 @@ function renderPinned() {
   els.pinnedList.innerHTML = pinned
     .map((message) => `
       <article class="pinned-item">
-        <strong>${escapeHtml(message.sourceLabel)} / ${escapeHtml(message.author.name)}</strong>
+        <strong>${escapeHtml(sourceChipLabel(message))} / ${escapeHtml(message.author.name)}</strong>
         <button type="button" class="unpin-btn" data-unpin-id="${escapeAttr(message.id)}">Unpin</button>
         <p>${escapeHtml(message.content)}</p>
       </article>
@@ -2476,6 +2480,22 @@ async function postJson(url, body = {}) {
 
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function sourceUsesInlineChannel(source) {
+  return CHANNEL_LABELED_SOURCES.has(String(source || "").toLowerCase());
+}
+
+function messageChannelName(message) {
+  return String(message?.channel || "").trim().replace(/^#/, "");
+}
+
+function sourceChipLabel(message) {
+  const source = String(message?.source || "").toLowerCase();
+  const label = String(message?.sourceLabel || message?.source || "source").trim();
+  const channel = messageChannelName(message);
+  if (!channel || !sourceUsesInlineChannel(source)) return label;
+  return `${label} · #${channel}`;
 }
 
 function sourceColor(source) {
