@@ -5,7 +5,7 @@ import test from "node:test";
 
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 
-test("dashboard exposes moment engine, proof console, workspace, and judge surfaces", async () => {
+test("dashboard exposes moments, moment sharing, and judge surfaces", async () => {
   const [html, app, css, server] = await Promise.all([
     readFile(`${repoRoot}/public/index.html`, "utf8"),
     readFile(`${repoRoot}/public/app.js`, "utf8"),
@@ -16,26 +16,15 @@ test("dashboard exposes moment engine, proof console, workspace, and judge surfa
   assert.match(server, /"\/judge"/);
   assert.match(app, /const isJudgeRoute = location\.pathname === "\/judge"/);
 
-  assert.match(html, /id="momentRail"/);
-  assert.match(html, /id="momentRailList"/);
-  assert.match(html, /id="proofConsole"/);
-  assert.match(html, /id="proofConsoleBody"/);
-  assert.match(html, /id="workspacePanel"/);
-  assert.match(html, /id="workspaceSummary"/);
+  assert.match(html, /id="momentsList"/);
+  assert.match(html, /id="momentShareLatest"/);
   assert.match(html, /id="judgeBrief"/);
 
-  assert.match(app, /function renderMomentRail\(\)/);
+  assert.match(app, /function renderMoments\(\)/);
   assert.match(app, /function shareMoment\(/);
-  assert.match(app, /function renderProofConsole\(\)/);
-  assert.match(app, /function renderWorkspaceSummary\(\)/);
   assert.match(app, /function renderJudgeBrief\(\)/);
-  assert.match(app, /function maskPublicUrl\(/);
-  assert.match(app, /maskPublicUrl\(setupSource\.webhookUrl\)/);
 
-  assert.match(css, /\.moment-rail\s*{/);
-  assert.match(css, /\.moment-action-row\s*{/);
-  assert.match(css, /\.proof-console\s*{/);
-  assert.match(css, /\.workspace-panel\s*{/);
+  assert.match(css, /\.moments-list\s*\{/);
   assert.match(css, /\.judge-brief\s*{/);
   assert.match(css, /\.judge-link::after\s*{/);
 });

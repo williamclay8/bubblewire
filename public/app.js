@@ -13,14 +13,9 @@ const THEME_KEY = "bubblewire:theme:v1";
 const DENSITY_KEY = "bubblewire:density:v1";
 const PREFS_KEY = "bubblewire:prefs:v1";
 const ACTIVATION_STORAGE_KEY = "bubblewire:activation:v1";
-const WORKSPACE_STORAGE_KEY = "bubblewire:workspace:v1";
-const SESSION_STORAGE_KEY = "bubblewire:session:v1";
-const MOD_QUEUE_STORAGE_KEY = "bubblewire:modqueue:v1";
 const SAFETY_STORAGE_KEY = "bubblewire:safety:v1";
-const SIGNAL_PRESET_KEY = "bubblewire:signal-preset:v1";
 const HERO_KEY = "bubblewire:hero-dismissed:v1";
 const BOOT_KEY = "bubblewire:booted";
-const COMMAND_KEY = "bubblewire:command:v1";
 const THEMES = ["gold", "matrix", "ice", "synthwave"];
 const HISTORY_PAGE = 60;
 const RADAR_BUCKETS = 30;
@@ -32,13 +27,6 @@ const OVERLAY_PRESETS = {
   approved: { mode: "approved", approvedOnly: true, max: 8, fade: 0, scale: 1.05, align: "top", sources: SOURCE_ORDER },
   moments: { mode: "moments", max: 5, fade: 0, scale: 1.08, align: "top", sources: SOURCE_ORDER },
   questions: { mode: "questions", max: 9, fade: 0, scale: 1.1, align: "bottom", sources: ["twitch", "kick", "x"] }
-};
-const SIGNAL_PRESETS = {
-  balanced: { label: "Balanced", heat: 18, watch: [] },
-  market: { label: "Market", heat: 16, watch: ["$btc", "$eth", "fed", "polymarket", "odds"] },
-  qna: { label: "Q&A", heat: 10, watch: ["?", "question", "explain", "what", "how"] },
-  launch: { label: "Launch", heat: 14, watch: ["ship", "bug", "pricing", "signup", "demo"] },
-  highSignal: { label: "High Signal", heat: 32, watch: ["alpha", "leak", "breaking", "confirmed"] }
 };
 const FALLBACK_COLORS = { twitch: "#9146ff", x: "#f4f2ea", kick: "#53fc18", xlive: "#ff5c5c", demo: "#d8a84a" };
 
@@ -72,12 +60,7 @@ const state = {
   olderExhausted: false,
   loadingOlder: false,
   setup: null,
-  serverSession: null,
-  workspace: loadWorkspace(),
-  sessionDesk: loadSessionDesk(),
-  modQueue: loadModeratorQueue(),
   safety: loadSafetyRules(),
-  signalPreset: loadSignalPreset(),
   watchNotify: loadFlag(WATCH_NOTIFY_KEY),
   activation: loadActivation(),
   theme: "gold",
@@ -103,16 +86,12 @@ const els = {
   linkLabel: document.querySelector("#linkLabel"),
   clock: document.querySelector("#clock"),
   tape: document.querySelector("#tape"),
-  sourceCards: document.querySelector("#sourceCards"),
   feedPanel: document.querySelector("#feedPanel"),
   feedList: document.querySelector("#feedList"),
   overlayFeed: document.querySelector("#overlayFeed"),
   feedSummary: document.querySelector("#feedSummary"),
   proofReceipt: document.querySelector("#proofReceipt"),
-  momentRail: document.querySelector("#momentRail"),
-  momentRailList: document.querySelector("#momentRailList"),
   momentShareLatest: document.querySelector("#momentShareLatest"),
-  moodReadout: document.querySelector("#moodReadout"),
   moodBadge: document.querySelector("#moodBadge"),
   moodBadgeLabel: document.querySelector("#moodBadgeLabel"),
   momentsList: document.querySelector("#momentsList"),
@@ -125,10 +104,6 @@ const els = {
   spikeButton: document.querySelector("#spikeButton"),
   exportButton: document.querySelector("#exportButton"),
   clearSearchButton: document.querySelector("#clearSearchButton"),
-  unreadCount: document.querySelector("#unreadCount"),
-  duplicateCount: document.querySelector("#duplicateCount"),
-  bufferCount: document.querySelector("#bufferCount"),
-  uptimeValue: document.querySelector("#uptimeValue"),
   rawPayload: document.querySelector("#rawPayload"),
   copyRawButton: document.querySelector("#copyRawButton"),
   pinnedList: document.querySelector("#pinnedList"),
@@ -150,45 +125,13 @@ const els = {
   setupBackdrop: document.querySelector("#setupBackdrop"),
   setupBody: document.querySelector("#setupBody"),
   setupClose: document.querySelector("#setupClose"),
-  proofConsole: document.querySelector("#proofConsole"),
-  proofConsoleBody: document.querySelector("#proofConsoleBody"),
-  proofRefreshButton: document.querySelector("#proofRefreshButton"),
-  workspacePanel: document.querySelector("#workspacePanel"),
-  workspaceName: document.querySelector("#workspaceName"),
-  workspaceSaveButton: document.querySelector("#workspaceSaveButton"),
-  workspaceLoadButton: document.querySelector("#workspaceLoadButton"),
-  workspaceCopyOverlayButton: document.querySelector("#workspaceCopyOverlayButton"),
-  workspaceSummary: document.querySelector("#workspaceSummary"),
-  sessionDesk: document.querySelector("#sessionDesk"),
-  sessionPreflight: document.querySelector("#sessionPreflight"),
-  sessionProofButton: document.querySelector("#sessionProofButton"),
-  sessionStartButton: document.querySelector("#sessionStartButton"),
-  sessionEndButton: document.querySelector("#sessionEndButton"),
-  moderatorQueue: document.querySelector("#moderatorQueue"),
-  moderatorQueueList: document.querySelector("#moderatorQueueList"),
-  moderatorQueueClearButton: document.querySelector("#moderatorQueueClearButton"),
-  replayStudio: document.querySelector("#replayStudio"),
-  replayExportButton: document.querySelector("#replayExportButton"),
-  replaySummary: document.querySelector("#replaySummary"),
-  guidedSetupPanel: document.querySelector("#guidedSetupPanel"),
-  guidedSetupList: document.querySelector("#guidedSetupList"),
-  safetyPanel: document.querySelector("#safetyPanel"),
-  safetyBlockedInput: document.querySelector("#safetyBlockedInput"),
-  safetySaveButton: document.querySelector("#safetySaveButton"),
-  safetyApprovedOnly: document.querySelector("#safetyApprovedOnly"),
-  signalPresetSelect: document.querySelector("#signalPresetSelect"),
   judgeBrief: document.querySelector("#judgeBrief"),
   judgeBriefMetrics: document.querySelector("#judgeBriefMetrics"),
   judgeDemoButton: document.querySelector("#judgeDemoButton"),
   signalStream: document.querySelector("#signalStream"),
   productCommand: document.querySelector("#productCommand"),
-  commandToggle: document.querySelector("#commandToggle"),
   productDemoButton: document.querySelector("#productDemoButton"),
   connectSourcesButton: document.querySelector("#connectSourcesButton"),
-  focusFeedButton: document.querySelector("#focusFeedButton"),
-  overlaySetupLink: document.querySelector("#overlaySetupLink"),
-  proofMetrics: document.querySelector("#proofMetrics"),
-  launchChecklist: document.querySelector("#launchChecklist"),
   channelHero: document.querySelector("#channelHero"),
   heroChannelInput: document.querySelector("#heroChannelInput"),
   heroWatchButton: document.querySelector("#heroWatchButton"),
@@ -197,7 +140,6 @@ const els = {
   watchingCount: document.querySelector("#watchingCount"),
   densityToggle: document.querySelector("#densityToggle"),
   watchNotifyToggle: document.querySelector("#watchNotify"),
-  recapButton: document.querySelector("#recapButton"),
   shareViewButton: document.querySelector("#shareViewButton"),
   spikeChip: document.querySelector("#spikeChip"),
   bootScreen: document.querySelector("#bootScreen"),
@@ -228,7 +170,6 @@ applyUrlState();
 connectEvents();
 loadSnapshot();
 loadSetupSnapshot().catch(() => {});
-loadSessionSnapshot().catch(() => {});
 startTicker();
 registerServiceWorker();
 if (!isOverlay) {
@@ -302,18 +243,6 @@ function bindControls() {
 
   // One delegated listener for the whole feed instead of per-row bindings.
   els.feedList?.addEventListener("click", (event) => {
-    const queue = event.target.closest("[data-queue-id]");
-    if (queue) {
-      event.stopPropagation();
-      queueMessageForReview(queue.dataset.queueId);
-      return;
-    }
-    const feature = event.target.closest("[data-feature-id]");
-    if (feature) {
-      event.stopPropagation();
-      featureMessageForOverlay(feature.dataset.featureId);
-      return;
-    }
     const pin = event.target.closest("[data-pin-id]");
     if (pin) {
       event.stopPropagation();
@@ -336,23 +265,6 @@ function bindControls() {
   });
 
   els.momentsList?.addEventListener("click", (event) => {
-    const moment = event.target.closest("[data-moment-id]");
-    if (moment) jumpToMessage(moment.dataset.momentId);
-  });
-
-  els.momentRailList?.addEventListener("click", (event) => {
-    const share = event.target.closest("[data-moment-share]");
-    if (share) {
-      event.stopPropagation();
-      shareMoment(share.dataset.momentShare);
-      return;
-    }
-    const replay = event.target.closest("[data-moment-replay]");
-    if (replay) {
-      event.stopPropagation();
-      jumpToMessage(replay.dataset.momentReplay);
-      return;
-    }
     const moment = event.target.closest("[data-moment-id]");
     if (moment) jumpToMessage(moment.dataset.momentId);
   });
@@ -400,7 +312,7 @@ function bindControls() {
     hideJumpPill();
   });
 
-  // Theme + density + share + recap
+  // Theme + density + share
   document.querySelectorAll("[data-theme-pick]").forEach((button) => {
     button.addEventListener("click", () => setTheme(button.dataset.themePick));
   });
@@ -416,29 +328,12 @@ function bindControls() {
       toast("clipboard unavailable", "err");
     }
   });
-  els.recapButton?.addEventListener("click", downloadRecap);
   els.judgeDemoButton?.addEventListener("click", runProductDemo);
   els.productDemoButton?.addEventListener("click", runProductDemo);
   els.connectSourcesButton?.addEventListener("click", () => {
     trackActivation("setup");
     openSetup();
   });
-  els.focusFeedButton?.addEventListener("click", () => {
-    trackActivation("feed");
-    setCommandCollapsed(true);
-    els.feedPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
-    els.feedList?.focus?.();
-  });
-  els.commandToggle?.addEventListener("click", () => {
-    setCommandCollapsed(!els.productCommand?.classList.contains("collapsed"));
-  });
-  initCommandCollapse();
-  els.overlaySetupLink?.addEventListener("click", () => trackActivation("overlay"));
-  els.launchChecklist?.addEventListener("click", onLaunchChecklistClick);
-  document.querySelectorAll("[data-copy-overlay-mode]").forEach((button) => {
-    button.addEventListener("click", () => copyOverlayModeUrl(button.dataset.copyOverlayMode));
-  });
-
   // Channel hero
   els.heroWatchButton?.addEventListener("click", () => heroWatch());
   els.heroChannelInput?.addEventListener("keydown", (event) => {
@@ -498,25 +393,6 @@ function bindControls() {
   els.setupClose?.addEventListener("click", closeSetup);
   els.setupBackdrop?.addEventListener("click", closeSetup);
   els.setupBody?.addEventListener("click", onSetupClick);
-  els.proofRefreshButton?.addEventListener("click", () => loadSetupSnapshot({ announce: true }));
-  els.workspaceSaveButton?.addEventListener("click", saveWorkspaceSnapshot);
-  els.workspaceLoadButton?.addEventListener("click", applyWorkspaceSnapshot);
-  els.workspaceCopyOverlayButton?.addEventListener("click", copyWorkspaceOverlayUrl);
-  els.sessionProofButton?.addEventListener("click", copyProofPacketUrl);
-  els.sessionStartButton?.addEventListener("click", startSessionDesk);
-  els.sessionEndButton?.addEventListener("click", endSessionDesk);
-  els.moderatorQueueList?.addEventListener("click", onModeratorQueueClick);
-  els.moderatorQueueClearButton?.addEventListener("click", clearModeratorQueue);
-  els.replayExportButton?.addEventListener("click", exportReplayBundle);
-  els.safetySaveButton?.addEventListener("click", saveSafetyFromControls);
-  els.safetyApprovedOnly?.addEventListener("change", (event) => {
-    state.safety.approvedOnly = event.target.checked;
-    saveSafetyRules();
-    renderSafetyPanel();
-    renderFeed();
-    toast(state.safety.approvedOnly ? "overlay approval gate on" : "overlay approval gate off");
-  });
-  els.signalPresetSelect?.addEventListener("change", (event) => applySignalPreset(event.target.value));
   els.setupBody?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && event.target.id === "channelInput") {
       event.preventDefault();
@@ -599,16 +475,6 @@ async function loadSnapshot() {
   }
 }
 
-async function loadSessionSnapshot() {
-  try {
-    const response = await fetch("/session.json");
-    state.serverSession = await response.json();
-    renderSessionDesk();
-  } catch {
-    throw new Error("session unavailable");
-  }
-}
-
 function connectEvents() {
   const events = new EventSource("/events.stream");
 
@@ -655,12 +521,9 @@ function renderWatching() {
 
 /* ---------- intelligence layer ---------- */
 
-const MOOD_GLYPH = { hyped: "▲▲", positive: "▲", neutral: "▬", restless: "▽", negative: "▼▼", quiet: "··" };
-
 function renderAnalysis() {
   if (isOverlay) return;
   renderMood();
-  renderMomentRail();
   renderMoments();
   renderTrends();
   renderQuestions();
@@ -684,34 +547,6 @@ function renderMood() {
       state.lastMoodTone = overall.tone;
     }
   }
-
-  if (!els.moodReadout) return;
-  if (!analysis) {
-    els.moodReadout.innerHTML = `<p class="intel-empty">listening…</p>`;
-    return;
-  }
-
-  const overall = analysis.overall || { mood: "quiet", tone: "neutral", score: 0, samples: 0 };
-  const rows = SOURCE_ORDER.map((source) => {
-    const data = analysis.sources?.[source] || { mood: "quiet", tone: "neutral", score: 0, samples: 0 };
-    const pct = Math.round(((data.score + 1) / 2) * 100);
-    return `
-      <div class="mood-row" data-tone="${escapeAttr(data.tone)}" style="--src:${escapeAttr(sourceColor(source))}">
-        <span class="mood-src">${escapeHtml(source)}</span>
-        <span class="mood-track"><span class="mood-fill" style="left:${pct}%"></span></span>
-        <span class="mood-label">${escapeHtml(data.mood)}</span>
-      </div>
-    `;
-  }).join("");
-
-  els.moodReadout.innerHTML = `
-    <div class="mood-overall" data-tone="${escapeAttr(overall.tone)}">
-      <span class="mood-overall-glyph">${MOOD_GLYPH[overall.mood] || "▬"}</span>
-      <span class="mood-overall-label">${escapeHtml(overall.mood)}</span>
-      <span class="mood-overall-meta">${overall.samples} msgs · ${analysis.windowSeconds}s</span>
-    </div>
-    ${rows}
-  `;
 }
 
 function renderMoments() {
@@ -732,44 +567,6 @@ function renderMoments() {
         </span>
         <span class="moment-text">${escapeHtml(moment.content)}</span>
       </button>
-    `)
-    .join("");
-}
-
-function renderMomentRail() {
-  if (!els.momentRailList) return;
-  const moments = state.analysis?.moments || [];
-  if (moments.length === 0) {
-    const trends = state.analysis?.trends || [];
-    const questions = state.analysis?.questions || [];
-    const fallback = [
-      trends[0] ? `watching "${trends[0].term}" across ${trends[0].sources.length} source${trends[0].sources.length === 1 ? "" : "s"}` : "",
-      questions[0] ? `latest question: ${questions[0].content}` : ""
-    ].filter(Boolean)[0];
-    els.momentRailList.innerHTML = `<p class="intel-empty">${escapeHtml(fallback || "waiting for a spike, charged message, or cross-platform trend")}</p>`;
-    return;
-  }
-
-  els.momentRailList.innerHTML = moments
-    .slice(0, 5)
-    .map((moment, index) => `
-      <article class="moment-card" data-moment-id="${escapeAttr(moment.id)}" data-tone="${escapeAttr(moment.tone)}" style="--src:${escapeAttr(sourceColor(moment.source))}">
-        <button type="button" class="moment-card-main" data-moment-replay="${escapeAttr(moment.id)}" title="Replay this moment in the feed">
-          <span class="moment-rank">${String(index + 1).padStart(2, "0")}</span>
-          <span class="moment-card-copy">
-            <span class="moment-head">
-              <span class="src-tag">${escapeHtml(moment.sourceLabel || moment.source)}</span>
-              <span class="moment-reason">${escapeHtml(moment.reason)}</span>
-              <span class="moment-time">${escapeHtml(formatTime(moment.at))}</span>
-            </span>
-            <span class="moment-text">${escapeHtml(moment.content)}</span>
-          </span>
-        </button>
-        <span class="moment-action-row">
-          <button type="button" data-moment-replay="${escapeAttr(moment.id)}">Replay</button>
-          <button type="button" data-moment-share="${escapeAttr(moment.id)}">Share</button>
-        </span>
-      </article>
     `)
     .join("");
 }
@@ -895,7 +692,6 @@ function ingestMessage(message) {
   prependMessage(message);
   renderStats();
   if (!isOverlay) {
-    renderSourceCards();
     alertWatchHit(message);
     spawnStreamParticle(message);
     trackSession(message);
@@ -948,7 +744,6 @@ function renderAll() {
   renderProductSurface();
   renderFeed();
   if (!isOverlay) {
-    renderSourceCards();
     renderPinned();
     renderAnalysis();
     drawRadar();
@@ -985,9 +780,6 @@ function renderStats() {
     els.feedSummary.textContent = summary;
   }
 
-  setNum(els.unreadCount, state.unread, true);
-  setNum(els.duplicateCount, state.stats.duplicatesDropped || 0, true);
-  setNum(els.bufferCount, state.messages.length, false);
   if (els.pausedBannerCount) els.pausedBannerCount.textContent = String(state.unread);
   if (els.pauseButton) {
     els.pauseButton.textContent = state.paused
@@ -1009,6 +801,12 @@ function renderStats() {
   renderProductSurface();
 }
 
+function transportLabel(rawType) {
+  // Map developer transport values to friendly labels at render time only.
+  if (rawType === "manual-injection") return "demo";
+  return rawType;
+}
+
 function renderProofReceipt() {
   if (!els.proofReceipt || isOverlay) return;
   const proofSources = state.proof?.sources || {};
@@ -1019,14 +817,15 @@ function renderProofReceipt() {
     const label = state.sources[source]?.label || source;
     const count = proof.count ?? sourceStats.count ?? 0;
     const level = proof.evidenceLevel || (count ? "live" : status.state || "waiting");
-    const last = proof.lastMessageAt
-      ? `last ${formatTime(proof.lastMessageAt)}`
-      : status.state || "waiting";
-    const rawType = proof.rawType ? ` · ${proof.rawType}` : "";
+    const transport = proof.rawType ? transportLabel(proof.rawType) : "";
+    const parts = [String(count)];
+    if (proof.lastMessageAt) parts.push(formatTime(proof.lastMessageAt));
+    const tail = transport || level;
+    if (tail && tail !== parts[parts.length - 1]) parts.push(tail);
 
     return `
       <span data-source="${escapeAttr(source)}" data-proof="${escapeAttr(level)}" style="--src:${escapeAttr(sourceColor(source))}">
-        <b>${escapeHtml(label)}</b> ${escapeHtml(level)} · ${escapeHtml(String(count))} · ${escapeHtml(last)}${escapeHtml(rawType)}
+        <b>${escapeHtml(label)}</b> · ${parts.map((part) => escapeHtml(part)).join(" · ")}
       </span>
     `;
   }).join("");
@@ -1034,492 +833,9 @@ function renderProofReceipt() {
   els.proofReceipt.innerHTML = `<strong>LIVE PROOF</strong>${receipt}`;
 }
 
-function renderProofConsole() {
-  if (!els.proofConsoleBody || isOverlay) return;
-  const setup = state.setup?.sources || {};
-  const rows = SOURCE_ORDER.map((source) => {
-    const meta = state.sources[source] || {};
-    const proof = state.proof?.sources?.[source] || {};
-    const sourceStats = state.stats.sources?.[source] || {};
-    const status = state.status[source] || {};
-    const setupSource = setup[source] || {};
-    const label = meta.label || source;
-    const count = proof.count ?? sourceStats.count ?? 0;
-    const evidence = proof.evidenceLevel || (count ? "live" : status.state || "waiting");
-    const last = proof.lastMessageAt || sourceStats.lastMessageAt;
-    const detail = status.detail || setupSource.note || "waiting for source evidence";
-    const xDiag = source === "x" ? diagnosticsRows(setupSource.diagnostics || status.diagnostics) : "";
-    const xRules = source === "x" && setupSource.rules
-      ? `<span class="proof-meta">rules ${escapeHtml(setupSource.rules.status || "unknown")} · ${escapeHtml(String(setupSource.rules.count || 0))}</span>`
-      : "";
-    const kickWebhook = source === "kick" && setupSource.webhookUrl
-      ? `<code class="proof-url">${escapeHtml(maskPublicUrl(setupSource.webhookUrl))}</code>`
-      : "";
-    return `
-      <article class="proof-console-row" data-source="${escapeAttr(source)}" data-proof="${escapeAttr(evidence)}" style="--src:${escapeAttr(sourceColor(source))}">
-        <header>
-          <span class="src-tag">${escapeHtml(label)}</span>
-          <strong>${escapeHtml(evidence)}</strong>
-          <span>${escapeHtml(String(count))} seen</span>
-        </header>
-        <p>${escapeHtml(detail)}</p>
-        <div class="proof-meta-row">
-          <span class="proof-meta">${last ? `last ${escapeHtml(formatTime(last))}` : "no live message yet"}</span>
-          <span class="proof-meta">${escapeHtml(status.state || "idle")}</span>
-          ${xRules}
-        </div>
-        ${kickWebhook}
-        ${xDiag}
-      </article>
-    `;
-  }).join("");
-
-  els.proofConsoleBody.innerHTML = rows;
-}
-
-function diagnosticsRows(diagnostics) {
-  if (!diagnostics) return "";
-  const status = diagnostics.httpStatus
-    ? `HTTP ${diagnostics.httpStatus}${diagnostics.statusText ? ` ${diagnostics.statusText}` : ""}`
-    : diagnostics.errorName || "runtime error";
-  const fields = [
-    ["status", status],
-    ["problem", diagnostics.problemTitle || diagnostics.problemDetail || diagnostics.summary || ""],
-    ["body", diagnostics.bodySnippet || ""]
-  ].filter(([, value]) => value);
-  if (!fields.length) return "";
-  return `
-    <div class="proof-diagnostics" aria-label="Redacted X diagnostics">
-      ${fields.map(([label, value]) => `
-        <span><b>${escapeHtml(label)}</b><code>${escapeHtml(value)}</code></span>
-      `).join("")}
-    </div>
-  `;
-}
-
 function renderProductSurface() {
   if (isOverlay) return;
-  renderProofMetrics();
-  renderLaunchChecklist();
-  renderProofConsole();
-  renderWorkspaceSummary();
-  renderSessionDesk();
-  renderModeratorQueue();
-  renderReplayStudio();
-  renderGuidedSetup();
-  renderSafetyPanel();
-  renderSignalPreset();
   renderJudgeBrief();
-}
-
-function renderWorkspaceSummary() {
-  if (!els.workspaceSummary || isOverlay) return;
-  const saved = state.workspace;
-  const activeSources = SOURCE_ORDER.filter((source) => sourceHasProof(source) || sourceIsConfigured(source)).length;
-  const topAuthor = [...state.session.authors.entries()].sort((a, b) => b[1] - a[1])[0];
-  const savedName = saved?.name || "No saved setup";
-  const savedAt = saved?.savedAt ? `saved ${formatTime(saved.savedAt)}` : "save this stream setup";
-  if (els.workspaceName && saved?.name && !els.workspaceName.value) els.workspaceName.value = saved.name;
-
-  els.workspaceSummary.innerHTML = `
-    <div class="workspace-stat">
-      <span>Saved</span>
-      <b>${escapeHtml(savedName)}</b>
-      <small>${escapeHtml(savedAt)}</small>
-    </div>
-    <div class="workspace-stat">
-      <span>Sources</span>
-      <b>${activeSources}/3 active</b>
-      <small>${escapeHtml(state.runtime.liveOnly ? "live-only" : "demo/live")}</small>
-    </div>
-    <div class="workspace-stat">
-      <span>Watch terms</span>
-      <b>${state.watchlist.length}</b>
-      <small>${escapeHtml(state.watchlist.slice(0, 3).join(", ") || "none")}</small>
-    </div>
-    <div class="workspace-stat">
-      <span>Top author</span>
-      <b>${escapeHtml(topAuthor?.[0] || "listening")}</b>
-      <small>${topAuthor ? `${topAuthor[1]} messages` : "session not warm yet"}</small>
-    </div>
-  `;
-}
-
-function saveWorkspaceSnapshot() {
-  const name = (els.workspaceName?.value || "").trim() || "Stream desk";
-  state.workspace = {
-    name,
-    savedAt: new Date().toISOString(),
-    filter: state.filter,
-    priorityOnly: state.priorityOnly,
-    watchlist: state.watchlist.slice(),
-    watchSound: state.watchSound,
-    watchNotify: state.watchNotify,
-    theme: state.theme,
-    density: state.density
-  };
-  try {
-    localStorage.setItem(WORKSPACE_STORAGE_KEY, JSON.stringify(state.workspace));
-  } catch {
-    /* in-memory only */
-  }
-  trackActivation("workspace");
-  renderWorkspaceSummary();
-  toast("workspace saved");
-}
-
-function applyWorkspaceSnapshot() {
-  const saved = state.workspace || loadWorkspace();
-  if (!saved) {
-    toast("no saved workspace yet", "warn");
-    return;
-  }
-  if (saved.filter && ["all", ...SOURCE_ORDER].includes(saved.filter)) state.filter = saved.filter;
-  if (typeof saved.priorityOnly === "boolean") state.priorityOnly = saved.priorityOnly;
-  if (Array.isArray(saved.watchlist)) state.watchlist = saved.watchlist.slice(0, 12);
-  if (typeof saved.watchSound === "boolean") state.watchSound = saved.watchSound;
-  if (typeof saved.watchNotify === "boolean") state.watchNotify = saved.watchNotify;
-  if (saved.theme) setTheme(saved.theme, { silent: true });
-  setDensity(saved.density || "comfortable");
-  savePrefs();
-  saveWatchlist();
-  saveWatchSound();
-  syncControlsToState();
-  renderWatchlist();
-  renderFeed();
-  renderStats();
-  renderWorkspaceSummary();
-  toast(`workspace loaded: ${saved.name || "stream desk"}`);
-}
-
-async function copyWorkspaceOverlayUrl() {
-  try {
-    await navigator.clipboard.writeText(`${location.origin}/overlay.html?preset=broadcast&max=8&scale=1.1`);
-    trackActivation("overlay");
-    toast("OBS URL copied");
-  } catch {
-    toast("clipboard unavailable", "err");
-  }
-}
-
-async function copyOverlayModeUrl(mode) {
-  const safeMode = ["approved", "moments", "questions", "feed"].includes(mode) ? mode : "approved";
-  const preset = safeMode === "feed" ? "broadcast" : safeMode;
-  try {
-    await navigator.clipboard.writeText(`${location.origin}/overlay.html?preset=${preset}&mode=${safeMode}`);
-    trackActivation("overlay");
-    toast(`${safeMode} overlay URL copied`);
-  } catch {
-    toast("clipboard unavailable", "err");
-  }
-}
-
-function loadWorkspace() {
-  try {
-    const value = JSON.parse(localStorage.getItem(WORKSPACE_STORAGE_KEY) || "null");
-    return value && typeof value === "object" ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function loadSessionDesk() {
-  try {
-    const value = JSON.parse(localStorage.getItem(SESSION_STORAGE_KEY) || "null");
-    return value && typeof value === "object" ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSessionDesk() {
-  try {
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(state.sessionDesk));
-  } catch {
-    /* in-memory only */
-  }
-}
-
-function startSessionDesk() {
-  state.sessionDesk = {
-    name: state.workspace?.name || "Live stream session",
-    startedAt: new Date().toISOString(),
-    endedAt: null
-  };
-  state.session.startedAt = Date.now();
-  saveSessionDesk();
-  renderSessionDesk();
-  toast("session started");
-}
-
-function endSessionDesk() {
-  state.sessionDesk = {
-    ...(state.sessionDesk || { name: "Live stream session", startedAt: new Date(state.session.startedAt).toISOString() }),
-    endedAt: new Date().toISOString()
-  };
-  saveSessionDesk();
-  renderSessionDesk();
-  toast("session closed");
-}
-
-async function copyProofPacketUrl() {
-  try {
-    await navigator.clipboard.writeText(`${location.origin}/proof-packet.json`);
-    trackActivation("proof_packet");
-    toast("proof packet url copied");
-  } catch {
-    toast("clipboard unavailable", "err");
-  }
-}
-
-function renderSessionDesk() {
-  if (!els.sessionDesk || isOverlay) return;
-  const session = state.serverSession;
-  const local = state.sessionDesk || {};
-  const duration = session?.durationSeconds ?? Math.max(0, Math.round((Date.now() - state.session.startedAt) / 1000));
-  const metrics = session?.metrics || {
-    totalMessages: state.stats.totalMessages || 0,
-    liveSources: SOURCE_ORDER.filter(sourceHasProof).length,
-    moments: state.analysis?.moments?.length || 0,
-    questions: state.analysis?.questions?.length || 0,
-    watching: state.watching || 0
-  };
-
-  els.sessionDesk.dataset.phase = session?.phase || (state.runtime.liveOnly ? "live" : "demo");
-  const metricHtml = [
-    ["Msgs", metrics.totalMessages || 0],
-    ["Sources", `${metrics.liveSources || 0}/3`],
-    ["Moments", metrics.moments || 0],
-    ["Q", metrics.questions || 0],
-    ["Time", formatDuration(duration * 1000)]
-  ].map(([label, value]) => `
-    <article>
-      <span>${escapeHtml(label)}</span>
-      <b>${escapeHtml(String(value))}</b>
-    </article>
-  `).join("");
-
-  const preflight = session?.preflight || fallbackPreflight();
-  if (els.sessionPreflight) {
-    els.sessionPreflight.innerHTML = preflight
-      .map((item) => `
-        <li data-status="${escapeAttr(item.status)}">
-          <b>${escapeHtml(item.key)}</b>
-          <span>${escapeHtml(item.detail || item.status)}</span>
-        </li>
-      `)
-      .join("");
-  }
-
-  const title = local.name || state.workspace?.name || "Live stream session";
-  const stateLabel = local.endedAt ? "closed" : local.startedAt ? "live" : "ready";
-  els.sessionDesk.querySelector("[data-session-title]")?.replaceChildren(document.createTextNode(title));
-  els.sessionDesk.querySelector("[data-session-state]")?.replaceChildren(document.createTextNode(stateLabel));
-  const metricsRoot = els.sessionDesk.querySelector("[data-session-metrics]");
-  if (metricsRoot) metricsRoot.innerHTML = metricHtml;
-}
-
-function fallbackPreflight() {
-  return [
-    { key: "runtime", status: state.runtime.liveOnly ? "pass" : "warn", detail: state.runtime.liveOnly ? "live-only" : "demo/live" },
-    { key: "history", status: state.setup?.history?.enabled ? "pass" : "warn", detail: state.setup?.history?.enabled ? "enabled" : "not confirmed" },
-    ...SOURCE_ORDER.map((source) => ({
-      key: source,
-      status: sourceHasProof(source) ? "pass" : sourceIsConfigured(source) ? "warn" : "fail",
-      detail: state.status[source]?.detail || "waiting"
-    }))
-  ];
-}
-
-function loadModeratorQueue() {
-  try {
-    const value = JSON.parse(localStorage.getItem(MOD_QUEUE_STORAGE_KEY) || "[]");
-    return Array.isArray(value) ? value.slice(0, 60) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveModeratorQueue() {
-  try {
-    localStorage.setItem(MOD_QUEUE_STORAGE_KEY, JSON.stringify(state.modQueue));
-  } catch {
-    /* in-memory only */
-  }
-}
-
-function queueMessageForReview(id) {
-  const message = state.messages.find((item) => item.id === id) || state.pinned.get(id);
-  if (!message) return;
-  const existing = state.modQueue.find((item) => item.id === id);
-  if (existing) {
-    existing.status = "pending";
-    existing.updatedAt = new Date().toISOString();
-  } else {
-    state.modQueue.unshift({
-      id,
-      status: "pending",
-      queuedAt: new Date().toISOString(),
-      message: snapshotMessage(message)
-    });
-    state.modQueue.splice(60);
-  }
-  saveModeratorQueue();
-  renderModeratorQueue();
-  trackActivation("moderation");
-  toast("queued for review");
-}
-
-function featureMessageForOverlay(id) {
-  const message = state.messages.find((item) => item.id === id) || state.pinned.get(id);
-  if (!message) return;
-  const approved = new Set(state.safety.approvedIds || []);
-  approved.add(id);
-  state.safety.approvedIds = [...approved].slice(-80);
-  saveSafetyRules();
-  const queued = state.modQueue.find((item) => item.id === id);
-  if (queued) {
-    queued.status = "approved";
-    queued.updatedAt = new Date().toISOString();
-  } else {
-    state.modQueue.unshift({
-      id,
-      status: "approved",
-      queuedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      message: snapshotMessage(message)
-    });
-  }
-  saveModeratorQueue();
-  renderModeratorQueue();
-  renderSafetyPanel();
-  toast("approved for overlay");
-}
-
-function onModeratorQueueClick(event) {
-  const action = event.target.closest("[data-mod-action]");
-  if (!action) return;
-  const id = action.dataset.modId;
-  const item = state.modQueue.find((entry) => entry.id === id);
-  if (!item) return;
-  const value = action.dataset.modAction;
-  if (value === "approve") {
-    featureMessageForOverlay(id);
-  } else if (value === "escalate") {
-    item.status = "escalated";
-    item.updatedAt = new Date().toISOString();
-    saveModeratorQueue();
-    renderModeratorQueue();
-    toast("message escalated", "warn");
-  } else if (value === "remove") {
-    state.modQueue = state.modQueue.filter((entry) => entry.id !== id);
-    saveModeratorQueue();
-    renderModeratorQueue();
-  }
-}
-
-function clearModeratorQueue() {
-  state.modQueue = [];
-  saveModeratorQueue();
-  renderModeratorQueue();
-  toast("moderator queue cleared");
-}
-
-function renderModeratorQueue() {
-  if (!els.moderatorQueueList || isOverlay) return;
-  if (els.moderatorQueue) els.moderatorQueue.dataset.count = String(state.modQueue.length);
-  if (state.modQueue.length === 0) {
-    els.moderatorQueueList.innerHTML = `<div class="queue-empty">No messages waiting.</div>`;
-    return;
-  }
-  els.moderatorQueueList.innerHTML = state.modQueue.slice(0, 8)
-    .map((item) => `
-      <article class="queue-item" data-status="${escapeAttr(item.status)}">
-        <header>
-          <span class="src-tag">${escapeHtml(item.message.sourceLabel || item.message.source)}</span>
-          <strong>${escapeHtml(item.message.author?.name || "unknown")}</strong>
-          <small>${escapeHtml(item.status)}</small>
-        </header>
-        <p>${escapeHtml(item.message.content || "")}</p>
-        <div class="queue-actions">
-          <button type="button" data-mod-action="approve" data-mod-id="${escapeAttr(item.id)}">Approve</button>
-          <button type="button" data-mod-action="escalate" data-mod-id="${escapeAttr(item.id)}">Flag</button>
-          <button type="button" data-mod-action="remove" data-mod-id="${escapeAttr(item.id)}">Done</button>
-        </div>
-      </article>
-    `)
-    .join("");
-}
-
-function renderReplayStudio() {
-  if (!els.replayStudio || isOverlay) return;
-  const moment = state.analysis?.moments?.[0];
-  const target = moment || state.messages[0] || null;
-  if (els.replayExportButton) els.replayExportButton.disabled = !target;
-  if (!els.replaySummary) return;
-  if (!target) {
-    els.replaySummary.innerHTML = `<span>No replay target yet</span>`;
-    return;
-  }
-  const context = replayContext(target.id, 45);
-  els.replaySummary.innerHTML = `
-    <strong>${escapeHtml(moment?.reason || "latest message")}</strong>
-    <span>${escapeHtml(target.sourceLabel || target.source)} · ${context.length} rows · ${escapeHtml(formatTime(target.at || target.receivedAt))}</span>
-    <p>${escapeHtml(target.content || "")}</p>
-  `;
-}
-
-async function exportReplayBundle() {
-  const target = state.analysis?.moments?.[0] || state.messages[0];
-  if (!target) {
-    toast("no replay target yet", "warn");
-    return;
-  }
-  try {
-    const response = await fetch(`/replay.json?moment=${encodeURIComponent(target.id)}&window=45`);
-    const bundle = await response.json();
-    downloadJson(`bubblewire-replay-${safeFilePart(target.id)}.json`, bundle);
-    trackActivation("replay");
-    toast("replay bundle exported");
-  } catch {
-    const local = {
-      kind: "replay-bundle",
-      generatedAt: new Date().toISOString(),
-      target: snapshotMessage(target),
-      context: replayContext(target.id, 45).map(snapshotMessage)
-    };
-    downloadJson(`bubblewire-replay-${safeFilePart(target.id)}.json`, local);
-    toast("local replay exported", "warn");
-  }
-}
-
-function replayContext(id, windowSeconds) {
-  const target = state.messages.find((message) => message.id === id) || state.messages[0];
-  if (!target) return [];
-  const targetMs = new Date(target.receivedAt || target.at).getTime();
-  const windowMs = windowSeconds * 1000;
-  return state.messages
-    .slice()
-    .reverse()
-    .filter((message) => Math.abs(new Date(message.receivedAt).getTime() - targetMs) <= windowMs);
-}
-
-function renderGuidedSetup() {
-  if (!els.guidedSetupList || isOverlay) return;
-  const setup = state.setup?.sources || {};
-  const rows = SOURCE_ORDER.map((source) => {
-    const status = sourceHasProof(source) ? "pass" : sourceIsConfigured(source) ? "warn" : "fail";
-    const detail = setup[source]?.note || state.status[source]?.detail || "waiting";
-    const action = source === "kick" ? "webhook" : source === "x" ? "rules" : "channel";
-    return `
-      <li data-status="${escapeAttr(status)}">
-        <b>${escapeHtml(source)}</b>
-        <span>${escapeHtml(action)}</span>
-        <small>${escapeHtml(detail)}</small>
-      </li>
-    `;
-  }).join("");
-  els.guidedSetupList.innerHTML = rows;
 }
 
 function loadSafetyRules() {
@@ -1549,32 +865,6 @@ function normalizeSafetyRules(value = {}) {
   };
 }
 
-function saveSafetyFromControls() {
-  const terms = String(els.safetyBlockedInput?.value || "")
-    .split(/[\n,]/)
-    .map((term) => term.trim())
-    .filter(Boolean)
-    .slice(0, 40);
-  state.safety.blockedTerms = [...new Set(terms)];
-  state.safety.approvedOnly = Boolean(els.safetyApprovedOnly?.checked);
-  saveSafetyRules();
-  renderSafetyPanel();
-  renderFeed();
-  toast("safety rules saved");
-}
-
-function renderSafetyPanel() {
-  if (!els.safetyPanel || isOverlay) return;
-  if (els.safetyBlockedInput && document.activeElement !== els.safetyBlockedInput) {
-    els.safetyBlockedInput.value = (state.safety.blockedTerms || []).join(", ");
-  }
-  if (els.safetyApprovedOnly) els.safetyApprovedOnly.checked = Boolean(state.safety.approvedOnly);
-  const summary = els.safetyPanel.querySelector("[data-safety-summary]");
-  if (summary) {
-    summary.textContent = `${state.safety.approvedIds?.length || 0} approved · ${state.safety.blockedTerms?.length || 0} blocked`;
-  }
-}
-
 function applySafetyToMessage(message, options = {}) {
   const rules = normalizeSafetyRules({ ...state.safety, ...(options.rules || {}) });
   const approvedOnly = Boolean(options.approvedOnly ?? rules.approvedOnly);
@@ -1600,48 +890,8 @@ function applySafetyToMessage(message, options = {}) {
   return { hidden: false, message: next };
 }
 
-function loadSignalPreset() {
-  try {
-    const value = localStorage.getItem(SIGNAL_PRESET_KEY) || "balanced";
-    return SIGNAL_PRESETS[value] ? value : "balanced";
-  } catch {
-    return "balanced";
-  }
-}
-
-function saveSignalPreset() {
-  try {
-    localStorage.setItem(SIGNAL_PRESET_KEY, state.signalPreset);
-  } catch {
-    /* in-memory only */
-  }
-}
-
-function renderSignalPreset() {
-  if (!els.signalPresetSelect || isOverlay) return;
-  els.signalPresetSelect.value = state.signalPreset;
-  const summary = els.signalPresetSelect.closest(".signal-preset-panel")?.querySelector("[data-signal-summary]");
-  const preset = SIGNAL_PRESETS[state.signalPreset] || SIGNAL_PRESETS.balanced;
-  if (summary) summary.textContent = `heat >= ${preset.heat} · ${preset.watch.length || state.watchlist.length} hints`;
-}
-
-function applySignalPreset(name) {
-  const next = SIGNAL_PRESETS[name] ? name : "balanced";
-  state.signalPreset = next;
-  const preset = SIGNAL_PRESETS[next];
-  const merged = [...new Set([...state.watchlist, ...preset.watch])].slice(0, 12);
-  state.watchlist = merged;
-  saveSignalPreset();
-  saveWatchlist();
-  renderSignalPreset();
-  renderWatchlist();
-  renderFeed();
-  renderStats();
-  toast(`${preset.label} signal preset`);
-}
-
 function currentHeatThreshold() {
-  return SIGNAL_PRESETS[state.signalPreset]?.heat || PRIORITY_HEAT;
+  return PRIORITY_HEAT;
 }
 
 function renderJudgeBrief() {
@@ -1669,83 +919,6 @@ function renderJudgeBrief() {
     .join("");
 }
 
-function renderProofMetrics() {
-  if (!els.proofMetrics) return;
-  const total = state.stats.totalMessages || 0;
-  const rate = messageRate();
-  const proofReady = SOURCE_ORDER.filter((source) => sourceHasProof(source)).length;
-  const watchHits = state.session.watchHits || 0;
-  const readyCount = SOURCE_ORDER.filter((source) => !sourceHasProof(source) && sourceIsConfigured(source)).length;
-  const sourcesLabel = proofReady < SOURCE_ORDER.length && readyCount > 0 ? `Sources · ${readyCount} ready` : "Sources";
-  const metrics = [
-    ["Captured", pad(total)],
-    [sourcesLabel, `${proofReady} live`],
-    ["Rate", `${rate}/min`],
-    ["Watch hits", String(watchHits)]
-  ];
-
-  els.proofMetrics.innerHTML = metrics
-    .map(([label, value]) => `
-      <article>
-        <span>${escapeHtml(label)}</span>
-        <b>${escapeHtml(value)}</b>
-      </article>
-    `)
-    .join("");
-}
-
-function renderLaunchChecklist() {
-  if (!els.launchChecklist) return;
-  const activeSources = SOURCE_ORDER.filter((source) => sourceHasProof(source) || sourceIsConfigured(source)).length;
-  const steps = [
-    {
-      key: "demo",
-      label: "Try the feed",
-      body: "Inject a labeled Twitch, X, and Kick burst or watch live traffic.",
-      action: "demo",
-      cta: state.runtime.demoEnabled === false ? "Live only" : "Run demo",
-      done: Boolean(state.activation.demo || state.stats.totalMessages > 0)
-    },
-    {
-      key: "setup",
-      label: "Connect sources",
-      body: "Check Twitch channels, X rules, and the Kick webhook from one drawer.",
-      action: "setup",
-      cta: "Open setup",
-      done: Boolean(state.activation.setup || activeSources > 0)
-    },
-    {
-      key: "watch",
-      label: "Add an alert",
-      body: "Track a keyword or ticker so the stream team catches the moment.",
-      action: "watch",
-      cta: "Add term",
-      done: state.watchlist.length > 0
-    },
-    {
-      key: "overlay",
-      label: "Go on air",
-      body: "Configure a transparent OBS overlay with source filters and fade timing.",
-      action: "overlay",
-      cta: "Overlay",
-      done: Boolean(state.activation.overlay)
-    }
-  ];
-
-  els.launchChecklist.innerHTML = steps
-    .map((step, index) => `
-      <article class="launch-step" data-done="${step.done}" data-step="${escapeAttr(step.key)}">
-        <span class="step-index">${step.done ? "✓" : String(index + 1)}</span>
-        <div>
-          <strong>${escapeHtml(step.label)}</strong>
-          <p>${escapeHtml(step.body)}</p>
-        </div>
-        <button type="button" data-onboard-action="${escapeAttr(step.action)}">${escapeHtml(step.cta)}</button>
-      </article>
-    `)
-    .join("");
-}
-
 function sourceHasProof(source) {
   const proof = state.proof?.sources?.[source] || {};
   const stats = state.stats.sources?.[source] || {};
@@ -1755,29 +928,6 @@ function sourceHasProof(source) {
     stats.count > 0 ||
     ["live", "webhook-proof", "signed"].includes(level)
   );
-}
-
-function sourceIsConfigured(source) {
-  const status = state.status[source] || {};
-  return ["connected", "live", "webhook-ready", "demo"].includes(status.state);
-}
-
-function onLaunchChecklistClick(event) {
-  const button = event.target.closest("[data-onboard-action]");
-  if (!button) return;
-  const action = button.dataset.onboardAction;
-  if (action === "demo") {
-    runProductDemo();
-  } else if (action === "setup") {
-    trackActivation("setup");
-    openSetup();
-  } else if (action === "watch") {
-    trackActivation("watch_prompt");
-    els.watchInput?.focus();
-  } else if (action === "overlay") {
-    trackActivation("overlay");
-    location.href = "/overlay-setup.html";
-  }
 }
 
 async function runProductDemo() {
@@ -1821,32 +971,6 @@ function renderTape(total, visible) {
     <span>unread <b>${pad(state.unread)}</b></span>
     ${sourceSegments}
   `;
-}
-
-function renderSourceCards() {
-  if (!els.sourceCards) return;
-  els.sourceCards.innerHTML = SOURCE_ORDER
-    .map((source) => {
-      const meta = state.sources[source] || {};
-      const status = state.status[source] || {};
-      const sourceStats = state.stats.sources?.[source] || {};
-      const lastAt = sourceStats.lastMessageAt
-        ? `<p class="last-at">last ${escapeHtml(formatTime(sourceStats.lastMessageAt))}</p>`
-        : "";
-      return `
-        <article class="source-card" style="--src:${escapeAttr(sourceColor(source))}" data-state="${escapeAttr(status.state || "idle")}">
-          <div class="source-card-head">
-            <strong>${escapeHtml(meta.label || source)}</strong>
-            <canvas class="spark" data-spark="${escapeAttr(source)}" aria-hidden="true"></canvas>
-            <span class="metric-value">${sourceStats.count || 0}</span>
-          </div>
-          <p>${escapeHtml(status.detail || "idle")}</p>
-          ${lastAt}
-        </article>
-      `;
-    })
-    .join("");
-  drawSparks();
 }
 
 function renderFeed() {
@@ -1994,6 +1118,9 @@ function messageMarkup(message, dupes = 1) {
   const heatBars = [1, 2, 3, 4]
     .map((step) => `<i${step <= heatLevel ? ' class="on"' : ""}></i>`)
     .join("");
+  const heatChip = heat > 0
+    ? `<span class="heat" data-tier="${tier}" title="Heat ${heat}"><span class="heat-bar">${heatBars}</span>${heat}</span>`
+    : "";
   const verified = message.author.verified ? `<span class="verified" title="Verified">✓</span>` : "";
   const mode = message.mode && message.mode !== "live"
     ? `<span class="mode-tag">${escapeHtml(message.mode)}</span>`
@@ -2025,10 +1152,8 @@ function messageMarkup(message, dupes = 1) {
         ${watchTag}
         ${dupeBadge}
         <span class="msg-spacer"></span>
-        <span class="heat" data-tier="${tier}" title="Heat ${heat}"><span class="heat-bar">${heatBars}</span>${heat}</span>
+        ${heatChip}
         <time class="msg-time">${escapeHtml(formatTime(message.receivedAt))}</time>
-        <button type="button" class="pin-btn queue-btn" data-queue-id="${escapeAttr(message.id)}">Review</button>
-        <button type="button" class="pin-btn feature-btn" data-feature-id="${escapeAttr(message.id)}">Feature</button>
         <button type="button" class="pin-btn" data-pin-id="${escapeAttr(message.id)}">${pinnedState ? "Unpin" : "Pin"}</button>
       </div>
       <p class="msg-content">${enrichContent(message.content, state.query)}</p>
@@ -2057,6 +1182,7 @@ function selectMessage(id) {
   const message = state.messages.find((item) => item.id === id);
   if (els.rawPayload && message) {
     els.rawPayload.textContent = JSON.stringify(message, null, 2);
+    els.rawPayload.classList.add("has-content");
   }
   if (previous) {
     els.feedList?.querySelector(`[data-message-id="${cssEscape(previous)}"]`)?.classList.remove("selected");
@@ -2321,10 +1447,6 @@ async function loadSetupSnapshot({ renderDrawer = false, announce = false } = {}
     const response = await fetch("/setup.json");
     state.setup = await response.json();
     if (renderDrawer || isSetupOpen()) renderSetup();
-    renderProofConsole();
-    renderWorkspaceSummary();
-    renderGuidedSetup();
-    renderSessionDesk();
     if (announce) toast("source proof refreshed");
   } catch {
     if (announce) toast("setup refresh failed", "err");
@@ -2743,7 +1865,6 @@ function trackActivation(step) {
   } catch {
     /* in-memory only */
   }
-  renderLaunchChecklist();
 }
 
 function applyStoredPrefs() {
@@ -2987,7 +2108,7 @@ function watchTabVisibility() {
 }
 
 function updateTabBadge() {
-  const base = "Bubblewire — Live Audience Signal Command Center";
+  const base = "Bubblewire — One feed for Twitch, X, and Kick";
   if (state.hiddenUnseen > 0 && document.hidden) {
     document.title = `(${Math.min(99, state.hiddenUnseen)}) ${base}`;
     if (els.favicon) els.favicon.href = "/assets/bubblewire-mark-alert.svg";
@@ -3062,165 +2183,6 @@ async function heroWatch() {
   }
 }
 
-/* ---------- session recap ---------- */
-
-function downloadRecap() {
-  trackActivation("recap");
-  const canvas = document.createElement("canvas");
-  canvas.width = 1200;
-  canvas.height = 630;
-  const ctx = canvas.getContext("2d");
-  const accent = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim() || "#d8a84a";
-
-  ctx.fillStyle = "#0a0a09";
-  ctx.fillRect(0, 0, 1200, 630);
-  ctx.strokeStyle = "rgba(236, 233, 223, 0.06)";
-  for (let x = 0; x < 1200; x += 40) {
-    ctx.beginPath();
-    ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, 630);
-    ctx.stroke();
-  }
-  ctx.strokeStyle = "rgba(236, 233, 223, 0.18)";
-  ctx.strokeRect(24.5, 24.5, 1151, 581);
-
-  ctx.fillStyle = accent;
-  ctx.font = "700 30px 'IBM Plex Mono', monospace";
-  ctx.fillText("BUBBLEWIRE_", 64, 96);
-  ctx.fillStyle = "rgba(236, 233, 223, 0.65)";
-  ctx.font = "500 16px 'IBM Plex Mono', monospace";
-  ctx.fillText(`SESSION RECAP — ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC`, 64, 126);
-
-  const topAuthor = [...state.session.authors.entries()].sort((a, b) => b[1] - a[1])[0];
-  const stats = [
-    ["CAPTURED", String(state.stats.totalMessages || 0)],
-    ["PEAK RATE", `${state.session.peakRate}/min`],
-    ["WATCH HITS", String(state.session.watchHits)],
-    ["TOP AUTHOR", topAuthor ? `${topAuthor[0]} (${topAuthor[1]})` : "—"]
-  ];
-  stats.forEach(([label, value], index) => {
-    const x = 64 + index * 280;
-    ctx.fillStyle = "rgba(236, 233, 223, 0.55)";
-    ctx.font = "600 14px 'IBM Plex Mono', monospace";
-    ctx.fillText(label, x, 200);
-    ctx.fillStyle = "#ece9df";
-    ctx.font = "700 30px 'IBM Plex Mono', monospace";
-    ctx.fillText(value.slice(0, 16), x, 240);
-  });
-
-  const hottest = state.session.hottest;
-  ctx.fillStyle = "rgba(236, 233, 223, 0.55)";
-  ctx.font = "600 14px 'IBM Plex Mono', monospace";
-  ctx.fillText("HOTTEST SIGNAL", 64, 330);
-  if (hottest) {
-    ctx.fillStyle = hottest.sourceColor || accent;
-    ctx.font = "700 20px 'IBM Plex Mono', monospace";
-    ctx.fillText(`[${hottest.sourceLabel}] ${hottest.author.name} — heat ${hottest.heat}`, 64, 364);
-    ctx.fillStyle = "#ece9df";
-    ctx.font = "400 26px Inter, sans-serif";
-    wrapText(ctx, String(hottest.content), 64, 404, 1072, 38, 3);
-  } else {
-    ctx.fillStyle = "#ece9df";
-    ctx.font = "400 24px Inter, sans-serif";
-    ctx.fillText("No messages this session yet.", 64, 370);
-  }
-
-  const sourceEntries = SOURCE_ORDER.map((source) => [source, state.stats.sources?.[source]?.count || 0]);
-  const maxCount = Math.max(1, ...sourceEntries.map(([, count]) => count));
-  sourceEntries.forEach(([source, count], index) => {
-    const y = 520 + index * 26;
-    ctx.fillStyle = "rgba(236, 233, 223, 0.6)";
-    ctx.font = "600 13px 'IBM Plex Mono', monospace";
-    ctx.fillText(source.toUpperCase(), 64, y + 11);
-    ctx.fillStyle = sourceColor(source);
-    ctx.fillRect(150, y, (count / maxCount) * 700, 14);
-    ctx.fillStyle = "#ece9df";
-    ctx.font = "600 13px 'IBM Plex Mono', monospace";
-    ctx.fillText(String(count), 870, y + 12);
-  });
-
-  ctx.fillStyle = accent;
-  ctx.font = "600 15px 'IBM Plex Mono', monospace";
-  ctx.fillText(location.host || "bubblewire.xyz", 950, 580);
-
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      toast("recap render failed", "err");
-      return;
-    }
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `bubblewire-recap-${new Date().toISOString().slice(0, 10)}.png`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 4000);
-    toast("recap card downloaded");
-  }, "image/png");
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-  const words = text.split(/\s+/);
-  let line = "";
-  let lines = 0;
-  for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (ctx.measureText(candidate).width > maxWidth && line) {
-      lines += 1;
-      if (lines === maxLines) {
-        ctx.fillText(`${line}…`, x, y);
-        return;
-      }
-      ctx.fillText(line, x, y);
-      y += lineHeight;
-      line = word;
-    } else {
-      line = candidate;
-    }
-  }
-  if (line) ctx.fillText(line, x, y);
-}
-
-/* ---------- command center collapse ---------- */
-
-function initCommandCollapse() {
-  if (!els.productCommand) return;
-  let stored = null;
-  try {
-    stored = localStorage.getItem(COMMAND_KEY);
-  } catch {
-    /* default expanded */
-  }
-  if (stored === null) {
-    // First visit: show the full pitch once, auto-collapse on the next load.
-    try {
-      localStorage.setItem(COMMAND_KEY, "auto");
-    } catch {
-      /* session only */
-    }
-    applyCommandCollapsed(false);
-    return;
-  }
-  applyCommandCollapsed(stored !== "expanded");
-}
-
-function setCommandCollapsed(collapsed) {
-  applyCommandCollapsed(collapsed);
-  try {
-    localStorage.setItem(COMMAND_KEY, collapsed ? "collapsed" : "expanded");
-  } catch {
-    /* session only */
-  }
-}
-
-function applyCommandCollapsed(collapsed) {
-  if (!els.productCommand) return;
-  els.productCommand.classList.toggle("collapsed", collapsed);
-  if (els.commandToggle) {
-    els.commandToggle.setAttribute("aria-expanded", String(!collapsed));
-    els.commandToggle.textContent = collapsed ? "▾ intro" : "▴ intro";
-    els.commandToggle.title = collapsed ? "Expand intro" : "Collapse intro";
-  }
-}
-
 /* ---------- service worker ---------- */
 
 function registerServiceWorker() {
@@ -3246,15 +2208,11 @@ function tick() {
     els.clock.dateTime = now.toISOString();
     els.clock.textContent = `${now.toISOString().slice(11, 19)} UTC`;
   }
-  if (els.uptimeValue && state.stats.startedAt) {
-    els.uptimeValue.textContent = formatDuration(Date.now() - new Date(state.stats.startedAt).getTime());
-  }
   const rate = messageRate();
   state.session.peakRate = Math.max(state.session.peakRate, rate);
   updateMeterSpeed(rate);
   detectSpike();
   drawRadar();
-  drawSparks();
 }
 
 function updateMeterSpeed(rate) {
@@ -3265,24 +2223,31 @@ function updateMeterSpeed(rate) {
 
 function detectSpike() {
   const now = Date.now();
+  const last10 = countSince(now - 10000);
+  const baselinePer10 = countSince(now - 120000) / 12;
+  const ratio = last10 / Math.max(1.5, baselinePer10);
+  const spiking = last10 >= 10 && ratio >= 4;
+
+  if (spiking) {
+    // Keep the chip alive while the burst persists; it auto-hides ~6s after the condition clears.
+    state.spikeUntil = now + 6000;
+    document.body.classList.add("spiking");
+    if (els.spikeChip) {
+      els.spikeChip.textContent = `▲ volume spike — ${Math.round(ratio)}× baseline`;
+      els.spikeChip.hidden = false;
+    }
+    if (now - state.lastSpikeAt > 30000) {
+      state.lastSpikeAt = now;
+      toast("volume spike detected", "warn");
+      if (state.watchSound) beep();
+    }
+    return;
+  }
+
   if (state.spikeUntil && now > state.spikeUntil) {
     state.spikeUntil = 0;
     document.body.classList.remove("spiking");
     if (els.spikeChip) els.spikeChip.hidden = true;
-  }
-
-  const last10 = countSince(now - 10000);
-  const baselinePer10 = countSince(now - 120000) / 12;
-  if (last10 >= 6 && last10 >= 3 * Math.max(1, baselinePer10) && now - state.lastSpikeAt > 30000) {
-    state.lastSpikeAt = now;
-    state.spikeUntil = now + 6000;
-    document.body.classList.add("spiking");
-    if (els.spikeChip) {
-      els.spikeChip.textContent = `▲ volume spike — ${Math.round(last10 / Math.max(1, baselinePer10))}× baseline`;
-      els.spikeChip.hidden = false;
-    }
-    toast("volume spike detected", "warn");
-    if (state.watchSound) beep();
   }
 }
 
@@ -3363,48 +2328,6 @@ function drawRadar() {
   }
 }
 
-function drawSparks() {
-  document.querySelectorAll("[data-spark]").forEach((canvas) => {
-    const source = canvas.dataset.spark;
-    if (!canvas.clientWidth) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const cssWidth = canvas.clientWidth;
-    const cssHeight = canvas.clientHeight;
-    if (canvas.width !== Math.round(cssWidth * dpr)) {
-      canvas.width = Math.round(cssWidth * dpr);
-      canvas.height = Math.round(cssHeight * dpr);
-    }
-
-    const ctx = canvas.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
-
-    const counts = bucketize(state.messages.filter((m) => m.source === source), 20, 3000);
-    const max = Math.max(1, ...counts);
-    const step = cssWidth / (counts.length - 1);
-    const color = sourceColor(source);
-
-    ctx.beginPath();
-    counts.forEach((value, index) => {
-      const x = index * step;
-      const y = cssHeight - 2 - (value / max) * (cssHeight - 5);
-      if (index === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.4;
-    ctx.stroke();
-    ctx.lineTo(cssWidth, cssHeight);
-    ctx.lineTo(0, cssHeight);
-    ctx.closePath();
-    ctx.globalAlpha = 0.14;
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-  });
-}
-
 function messageRate() {
   const cutoff = Date.now() - 60000;
   return state.messages.filter((m) => new Date(m.receivedAt).getTime() >= cutoff).length;
@@ -3474,39 +2397,6 @@ async function postJson(url, body = {}) {
   return response.json();
 }
 
-function downloadJson(filename, value) {
-  const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 500);
-}
-
-function safeFilePart(value) {
-  return String(value || "message").replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 64) || "message";
-}
-
-function snapshotMessage(message) {
-  return {
-    id: message.id,
-    source: message.source,
-    sourceLabel: message.sourceLabel,
-    author: {
-      name: message.author?.name || "unknown",
-      handle: message.author?.handle || ""
-    },
-    channel: message.channel || "",
-    content: String(message.content || "").slice(0, 500),
-    receivedAt: message.receivedAt || message.at || new Date().toISOString(),
-    heat: Number(message.heat || 0),
-    url: message.url || ""
-  };
-}
-
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -3546,52 +2436,12 @@ function parseColor(value) {
   return null;
 }
 
-function setNum(el, value, flash) {
-  if (!el) return;
-  const next = String(value);
-  if (el.textContent === next) return;
-  tweenNumber(el, value);
-  if (!flash) return;
-  el.classList.remove("tick");
-  void el.offsetWidth;
-  el.classList.add("tick");
-}
-
-function tweenNumber(el, target) {
-  const from = Number(el.dataset.tweenValue ?? el.textContent) || 0;
-  const to = Number(target);
-  if (!Number.isFinite(to) || from === to || Math.abs(to - from) > 500) {
-    el.textContent = String(target);
-    el.dataset.tweenValue = String(target);
-    return;
-  }
-  el.dataset.tweenValue = String(to);
-  const startedAt = performance.now();
-  const duration = 280;
-  const step = (now) => {
-    const t = Math.min(1, (now - startedAt) / duration);
-    const eased = 1 - (1 - t) ** 3;
-    el.textContent = String(Math.round(from + (to - from) * eased));
-    if (t < 1 && el.dataset.tweenValue === String(to)) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
 function pad(value) {
   return String(value).padStart(4, "0");
 }
 
 function formatTime(value) {
   return timeFormatter.format(new Date(value));
-}
-
-function formatDuration(ms) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  const two = (n) => String(n).padStart(2, "0");
-  return `${two(hours)}:${two(minutes)}:${two(seconds)}`;
 }
 
 function formatHandle(handle) {
@@ -3609,17 +2459,6 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-function maskPublicUrl(value) {
-  try {
-    const url = new URL(value);
-    const path = url.pathname.replace(/([^/]{4})[^/]*$/, "$1…");
-    return `${url.origin}${path}`;
-  } catch {
-    const text = String(value || "");
-    return text.length > 24 ? `${text.slice(0, 24)}…` : text;
-  }
 }
 
 function escapeAttr(value) {

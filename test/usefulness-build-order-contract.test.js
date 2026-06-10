@@ -24,50 +24,20 @@ test("server exposes stream session, proof packet, and replay surfaces", async (
   assert.match(session, /export function applySafetyRules/);
 });
 
-test("dashboard contains the full usefulness build order surfaces", async () => {
-  const [html, app, css] = await Promise.all([
+test("dashboard keeps the surviving usefulness surfaces and stays decluttered", async () => {
+  const [html, app] = await Promise.all([
     readFile(`${repoRoot}/public/index.html`, "utf8"),
-    readFile(`${repoRoot}/public/app.js`, "utf8"),
-    readFile(`${repoRoot}/public/styles.css`, "utf8")
+    readFile(`${repoRoot}/public/app.js`, "utf8")
   ]);
 
-  for (const id of [
-    "sessionDesk",
-    "sessionPreflight",
-    "sessionProofButton",
-    "moderatorQueue",
-    "moderatorQueueList",
-    "replayStudio",
-    "replayExportButton",
-    "guidedSetupPanel",
-    "safetyPanel",
-    "safetyBlockedInput",
-    "signalPresetSelect"
-  ]) {
-    assert.match(html, new RegExp(`id="${id}"`));
-  }
+  assert.match(app, /SAFETY_STORAGE_KEY/);
+  assert.match(app, /applySafetyToMessage/);
 
-  for (const symbol of [
-    "SESSION_STORAGE_KEY",
-    "MOD_QUEUE_STORAGE_KEY",
-    "SAFETY_STORAGE_KEY",
-    "SIGNAL_PRESETS",
-    "renderSessionDesk",
-    "renderModeratorQueue",
-    "queueMessageForReview",
-    "exportReplayBundle",
-    "renderGuidedSetup",
-    "applySafetyToMessage",
-    "applySignalPreset"
-  ]) {
-    assert.match(app, new RegExp(symbol));
-  }
+  assert.match(html, /id="watchChips"/);
+  assert.match(html, /id="pinnedList"/);
 
-  assert.match(css, /\.session-desk\s*{/);
-  assert.match(css, /\.moderator-queue\s*{/);
-  assert.match(css, /\.replay-studio\s*{/);
-  assert.match(css, /\.guided-setup-panel\s*{/);
-  assert.match(css, /\.safety-panel\s*{/);
+  assert.doesNotMatch(html, /id="moderatorQueue"/);
+  assert.doesNotMatch(html, /id="sessionDesk"/);
 });
 
 test("overlay supports approved, moment, question, and featured modes", async () => {

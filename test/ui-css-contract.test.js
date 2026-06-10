@@ -39,11 +39,12 @@ test("mobile dashboard keeps a phone-width startup layout with a denser feed", a
   const mobile = css.slice(css.indexOf("@media (max-width: 820px)"));
   const avatarDensitySection = css.slice(css.indexOf("/* ---------- v4: avatars + density ---------- */"));
 
-  assert.match(html, /href="\/styles\.css\?v=build-order-20260607a"/);
+  assert.match(html, /href="\/styles\.css\?v=audit-fixes-20260610b"/);
   assert.match(css, /\.layout\s*{[\s\S]*grid-template-columns:\s*236px minmax\(0,\s*1fr\) 332px;/);
   assert.match(mobile, /\.shell,\s*\.topbar,\s*\.tape,\s*\.signal-stream,\s*\.layout,\s*\.rail,\s*\.feed-panel,\s*\.inspector\s*{[\s\S]*max-width:\s*100%;[\s\S]*overflow-x:\s*hidden;/);
-  assert.match(mobile, /\.overlay-link\s*{[\s\S]*width:\s*36px;[\s\S]*font-size:\s*0;/);
-  assert.match(mobile, /\.overlay-link::after\s*{[\s\S]*content:\s*"↗";/);
+  assert.match(mobile, /\.topbar-tools\s*{[\s\S]*flex-wrap:\s*wrap;/);
+  assert.match(mobile, /\.overlay-link\s*{[^}]*min-height:\s*30px;[^}]*font-size:\s*10px;/);
+  assert.doesNotMatch(mobile, /\.overlay-link\s*{[^}]*font-size:\s*0;/);
   assert.match(mobile, /\.feed-panel\s*{[^}]*width:\s*100%;[^}]*min-width:\s*0;[^}]*height:\s*74vh;[^}]*height:\s*74svh;/);
   assert.match(mobile, /\.feed-head\s*{[^}]*padding:\s*10px 12px;/);
   assert.doesNotMatch(mobile, /\.proof-receipt\s*{[^}]*flex-wrap:\s*nowrap;/);

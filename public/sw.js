@@ -1,6 +1,6 @@
 /* Bubblewire service worker — static shell only. Live data never gets cached. */
 
-const CACHE_NAME = "bubblewire-shell-v2";
+const CACHE_NAME = "bubblewire-shell-v4-audit-fixes-20260610b";
 const SHELL_ASSETS = [
   "/styles.css",
   "/app.js",

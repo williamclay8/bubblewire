@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bubblewire — Live Audience Signal Command Center</title>
-    <meta name="description" content="One real-time command center for Twitch, X, and Kick: source-labeled chat, proof receipts, watchlist alerts, history, and an OBS overlay.">
+    <title>Bubblewire — One feed for Twitch, X, and Kick</title>
+    <meta name="description" content="Unified real-time chat for Twitch, X, and Kick with source labels, watchlist alerts, history, and an OBS overlay.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
     <link rel="manifest" href="/manifest.webmanifest">
@@ -12,7 +12,7 @@
     <link rel="preload" href="/assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/IBMPlexMono-600.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/styles.css?v=build-order-20260607a">
+    <link rel="stylesheet" href="/styles.css?v=audit-fixes-20260610b">
   </head>
   <body>
     <div class="shell" id="appShell">
@@ -34,7 +34,7 @@
           </span>
           <time class="clock" id="clock">--:--:--</time>
           <button class="setup-button" id="setupButton" type="button" title="Source setup &amp; credentials status [s]" aria-haspopup="dialog">Setup</button>
-          <a class="overlay-link judge-link" href="/judge" title="Judge-ready proof mode">JUDGE</a>
+          <a class="overlay-link judge-link" href="/judge" title="Judge-ready proof mode">PROOF</a>
           <a class="overlay-link" href="/streamer.html" title="Second-screen glanceable view for live streamers">STREAMER ↗</a>
           <a class="overlay-link" href="/overlay.html" title="OBS-ready overlay view">OVERLAY ↗</a>
         </div>
@@ -44,57 +44,14 @@
 
       <canvas class="signal-stream" id="signalStream" aria-hidden="true"></canvas>
 
-      <section class="product-command" id="productCommand" aria-label="Bubblewire product command center">
-        <button class="command-toggle" id="commandToggle" type="button" aria-expanded="true" title="Collapse intro">▴ intro</button>
-        <div class="product-command-inner">
-          <div class="command-copy">
-            <p class="eyebrow">Live audience signal command center</p>
-            <h1>One real-time feed for Twitch, X, and Kick</h1>
-            <p>
-              Source-labeled chat, filtered posts, proof receipts, watchlist alerts, replay history,
-              and OBS overlays for streams where missing the moment costs you.
-            </p>
-            <div class="command-actions">
-              <button id="productDemoButton" type="button">Try live demo</button>
-              <button id="connectSourcesButton" type="button">Connect sources</button>
-              <a id="overlaySetupLink" href="/overlay-setup.html">Launch overlay</a>
-              <button id="focusFeedButton" type="button">Show feed</button>
-            </div>
-          </div>
-
-          <div class="command-proof" aria-label="Live product proof">
-            <div class="proof-metrics" id="proofMetrics">
-              <article><span>Captured</span><b>0000</b></article>
-              <article><span>Proof</span><b>0/3</b></article>
-              <article><span>Rate</span><b>0/min</b></article>
-              <article><span>Watch hits</span><b>0</b></article>
-            </div>
-            <div class="launch-checklist" id="launchChecklist" aria-label="Self-serve launch checklist"></div>
-          </div>
+      <section class="product-command" id="productCommand" aria-label="Bubblewire product masthead">
+        <div class="command-copy">
+          <h1>One real-time feed for Twitch, X, and Kick</h1>
+          <p>Source-labeled live chat with watchlist alerts, history, and an OBS overlay.</p>
         </div>
-
-        <div class="capability-strip" id="capabilityStrip" aria-label="What Bubblewire does">
-          <article>
-            <strong>Collapse noise</strong>
-            <span>Deduped rows, heat, priority filters, and author drill-down.</span>
-          </article>
-          <article>
-            <strong>Catch moments</strong>
-            <span>Watchlist alerts, pins, session recap, and background notifications.</span>
-          </article>
-          <article>
-            <strong>Prove sources</strong>
-            <span>Per-source status, evidence levels, raw payloads, and live receipts.</span>
-          </article>
-          <article>
-            <strong>Go on air</strong>
-            <span>Transparent OBS overlay with size, fade, alignment, and source filters.</span>
-          </article>
-        </div>
-
-        <div class="operator-signal" id="operatorSignal">
-          <strong>Built for market streams</strong>
-          <span>Hosts watch the room, mods catch spam and alpha, producers clip the proof, and teams replay what mattered after the stream.</span>
+        <div class="command-actions">
+          <button id="productDemoButton" type="button">Try live demo</button>
+          <button id="connectSourcesButton" type="button">Connect sources</button>
         </div>
       </section>
 
@@ -154,12 +111,13 @@
           </section>
 
           <section class="rail-section">
-            <h2>// theme</h2>
-            <div class="theme-row" role="group" aria-label="Theme">
-              <button type="button" data-theme-pick="gold" class="theme-swatch active" title="Gold terminal" aria-pressed="true"><i style="background:#d8a84a"></i></button>
-              <button type="button" data-theme-pick="matrix" class="theme-swatch" title="Matrix" aria-pressed="false"><i style="background:#3dff6e"></i></button>
-              <button type="button" data-theme-pick="ice" class="theme-swatch" title="Ice" aria-pressed="false"><i style="background:#6fd6ff"></i></button>
-              <button type="button" data-theme-pick="synthwave" class="theme-swatch" title="Synthwave" aria-pressed="false"><i style="background:#ff6ec7"></i></button>
+            <h2>// transport</h2>
+            <div class="control-grid">
+              <button id="pauseButton" type="button" aria-pressed="false" title="Pause the feed [p]">Pause</button>
+              <button id="spikeButton" type="button" title="Inject a demo burst">Spike</button>
+              <button id="exportButton" type="button" title="Download feed as NDJSON">Export</button>
+              <button id="clearSearchButton" type="button" title="Clear search [esc]">Clear</button>
+              <button id="shareViewButton" type="button" title="Copy a link to this exact view">Share</button>
             </div>
           </section>
 
@@ -182,71 +140,14 @@
             </label>
           </section>
 
-          <section class="rail-section workspace-panel" id="workspacePanel">
-            <h2><label for="workspaceName">// workspace</label></h2>
-            <div class="watch-add">
-              <input id="workspaceName" type="text" placeholder="stream setup name" autocomplete="off" spellcheck="false" maxlength="32">
-              <button id="workspaceSaveButton" type="button" title="Save current operator setup">Save</button>
-            </div>
-            <div class="workspace-summary" id="workspaceSummary"></div>
-            <div class="control-grid workspace-actions">
-              <button id="workspaceLoadButton" type="button" title="Load saved setup">Load</button>
-              <button id="workspaceCopyOverlayButton" type="button" title="Copy broadcast overlay URL">Copy OBS</button>
-            </div>
-          </section>
-
-          <section class="rail-section signal-preset-panel">
-            <h2><label for="signalPresetSelect">// signal preset</label></h2>
-            <select id="signalPresetSelect" class="control-select" aria-label="Signal preset">
-              <option value="balanced">Balanced</option>
-              <option value="market">Market</option>
-              <option value="qna">Q&amp;A</option>
-              <option value="launch">Launch</option>
-              <option value="highSignal">High Signal</option>
-            </select>
-            <p class="control-note" data-signal-summary>heat >= 18</p>
-          </section>
-
-          <section class="rail-section safety-panel" id="safetyPanel">
-            <h2><label for="safetyBlockedInput">// broadcast safety</label></h2>
-            <textarea id="safetyBlockedInput" rows="3" spellcheck="false" placeholder="blocked terms, separated by commas"></textarea>
-            <label class="switch-row" for="safetyApprovedOnly">
-              <input id="safetyApprovedOnly" type="checkbox">
-              <span class="switch" aria-hidden="true"></span>
-              <span class="switch-label">Approved overlay only</span>
-            </label>
-            <div class="control-grid">
-              <button id="safetySaveButton" type="button">Save</button>
-              <button type="button" data-copy-overlay-mode="approved">OBS Gate</button>
-            </div>
-            <p class="control-note" data-safety-summary>0 approved · 0 blocked</p>
-          </section>
-
-          <section class="rail-section moderator-queue" id="moderatorQueue">
-            <h2>// mod queue <button id="moderatorQueueClearButton" type="button" class="mini-btn" title="Clear queue">Clear</button></h2>
-            <div class="moderator-queue-list" id="moderatorQueueList"></div>
-          </section>
-
           <section class="rail-section">
-            <h2>// transport</h2>
-            <div class="control-grid">
-              <button id="pauseButton" type="button" aria-pressed="false" title="Pause the feed [p]">Pause</button>
-              <button id="spikeButton" type="button" title="Inject a demo burst">Spike</button>
-              <button id="exportButton" type="button" title="Download feed as NDJSON">Export</button>
-              <button id="clearSearchButton" type="button" title="Clear search [esc]">Clear</button>
-              <button id="recapButton" type="button" title="Download a session recap card">Recap</button>
-              <button id="shareViewButton" type="button" title="Copy a link to this exact view">Share</button>
+            <h2>// theme</h2>
+            <div class="theme-row" role="group" aria-label="Theme">
+              <button type="button" data-theme-pick="gold" class="theme-swatch active" title="Gold terminal" aria-pressed="true"><i style="background:#d8a84a"></i></button>
+              <button type="button" data-theme-pick="matrix" class="theme-swatch" title="Matrix" aria-pressed="false"><i style="background:#3dff6e"></i></button>
+              <button type="button" data-theme-pick="ice" class="theme-swatch" title="Ice" aria-pressed="false"><i style="background:#6fd6ff"></i></button>
+              <button type="button" data-theme-pick="synthwave" class="theme-swatch" title="Synthwave" aria-pressed="false"><i style="background:#ff6ec7"></i></button>
             </div>
-          </section>
-
-          <section class="rail-section">
-            <h2>// counters</h2>
-            <dl class="counters">
-              <div><dt>Unread</dt><dd id="unreadCount">0</dd></div>
-              <div><dt>Dedupe</dt><dd id="duplicateCount">0</dd></div>
-              <div><dt>Buffer</dt><dd id="bufferCount">0</dd></div>
-              <div><dt>Uptime</dt><dd id="uptimeValue">—</dd></div>
-            </dl>
           </section>
 
           <p class="rail-hint">[/] search · [p] pause · [1-4] filter · [esc] clear</p>
@@ -271,16 +172,6 @@
           <div class="proof-receipt" id="proofReceipt" aria-label="Live proof receipt">
             awaiting live proof
           </div>
-          <section class="moment-rail" id="momentRail" aria-label="Moment engine">
-            <header>
-              <div>
-                <h2>// moment engine <span class="intel-tag" title="Transparent rule-based scoring over live messages">heuristic</span></h2>
-                <p>spikes, questions, trend bridges, and replayable proof</p>
-              </div>
-              <button id="momentShareLatest" type="button" class="mini-btn" title="Copy latest moment card">Share latest</button>
-            </header>
-            <div class="moment-rail-list" id="momentRailList"></div>
-          </section>
           <div class="spike-chip" id="spikeChip" hidden>▲ volume spike</div>
           <div class="paused-banner" id="pausedBanner" hidden>
             feed paused — <b id="pausedBannerCount">0</b> buffered
@@ -298,12 +189,7 @@
 
         <aside class="inspector" aria-label="Signal inspector">
           <section class="panel-section intel-section">
-            <h2>// chat mood <span class="intel-tag" title="Transparent rule-based scoring over message text — not a trained model">heuristic</span></h2>
-            <div id="moodReadout" class="mood-readout" aria-live="polite"></div>
-          </section>
-
-          <section class="panel-section intel-section">
-            <h2>// moments <span class="count-chip" id="momentCount">0</span></h2>
+            <h2>// moments <span class="count-chip" id="momentCount">0</span> <button id="momentShareLatest" type="button" class="mini-btn" title="Copy latest moment card">Share latest</button></h2>
             <div id="momentsList" class="moments-list"></div>
           </section>
 
@@ -315,42 +201,6 @@
           <section class="panel-section intel-section">
             <h2>// surfaced questions</h2>
             <div id="questionsList" class="questions-list"></div>
-          </section>
-
-          <section class="panel-section session-desk" id="sessionDesk">
-            <h2>// stream session <button id="sessionProofButton" type="button" class="mini-btn" title="Copy proof packet URL">Proof</button></h2>
-            <header class="session-desk-head">
-              <div>
-                <strong data-session-title>Live stream session</strong>
-                <span data-session-state>ready</span>
-              </div>
-              <div class="session-actions">
-                <button id="sessionStartButton" type="button">Start</button>
-                <button id="sessionEndButton" type="button">End</button>
-              </div>
-            </header>
-            <div class="session-metrics" data-session-metrics></div>
-            <ol class="session-preflight" id="sessionPreflight"></ol>
-          </section>
-
-          <section class="panel-section replay-studio" id="replayStudio">
-            <h2>// replay studio <button id="replayExportButton" type="button" class="mini-btn">Export</button></h2>
-            <div class="replay-summary" id="replaySummary"></div>
-          </section>
-
-          <section class="panel-section guided-setup-panel" id="guidedSetupPanel">
-            <h2>// guided setup</h2>
-            <ol class="guided-setup-list" id="guidedSetupList"></ol>
-          </section>
-
-          <section class="panel-section">
-            <h2>// source stack</h2>
-            <div id="sourceCards" class="source-cards"></div>
-          </section>
-
-          <section class="panel-section proof-console" id="proofConsole">
-            <h2>// proof console <button id="proofRefreshButton" type="button" class="mini-btn" title="Refresh setup snapshot">Refresh</button></h2>
-            <div id="proofConsoleBody" class="proof-console-body"></div>
           </section>
 
           <section class="panel-section">
@@ -410,6 +260,6 @@
       </div>
     </div>
 
-    <script type="module" src="/app.js?v=build-order-20260607a"></script>
+    <script type="module" src="/app.js?v=audit-fixes-20260610b"></script>
   </body>
 </html>
