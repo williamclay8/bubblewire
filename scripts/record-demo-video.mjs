@@ -60,7 +60,7 @@ try {
   });
   await navigate(target);
   await sleep(1200);
-  await capture("01-boot", "Boot sequence", "One real-time feed for Twitch, X, and Kick.");
+  await capture("01-boot", "Boot sequence", "One real-time feed for Twitch, YouTube, X, X Live, and Kick.");
 
   await waitForRows();
   await sleep(2600);

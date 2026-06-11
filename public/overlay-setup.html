@@ -7,7 +7,7 @@
     <meta name="description" content="Configure the Bubblewire OBS overlay: size, fade, sources, and alignment.">
     <meta name="theme-color" content="#0a0a09">
     <link rel="icon" type="image/svg+xml" href="/assets/bubblewire-mark.svg">
-    <link rel="stylesheet" href="/styles.css?v=twitch-lock-20260610">
+    <link rel="stylesheet" href="/styles.css?v=market-bubble-live-20260611">
   </head>
   <body class="config-page">
     <div class="config-shell">
@@ -95,6 +95,11 @@
               <span class="switch" aria-hidden="true"></span>
               <span class="switch-label">X</span>
             </label>
+            <label class="switch-row" for="cfgXLive">
+              <input id="cfgXLive" type="checkbox" checked data-cfg-source="xlive">
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-label">X Live</span>
+            </label>
             <label class="switch-row" for="cfgKick">
               <input id="cfgKick" type="checkbox" checked data-cfg-source="kick">
               <span class="switch" aria-hidden="true"></span>
@@ -135,6 +140,6 @@
     </div>
 
     <div class="toast-root" id="toastRoot" aria-live="polite"></div>
-    <script type="module" src="/overlay-setup.js"></script>
+    <script type="module" src="/overlay-setup.js?v=market-bubble-live-20260611"></script>
   </body>
 </html>

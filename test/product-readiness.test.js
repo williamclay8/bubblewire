@@ -14,14 +14,14 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   const publicText = `${html}\n${app}\n${css}`;
 
   assert.doesNotMatch(publicText, /Y Combinator|\byc\b|ycombinator/i);
-  assert.match(html, /One real-time feed for Twitch, YouTube, X, and Kick/);
+  assert.match(html, /One real-time feed for Twitch, YouTube, X, X Live, and Kick/);
   assert.match(html, /id="productCommand"/);
   assert.match(html, /id="productDemoButton"/);
   assert.match(html, /id="connectSourcesButton"/);
   assert.match(html, /data-source-filter="youtube"/);
   assert.match(app, /SOURCE_ORDER = \["twitch", "youtube", "x", "xlive", "kick"\]/);
-  assert.match(html, /src="\/app\.js\?v=stream-targets-20260610"/);
-  assert.match(html, /href="\/styles\.css\?v=twitch-lock-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=market-bubble-live-20260611"/);
+  assert.match(html, /href="\/styles\.css\?v=market-bubble-live-20260611"/);
 
   assert.match(app, /ACTIVATION_STORAGE_KEY/);
   assert.match(app, /productDemoButton:\s*document\.querySelector\("#productDemoButton"\)/);
@@ -35,14 +35,15 @@ test("homepage presents Bubblewire with a compact self-serve masthead", async ()
   assert.match(css, /body\[data-judge="1"\]\s+\.product-command\s*{[\s\S]*display:\s*none\s*!important;/);
 });
 
-test("overlay configurator exposes YouTube as a source", async () => {
+test("overlay configurator exposes YouTube and X Live as sources", async () => {
   const [html, app] = await Promise.all([
     readFile(`${repoRoot}/public/overlay-setup.html`, "utf8"),
     readFile(`${repoRoot}/public/overlay-setup.js`, "utf8")
   ]);
 
   assert.match(html, /data-cfg-source="youtube"/);
-  assert.match(app, /sources:\s*\["twitch", "youtube", "x", "kick"\]/);
+  assert.match(html, /data-cfg-source="xlive"/);
+  assert.match(app, /sources:\s*\["twitch", "youtube", "x", "xlive", "kick"\]/);
 });
 
 test("live message source chips carry channel context where sources can fan out", async () => {
@@ -53,8 +54,8 @@ test("live message source chips carry channel context where sources can fan out"
     readFile(`${repoRoot}/public/streamer.js`, "utf8")
   ]);
 
-  assert.match(html, /src="\/app\.js\?v=stream-targets-20260610"/);
-  assert.match(streamerHtml, /src="\/streamer\.js\?v=stream-targets-20260610"/);
+  assert.match(html, /src="\/app\.js\?v=market-bubble-live-20260611"/);
+  assert.match(streamerHtml, /src="\/streamer\.js\?v=market-bubble-live-20260611"/);
   assert.match(app, /const INLINE_CHANNEL_SOURCES = new Set\(SOURCE_ORDER\);/);
   assert.doesNotMatch(app, /CHANNEL_LABELED_SOURCES/);
   assert.match(app, /function sourceChipLabel\(message\)/);

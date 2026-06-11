@@ -39,7 +39,7 @@ test("mobile dashboard keeps a phone-width startup layout with a denser feed", a
   const mobile = css.slice(css.indexOf("@media (max-width: 820px)"));
   const avatarDensitySection = css.slice(css.indexOf("/* ---------- v4: avatars + density ---------- */"));
 
-  assert.match(html, /href="\/styles\.css\?v=twitch-lock-20260610"/);
+  assert.match(html, /href="\/styles\.css\?v=market-bubble-live-20260611"/);
   assert.match(css, /\.layout\s*{[\s\S]*grid-template-columns:\s*236px minmax\(0,\s*1fr\) 332px;/);
   assert.match(mobile, /\.shell,\s*\.topbar,\s*\.tape,\s*\.signal-stream,\s*\.layout,\s*\.rail,\s*\.feed-panel,\s*\.inspector\s*{[\s\S]*max-width:\s*100%;[\s\S]*overflow-x:\s*hidden;/);
   assert.match(mobile, /\.topbar-tools\s*{[\s\S]*flex-wrap:\s*wrap;/);

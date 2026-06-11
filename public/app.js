@@ -2197,7 +2197,7 @@ function watchTabVisibility() {
 }
 
 function updateTabBadge() {
-  const base = "Bubblewire — One feed for Twitch, YouTube, X, and Kick";
+  const base = "Bubblewire — One feed for Twitch, YouTube, X, X Live, and Kick";
   if (state.hiddenUnseen > 0 && document.hidden) {
     document.title = `(${Math.min(99, state.hiddenUnseen)}) ${base}`;
     if (els.favicon) els.favicon.href = "/assets/bubblewire-mark-alert.svg";

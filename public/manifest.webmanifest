@@ -1,7 +1,7 @@
 {
   "name": "Bubblewire — Market Bubble Relay",
   "short_name": "Bubblewire",
-  "description": "Unified Twitch + YouTube + X + Kick chat relay: one real-time feed with source labels.",
+  "description": "Unified Twitch + YouTube + X + X Live + Kick chat relay: one real-time feed with source labels.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
