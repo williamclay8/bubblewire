@@ -1,0 +1,65 @@
+{
+  "target": "https://bubblewire.xyz",
+  "capturedAt": "2026-06-11T22:07:14.075Z",
+  "width": 1920,
+  "height": 1080,
+  "captureFps": 5,
+  "redaction": "No setup drawer, env names, token-state rows, or credential identifiers captured.",
+  "screenshots": [
+    {
+      "name": "dashboard-live-proof",
+      "label": "Live dashboard with source proof",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof.png"
+    },
+    {
+      "name": "youtube-filter",
+      "label": "YouTube source filter",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/youtube-filter.png"
+    },
+    {
+      "name": "search-market",
+      "label": "Search across the live room",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/search-market.png"
+    },
+    {
+      "name": "streamer-mode",
+      "label": "Streamer Mode",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/streamer-mode.png"
+    },
+    {
+      "name": "overlay-setup",
+      "label": "Overlay setup with X Live source",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/overlay-setup.png"
+    },
+    {
+      "name": "overlay-live",
+      "label": "OBS overlay",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/overlay-live.png"
+    },
+    {
+      "name": "dashboard-close",
+      "label": "Dashboard close",
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-close.png"
+    }
+  ],
+  "clips": [
+    {
+      "name": "dashboard-live-proof",
+      "frameDir": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof-frames",
+      "frames": 40,
+      "durationSeconds": 8
+    },
+    {
+      "name": "streamer-mode",
+      "frameDir": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/streamer-mode-frames",
+      "frames": 34,
+      "durationSeconds": 6.8
+    },
+    {
+      "name": "overlay-live",
+      "frameDir": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/overlay-live-frames",
+      "frames": 30,
+      "durationSeconds": 6
+    }
+  ]
+}

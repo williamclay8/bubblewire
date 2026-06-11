@@ -2,7 +2,7 @@
 
 ## Claim
 
-Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + X + Kick + X Live with source labels, demo-safe operation, a live-only production mode, server-side live adapter paths, and judge-readable evidence.
+Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + YouTube + X + Kick + X Live with source labels, demo-safe operation, a live-only production mode, server-side live adapter paths, and judge-readable evidence.
 
 ## Target
 
@@ -10,7 +10,8 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Public app: `https://bubblewire.xyz`
 - Public overlay: `https://bubblewire.xyz/overlay.html`
 - Fallback Render URL: `https://bubblewire-challenge.onrender.com`
-- Public demo video: `https://youtu.be/kwUZgMBtK48`
+- Public demo video: `https://youtu.be/I9C0VDrWddA`
+- Final Market Bubble local video: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4`
 - Historical final-cut YouTube demo: `https://youtu.be/hLerxCevS2w`
 - Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 - Next resubmission script: `docs/submission-video-script-2026-06-10.md`
@@ -29,14 +30,15 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Custom-domain resubmission: recorded 2026-06-04 18:17 CDT with demo video `https://youtu.be/MGEKOfs4yn0`, live app `https://bubblewire.xyz`, and pushed commit `49145a8`.
 - YouTube final-cut resubmission: recorded 2026-06-06 09:46 CDT with demo video `https://youtu.be/hLerxCevS2w`, live app `https://bubblewire.xyz`, and pushed commit `fef9b96`.
 - Refreshed public-video resubmission: recorded 2026-06-09 20:37 CDT with demo video `https://youtu.be/kwUZgMBtK48`, X handle `@williamclay`, GitHub repo `https://github.com/williamclay8/bubblewire`, and live app note `https://bubblewire.xyz`.
-- Date: 2026-06-09
+- Final Market Bubble submission: recorded 2026-06-11 17:18 CDT with demo video `https://youtu.be/I9C0VDrWddA`, X handle `@williamclay`, GitHub repo `https://github.com/williamclay8/bubblewire`, live app note `https://bubblewire.xyz`, and Google Forms confirmation "Your response has been recorded."
+- Date: 2026-06-11
 
 ## Verification Commands
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `npm test` | Pass, 77/77 tests on 2026-06-09 | `docs/evidence/logs/proof.json` |
-| `npm run check` | Pass on 2026-06-09 | `docs/evidence/logs/proof.json` |
+| `npm test` | Pass, 94/94 tests on 2026-06-11 | Terminal verification during final Market Bubble run |
+| `npm run check` | Pass on 2026-06-11 | Terminal verification during final Market Bubble run |
 | `npm run proof` | Pass on 2026-06-09 against `http://127.0.0.1:3100` | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass on 2026-06-09 against `https://bubblewire.xyz` with `twitch,x,kick` expected | `docs/evidence/logs/live-proof.json` |
 | `render blueprints validate render.yaml --output json` | Pass | `docs/evidence/logs/render-blueprint-validation.json` |
@@ -62,6 +64,8 @@ The final-cut demo video is uploaded to YouTube as `https://youtu.be/hLerxCevS2w
 
 The next resubmission script is `docs/submission-video-script-2026-06-10.md`. Its local narrated-video recipe is `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The first local narrated draft rendered to `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4` with caption sidecars at `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt`. The narrated cut was uploaded publicly to YouTube as `https://youtu.be/kwUZgMBtK48`. Google Forms recorded the refreshed public-video resubmission on 2026-06-09 at 20:37 CDT. A deployable MP4 copy lives under `public/assets/` and is reachable at `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 
+The final Market Bubble cut is uploaded unlisted to YouTube as `https://youtu.be/I9C0VDrWddA`. The local source is `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4`, rendered at 1920 x 1080, H.264/AAC, with 74.11s duration and caption sidecars. Capture artifacts live under `docs/evidence/video/market-bubble-final-2026-06-11/`, including `dashboard-live-proof.png`, `youtube-filter.png`, `streamer-mode.png`, `overlay-setup.png`, `overlay-live.png`, and review frames. The redaction boundary explicitly avoided setup drawer secrets, environment values, token state, and credential identifiers.
+
 ## 2026-06-05 Tranche Receipts
 
 | Receipt | Evidence |
@@ -76,6 +80,7 @@ The next resubmission script is `docs/submission-video-script-2026-06-10.md`. It
 | Source | Implemented live path | Demo-safe/live-only fallback |
 | --- | --- | --- |
 | Twitch | EventSub `channel.chat.message`; anonymous read-only IRC fallback for public channels; authenticated IRC fallback | Demo mode emits labeled demo messages; live-only mode marks missing `TWITCH_CHANNELS` as `missing` |
+| YouTube | Live comments/chat polling for configured channel/video handles | Live-only mode marks missing API key/quota or inactive chat honestly |
 | X + X Live | X API v2 filtered stream via server-side bearer token; X Live replies via a `conversation_id:<post id>` rule on the shared stream | Demo mode emits labeled demo messages; live-only mode marks missing or blocked X access honestly |
 | Kick | Official Events API `chat.message.sent` webhook to `/webhooks/kick` or `/kick.webhook`; optional startup subscription with `KICK_AUTO_SUBSCRIBE=1`; optional signature verification with `KICK_REQUIRE_SIGNATURE=1` | Demo mode emits labeled demo messages; live-only mode stays `webhook-ready` until a webhook arrives |
 
@@ -91,11 +96,11 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 
 ## Lumi Hygiene
 
-- Local changes: tracked in the active release run until committed
+- Local changes: final video packet assets are tracked in the active release run until committed
 - Committed: tracked in the final Lumi closeout for the release run
 - Pushed: tracked in the final Lumi closeout for the release run
-- Deployed/live: release commit `c8303a2` is pushed to `main`, Render deploy `dep-d8kc2jdckfvc739hasjg` is live, `https://bubblewire.xyz` health check passes, and the public MP4 mirror returns HTTP 200
-- Entry submitted: yes, latest Google Form confirmation recorded 2026-06-09 20:37 CDT
+- Deployed/live: app release commit `6d03d94` is pushed to `main`, Render deploy `dep-d8livo6k1jcs73al2acg` is live, and `https://bubblewire.xyz` health check passes
+- Entry submitted: yes, latest Google Form confirmation recorded 2026-06-11 17:18 CDT with YouTube demo `https://youtu.be/I9C0VDrWddA`
 - Local server: used for demo-mode and live-only evidence capture, then stopped
 
 ## Live Smoke
@@ -134,4 +139,4 @@ Latest live source evidence from that proof:
 
 ## Submission Closeout
 
-Historical form steps are complete for prior submissions. The refreshed public-video resubmission was recorded by Google Forms on 2026-06-09 at 20:37 CDT. Release commit `c8303a2` is pushed to `main`; Render deploy `dep-d8kc2jdckfvc739hasjg` is live; `https://bubblewire.xyz` serves the refreshed demo-video link and public MP4 mirror.
+Historical form steps are complete for prior submissions. The final Market Bubble submission was recorded by Google Forms on 2026-06-11 at 17:18 CDT. App release commit `6d03d94` is pushed to `main`; Render deploy `dep-d8livo6k1jcs73al2acg` is live; the final YouTube submission is `https://youtu.be/I9C0VDrWddA`.

@@ -1,0 +1,77 @@
+{
+  "title": "Bubblewire Market Bubble Final Submission",
+  "voice": "Samantha",
+  "rate": 172,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "background": "#0a0a09",
+  "redaction_reviewed": true,
+  "audio_fade_in": 0.04,
+  "audio_fade_out": 0.08,
+  "audio_tail_pad": 0.25,
+  "audio_loudnorm": true,
+  "loudnorm_i": -16,
+  "loudnorm_tp": -1.5,
+  "loudnorm_lra": 11,
+  "transition": "hard-cut",
+  "transition_seconds": 0,
+  "shots": [
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof-clip.mp4",
+      "duration": 9,
+      "pause_after": 0.25,
+      "caption": "Recorded live during Market Bubble.",
+      "narration": "This was recorded live during Market Bubble. Bubblewire puts Twitch at fazebanks, YouTube at notthreadguy, X filtered posts, and the Market Bubble X Live rule in one proof-backed feed."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof.png",
+      "duration": 8.5,
+      "pause_after": 0.25,
+      "caption": "Live evidence for Twitch, YouTube, and X. X Live is waiting honestly.",
+      "narration": "The proof strip is honest: Twitch, YouTube, and X have live evidence; X Live is live and waiting for broadcast replies instead of faking traffic."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/youtube-filter.png",
+      "duration": 8,
+      "pause_after": 0.2,
+      "caption": "YouTube comments from notthreadguy land in the same feed.",
+      "narration": "Filtering shows YouTube comments from notthreadguy beside the rest of the room, with source labels and event types intact."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/search-market.png",
+      "duration": 8.5,
+      "pause_after": 0.2,
+      "caption": "Search and source filters keep the operator in control.",
+      "narration": "Search and source filters let an operator find the market thread, isolate a platform, and keep the whole audience in context."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/streamer-mode-clip.mp4",
+      "duration": 10,
+      "pause_after": 0.25,
+      "caption": "Streamer Mode turns the feed into a glanceable live desk.",
+      "narration": "Streamer Mode turns the same feed into a second screen: the top question, mood, volume, trends, and open questions stay readable at a glance."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/overlay-setup.png",
+      "duration": 9,
+      "pause_after": 0.25,
+      "caption": "The overlay builder keeps every source explicit.",
+      "narration": "Overlay setup makes the aggregator broadcastable. It keeps Twitch, YouTube, X, X Live, and Kick as explicit source switches, with size, fade, and alignment controls."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/overlay-live-clip.mp4",
+      "duration": 8,
+      "pause_after": 0.25,
+      "caption": "OBS gets the conversation without dashboard chrome.",
+      "narration": "The OBS overlay carries live rows without dashboard chrome, so producers can put the conversation directly on stream."
+    },
+    {
+      "path": "/Users/clay/Documents/Market Bubble/docs/evidence/video/market-bubble-final-2026-06-11/dashboard-close.png",
+      "duration": 7.5,
+      "pause_after": 0.4,
+      "caption": "The moment. The proof. The broadcast.",
+      "narration": "For this Market Bubble run, Bubblewire captures the moment, the proof, and the broadcast in one customizable aggregator."
+    }
+  ]
+}
