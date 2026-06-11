@@ -217,6 +217,58 @@ test("setXLiveBroadcastRule accepts an X broadcast URL", async () => {
   assert.deepEqual(addCall.body.add, [{ value: "url_contains:1yKAPPvoZmqxb", tag: "xlive:1yKAPPvoZmqxb" }]);
 });
 
+test("startXConnector ensures an env-configured X broadcast rule before opening the stream", async (t) => {
+  const calls = [];
+  const statuses = [];
+  const streamBody = new ReadableStream();
+  const connector = startXConnector(
+    {
+      setSourceStatus(source, status) {
+        statuses.push({ source, status });
+      },
+      addMessage() {}
+    },
+    {
+      X_BEARER_TOKEN: "SECRET_TOKEN",
+      X_STREAM_ENABLED: "on",
+      X_LIVE_BROADCAST_ID: "https://x.com/i/broadcasts/1yKAPPvoZmqxb"
+    },
+    {
+      fetch: async (url, options = {}) => {
+        const href = String(url);
+        const method = options.method || "GET";
+        const body = options.body ? JSON.parse(options.body) : null;
+        calls.push({ href, method, body });
+
+        if (href.endsWith("/rules")) {
+          const hasAddedXLive = calls.some((call) => call.body?.add);
+          return new Response(JSON.stringify({
+            data: hasAddedXLive
+              ? [{ id: "991", tag: "xlive:1yKAPPvoZmqxb", value: "url_contains:1yKAPPvoZmqxb" }]
+              : [{ id: "100", tag: "marketbubble-live", value: "MarketBubble" }]
+          }), { status: method === "POST" ? 201 : 200 });
+        }
+
+        return new Response(streamBody, { status: 200 });
+      }
+    }
+  );
+
+  t.after(() => connector.stop());
+
+  await waitFor(() => statuses.some((entry) => entry.source === "x" && entry.status.state === "connected"));
+  const streamCallIndex = calls.findIndex((call) => call.href.includes("/2/tweets/search/stream") && call.method === "GET" && !call.href.endsWith("/rules"));
+  const addCallIndex = calls.findIndex((call) => call.body?.add);
+  const xliveStatus = statuses.filter((entry) => entry.source === "xlive").pop()?.status;
+
+  assert.ok(addCallIndex >= 0);
+  assert.ok(streamCallIndex > addCallIndex);
+  assert.deepEqual(calls[addCallIndex].body.add, [{ value: "url_contains:1yKAPPvoZmqxb", tag: "xlive:1yKAPPvoZmqxb" }]);
+  assert.equal(xliveStatus.state, "live");
+  assert.equal(connector.snapshot().rules.rules.some((rule) => rule.tag === "xlive:1yKAPPvoZmqxb"), true);
+  assert.doesNotMatch(JSON.stringify({ calls, statuses }), /SECRET_TOKEN/);
+});
+
 test("setXLiveBroadcastRule reports missing bearer token and invalid ids without fetching", async () => {
   let fetchCalls = 0;
   const fetchSpy = async () => {

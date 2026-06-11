@@ -14,6 +14,8 @@ export function startXConnector(hub, env = process.env, options = {}) {
   const bearerToken = env.X_BEARER_TOKEN;
   let rules = resolveXRulesFromEnv(env);
   let diagnostics = null;
+  let ensuredXLiveRuleFor = "";
+  let xliveRuleDiagnostics = null;
   const stream = resolveXStreamPolicy(env);
   let xliveBroadcastId = extractXLiveBroadcastTarget(env.X_LIVE_BROADCAST_ID || "");
   let lastXState = "idle";
@@ -21,16 +23,22 @@ export function startXConnector(hub, env = process.env, options = {}) {
     setTimeout: options.setTimeout || setTimeout,
     clearTimeout: options.clearTimeout || clearTimeout
   };
+  const fetchImpl = options.fetch || fetch;
 
   function setStatuses(state, payload) {
     lastXState = state;
     hub.setSourceStatus("x", { state, ...payload });
-    hub.setSourceStatus("xlive", xliveStatusForStreamState(state, xliveBroadcastId, payload));
+    hub.setSourceStatus("xlive", xliveStatusForSharedStream(state, payload));
   }
 
   function setXLiveBroadcast(id) {
-    xliveBroadcastId = extractXLiveBroadcastTarget(id || "") || "";
-    hub.setSourceStatus("xlive", xliveStatusForStreamState(lastXState, xliveBroadcastId));
+    const next = extractXLiveBroadcastTarget(id || "") || "";
+    if (next !== xliveBroadcastId) {
+      ensuredXLiveRuleFor = "";
+      xliveRuleDiagnostics = null;
+    }
+    xliveBroadcastId = next;
+    hub.setSourceStatus("xlive", xliveStatusForSharedStream(lastXState));
     return xliveBroadcastId;
   }
 
@@ -83,6 +91,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
   async function connect() {
     if (stopped) return;
     controller = new AbortController();
+    await ensureXLiveRule();
     await refreshRules();
     setStatuses("connecting", {
       detail: xStatusDetail("opening filtered stream", rules),
@@ -96,7 +105,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
     url.searchParams.set("user.fields", "name,username,verified,profile_image_url");
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchImpl(url, {
         signal: controller.signal,
         headers: {
           Authorization: `Bearer ${bearerToken}`
@@ -195,7 +204,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
 
   async function refreshRules() {
     try {
-      const response = await fetch(X_RULES_URL, {
+      const response = await fetchImpl(X_RULES_URL, {
         signal: controller.signal,
         headers: {
           Authorization: `Bearer ${bearerToken}`
@@ -222,6 +231,34 @@ export function startXConnector(hub, env = process.env, options = {}) {
         checkedAt: new Date().toISOString()
       };
     }
+  }
+
+  async function ensureXLiveRule() {
+    if (!xliveBroadcastId || ensuredXLiveRuleFor === xliveBroadcastId) return;
+    const result = await setXLiveBroadcastRule({ X_BEARER_TOKEN: bearerToken }, xliveBroadcastId, { fetch: fetchImpl });
+    if (result.rules) rules = result.rules;
+    if (result.ok) {
+      ensuredXLiveRuleFor = xliveBroadcastId;
+      xliveRuleDiagnostics = null;
+      return;
+    }
+
+    ensuredXLiveRuleFor = "";
+    xliveRuleDiagnostics = {
+      summary: result.summary || "X Live rule setup failed",
+      httpStatus: result.httpStatus || null,
+      errors: result.errors || []
+    };
+    hub.setSourceStatus("xlive", xliveStatusForSharedStream("error", { detail: xliveRuleDiagnostics.summary }));
+  }
+
+  function xliveStatusForSharedStream(state, payload = {}) {
+    if (!xliveRuleDiagnostics) return xliveStatusForStreamState(state, xliveBroadcastId, payload);
+    return xliveStatusForStreamState("error", xliveBroadcastId, {
+      ...payload,
+      detail: `X Live rule setup failed · ${xliveRuleDiagnostics.summary}`,
+      diagnostics: xliveRuleDiagnostics
+    });
   }
 
   function rememberMatchingRules(matchingRules = []) {
