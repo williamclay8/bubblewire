@@ -15,7 +15,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
   let rules = resolveXRulesFromEnv(env);
   let diagnostics = null;
   const stream = resolveXStreamPolicy(env);
-  let xliveBroadcastId = extractXPostId(env.X_LIVE_BROADCAST_ID || "");
+  let xliveBroadcastId = extractXLiveBroadcastTarget(env.X_LIVE_BROADCAST_ID || "");
   let lastXState = "idle";
   const timers = {
     setTimeout: options.setTimeout || setTimeout,
@@ -29,7 +29,7 @@ export function startXConnector(hub, env = process.env, options = {}) {
   }
 
   function setXLiveBroadcast(id) {
-    xliveBroadcastId = extractXPostId(id || "") || "";
+    xliveBroadcastId = extractXLiveBroadcastTarget(id || "") || "";
     hub.setSourceStatus("xlive", xliveStatusForStreamState(lastXState, xliveBroadcastId));
     return xliveBroadcastId;
   }
@@ -322,14 +322,38 @@ export function extractXPostId(input) {
   return match ? match[1] : "";
 }
 
+export function extractXLiveBroadcastTarget(input) {
+  return extractXPostId(input) || extractXBroadcastId(input);
+}
+
+export function extractXBroadcastId(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  if (isXBroadcastId(raw)) return raw;
+
+  let url;
+  try {
+    url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+  } catch {
+    return "";
+  }
+
+  const host = url.hostname.toLowerCase().replace(/^www\.|^m\.|^mobile\./, "");
+  if (!["x.com", "twitter.com"].includes(host)) return "";
+
+  const match = url.pathname.match(/^\/i\/broadcasts\/([A-Za-z0-9_-]{10,64})(?:\/|$)/);
+  return match && isXBroadcastId(match[1]) ? match[1] : "";
+}
+
 export function isXLiveRuleTag(tag) {
   return String(tag || "").startsWith(X_LIVE_RULE_TAG_PREFIX);
 }
 
 export function xliveRuleForBroadcast(broadcastId) {
+  const target = cleanXLiveTargetId(broadcastId);
   return {
-    value: `conversation_id:${broadcastId}`,
-    tag: `${X_LIVE_RULE_TAG_PREFIX}${broadcastId}`
+    value: /^\d{5,25}$/.test(target) ? `conversation_id:${target}` : `url_contains:${target}`,
+    tag: `${X_LIVE_RULE_TAG_PREFIX}${target}`
   };
 }
 
@@ -403,9 +427,9 @@ async function mutateXRules(bearerToken, fetchImpl, body) {
 
 export async function setXLiveBroadcastRule(env = process.env, broadcastId, options = {}) {
   const bearerToken = env.X_BEARER_TOKEN;
-  const id = extractXPostId(broadcastId);
+  const id = extractXLiveBroadcastTarget(broadcastId);
   if (!id) {
-    return { ok: false, broadcastId: null, summary: "invalid broadcast post id" };
+    return { ok: false, broadcastId: null, summary: "invalid X live broadcast URL or post id" };
   }
   const rule = xliveRuleForBroadcast(id);
   if (!bearerToken) {
@@ -780,6 +804,18 @@ function cleanRuleText(value, maxLength) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, maxLength);
+}
+
+function cleanXLiveTargetId(value) {
+  return extractXLiveBroadcastTarget(value) ||
+    String(value || "")
+      .trim()
+      .replace(/[^A-Za-z0-9_-]/g, "")
+      .slice(0, 64);
+}
+
+function isXBroadcastId(value) {
+  return /^(?=.{10,64}$)(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9_-]+$/.test(String(value || "").trim());
 }
 
 function mergeRules(current, observed) {

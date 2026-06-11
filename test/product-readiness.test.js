@@ -69,14 +69,18 @@ test("live message source chips carry channel context where sources can fan out"
   assert.match(streamer, /sourceChipLabel\(message\)/);
 });
 
-test("production Twitch channel controls do not pretend locked env channels are removable", async () => {
+test("production aggregator defaults pin the requested live account targets", async () => {
   const [app, css, renderConfig] = await Promise.all([
     readFile(`${repoRoot}/public/app.js`, "utf8"),
     readFile(`${repoRoot}/public/styles.css`, "utf8"),
     readFile(`${repoRoot}/render.yaml`, "utf8")
   ]);
 
-  assert.match(renderConfig, /value:\s*threadguy,fazebanks,marketbubble\b/);
+  assert.match(renderConfig, /key:\s*TWITCH_CHANNELS\s*\n\s*value:\s*fazebanks\b/);
+  assert.match(renderConfig, /key:\s*YOUTUBE_CHANNEL_HANDLE\s*\n\s*value:\s*"@notthreadguy"/);
+  assert.match(renderConfig, /key:\s*X_STREAM_RULES\s*\n\s*value:\s*"marketbubble-live: from:marketbubble"/);
+  assert.match(renderConfig, /key:\s*X_LIVE_BROADCAST_ID\s*\n\s*value:\s*https:\/\/x\.com\/i\/broadcasts\/1yKAPPvoZmqxb/);
+  assert.doesNotMatch(renderConfig, /value:\s*threadguy,fazebanks,marketbubble\b/);
   assert.doesNotMatch(renderConfig, /\bxqc\b/);
   assert.match(app, /function twitchChannelChip\(channel,\s*adminLocked\)/);
   assert.match(app, /twitchChannelChip\(channel,\s*setup\.adminLocked\)/);

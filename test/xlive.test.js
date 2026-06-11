@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   clearXLiveBroadcastRules,
+  extractXLiveBroadcastTarget,
   extractXPostId,
   isXLiveRuleTag,
   setXLiveBroadcastRule,
@@ -38,6 +39,14 @@ test("extractXPostId accepts x.com and twitter.com status URLs, query params, an
   assert.equal(extractXPostId("  1930412345678901234  "), "1930412345678901234");
 });
 
+test("extractXLiveBroadcastTarget accepts X broadcast URLs and post URLs", () => {
+  assert.equal(extractXLiveBroadcastTarget("https://x.com/i/broadcasts/1yKAPPvoZmqxb"), "1yKAPPvoZmqxb");
+  assert.equal(extractXLiveBroadcastTarget("https://twitter.com/i/broadcasts/1yKAPPvoZmqxb"), "1yKAPPvoZmqxb");
+  assert.equal(extractXLiveBroadcastTarget("x.com/i/broadcasts/1yKAPPvoZmqxb?s=20"), "1yKAPPvoZmqxb");
+  assert.equal(extractXLiveBroadcastTarget("https://x.com/blknoiz06/status/1930412345678901234"), "1930412345678901234");
+  assert.equal(extractXLiveBroadcastTarget("not a broadcast"), "");
+});
+
 test("extractXPostId rejects invalid input", () => {
   assert.equal(extractXPostId(""), "");
   assert.equal(extractXPostId(null), "");
@@ -56,6 +65,13 @@ test("xliveRuleForBroadcast builds the conversation_id rule with the xlive tag",
   });
   assert.equal(isXLiveRuleTag("xlive:1930412345678901234"), true);
   assert.equal(isXLiveRuleTag("challenge-watch"), false);
+});
+
+test("xliveRuleForBroadcast builds a URL rule for X broadcast urls", () => {
+  assert.deepEqual(xliveRuleForBroadcast("1yKAPPvoZmqxb"), {
+    value: "url_contains:1yKAPPvoZmqxb",
+    tag: "xlive:1yKAPPvoZmqxb"
+  });
 });
 
 test("SOURCE_META registers xlive as its own labeled source", () => {
@@ -167,6 +183,40 @@ test("setXLiveBroadcastRule replaces stale xlive rules and adds the conversation
   assert.doesNotMatch(JSON.stringify(result), /SECRET_TOKEN/);
 });
 
+test("setXLiveBroadcastRule accepts an X broadcast URL", async () => {
+  const calls = [];
+  const result = await setXLiveBroadcastRule(
+    { X_BEARER_TOKEN: "SECRET_TOKEN" },
+    "https://x.com/i/broadcasts/1yKAPPvoZmqxb",
+    {
+      fetch: async (url, options = {}) => {
+        const method = options.method || "GET";
+        const body = options.body ? JSON.parse(options.body) : null;
+        calls.push({ url: String(url), method, body });
+
+        if (method === "GET") {
+          return new Response(JSON.stringify({
+            data: [
+              { id: "991", tag: "xlive:1yKAPPvoZmqxb", value: "url_contains:1yKAPPvoZmqxb" }
+            ]
+          }), { status: 200 });
+        }
+
+        return new Response(JSON.stringify({ data: [] }), { status: 201 });
+      }
+    }
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.broadcastId, "1yKAPPvoZmqxb");
+  assert.deepEqual(result.rule, {
+    value: "url_contains:1yKAPPvoZmqxb",
+    tag: "xlive:1yKAPPvoZmqxb"
+  });
+  const addCall = calls.find((call) => call.body?.add);
+  assert.deepEqual(addCall.body.add, [{ value: "url_contains:1yKAPPvoZmqxb", tag: "xlive:1yKAPPvoZmqxb" }]);
+});
+
 test("setXLiveBroadcastRule reports missing bearer token and invalid ids without fetching", async () => {
   let fetchCalls = 0;
   const fetchSpy = async () => {
@@ -181,7 +231,7 @@ test("setXLiveBroadcastRule reports missing bearer token and invalid ids without
 
   const badId = await setXLiveBroadcastRule({ X_BEARER_TOKEN: "t" }, "nonsense", { fetch: fetchSpy });
   assert.equal(badId.ok, false);
-  assert.match(badId.summary, /invalid broadcast post id/);
+  assert.match(badId.summary, /invalid X live broadcast URL or post id/);
   assert.equal(fetchCalls, 0);
 });
 

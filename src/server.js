@@ -16,7 +16,7 @@ import {
 } from "./connectors/youtube.js";
 import {
   clearXLiveBroadcastRules,
-  extractXPostId,
+  extractXLiveBroadcastTarget,
   fetchXConnectionHistory,
   resolveXRulesFromEnv,
   resolveXStreamPolicy,
@@ -266,11 +266,11 @@ const server = http.createServer(async (request, response) => {
         return sendJson(response, await clearXLiveBroadcast());
       }
 
-      const broadcastId = extractXPostId(payload.url || payload.id || payload.broadcast || "");
+      const broadcastId = extractXLiveBroadcastTarget(payload.url || payload.id || payload.broadcast || "");
       if (!broadcastId) {
         return sendJson(response, {
           ok: false,
-          error: "expected an x.com/twitter.com status URL or a numeric post id"
+          error: "expected an X broadcast URL, x.com/twitter.com status URL, or numeric post id"
         }, 400);
       }
 
@@ -585,7 +585,7 @@ function createPausedXConnector() {
   return {
     stop() {},
     setXLiveBroadcast(id) {
-      const next = extractXPostId(id || "") || "";
+      const next = extractXLiveBroadcastTarget(id || "") || "";
       hub.setSourceStatus("xlive", xliveStatusForStreamState("paused", next));
       return next;
     },
@@ -632,9 +632,9 @@ async function loadRuntimeXLiveBroadcast() {
     .then((raw) => JSON.parse(raw))
     .catch(() => null);
   if (saved && typeof saved === "object" && "broadcastId" in saved) {
-    return extractXPostId(saved.broadcastId || "") || "";
+    return extractXLiveBroadcastTarget(saved.broadcastId || "") || "";
   }
-  return extractXPostId(process.env.X_LIVE_BROADCAST_ID || "") || "";
+  return extractXLiveBroadcastTarget(process.env.X_LIVE_BROADCAST_ID || "") || "";
 }
 
 async function persistRuntimeXLiveBroadcast() {

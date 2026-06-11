@@ -34,9 +34,11 @@ YouTube: Bubblewire consumes official YouTube Data API live-chat messages. Set `
 
 X: Bubblewire consumes X API v2 filtered stream from the server with `X_BEARER_TOKEN`. Create stream rules in X before starting the app.
 
+Production defaults currently target Twitch `fazebanks`, YouTube `@notthreadguy`, the X filtered-stream rule snapshot `marketbubble-live: from:marketbubble`, and X Live broadcast `https://x.com/i/broadcasts/1yKAPPvoZmqxb`.
+
 **Important:** X integration delivers filtered posts, not live chat messages. This is a current limitation of the X API v2 filtered stream.
 
-X Live (Ansem's chat): comments on an X live video broadcast are replies to the broadcast post, so Bubblewire ingests them officially by adding a `conversation_id:<post id>` rule (tagged `xlive:<id>`) to the same shared filtered stream — X allows only one stream connection per app, so no second connection is opened. Paste the live post URL in the setup panel (`s` → X Live → Go live) when the stream starts, or set `X_LIVE_BROADCAST_ID` at boot; runtime config persists to `data/xlive.json`. Matching messages surface as the distinct `xlive` source ("X Live", red) across the feed, filters, analysis, overlay, and Streamer Mode.
+X Live: comments on an X live video broadcast ride the same shared filtered stream — X allows only one stream connection per app, so no second connection is opened. Paste a live status URL or an `/i/broadcasts/...` URL in the setup panel (`s` → X Live → Go live), or set `X_LIVE_BROADCAST_ID` at boot; runtime config persists to `data/xlive.json`. Numeric status targets use `conversation_id:<post id>` rules, while broadcast URL targets use `url_contains:<broadcast id>` rules. Matching messages surface as the distinct `xlive` source ("X Live", red) across the feed, filters, analysis, overlay, and Streamer Mode.
 
 Render deployments can briefly overlap old and new instances. Bubblewire auto-clears stale filtered-stream sessions by default in Render production after X returns `TooManyConnections`; set `X_AUTO_TERMINATE_CONNECTIONS=off` if the same X app is intentionally shared with another stream consumer.
 
