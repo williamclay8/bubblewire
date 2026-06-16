@@ -8,3 +8,9 @@ dist/
 playwright-report/
 test-results/
 data/
+
+# Generated evidence capture scratch outputs. Curated packet assets stay tracked.
+docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof-frames/
+docs/evidence/video/market-bubble-final-2026-06-11/overlay-live-frames/
+docs/evidence/video/market-bubble-final-2026-06-11/streamer-mode-frames/
+docs/evidence/video/market-bubble-live-2026-06-11/
