@@ -20,7 +20,7 @@ Overlay view: `http://localhost:3000/overlay.html` locally or `https://bubblewir
 
 Fallback Render URL: `https://bubblewire-challenge.onrender.com`.
 
-Demo video: `https://youtu.be/kwUZgMBtK48`.
+Demo video: `https://youtu.be/I9C0VDrWddA`.
 
 Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`.
 
@@ -163,5 +163,15 @@ Render free-tier services cold-start after idle. For a snappy judge demo, ping `
 - Evidence manifest: `docs/evidence/manifest.md`
 - Submission form copy: `docs/submission-form-answer.md`
 - Demo notes: `docs/challenge-submission.md`
+- Final Market Bubble YouTube demo: `https://youtu.be/I9C0VDrWddA`
+- Final local video packet: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4` plus `.srt` and `.vtt` sidecars
+- Compact live-submission cut: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4` plus `.srt`, `.vtt`, and `.metadata.json` sidecars
+- Capture helper: `scripts/capture-live-cold-open.mjs`
 - Initial challenge entry: June 4, 2026 at 2:42 PM CDT
 - Custom-domain resubmission: recorded June 4, 2026 at 18:17 CDT
+
+Controlled swarm standard for future agent work:
+
+```text
+Run a controlled swarm on Bubblewire, read-only first: max_depth=1, max_lanes=4, no lane-created children, no secrets/live/provider actions, lane receipts required; controller integrates receipts before any bounded write slice.
+```

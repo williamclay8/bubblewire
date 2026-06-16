@@ -1,0 +1,66 @@
+{
+  "artifact": "bubblewire-market-bubble-live-submission-cut-2026-06-11",
+  "curatedAt": "2026-06-16",
+  "sourceCapture": {
+    "script": "scripts/capture-live-cold-open.mjs",
+    "targetDefault": "https://bubblewire.xyz",
+    "outputDefault": "docs/evidence/video/market-bubble-live-2026-06-11",
+    "captureFpsDefault": 5,
+    "frameSizeDefault": "1920x1080"
+  },
+  "files": [
+    {
+      "path": "docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4",
+      "role": "compact live-submission video",
+      "bytes": 6364339,
+      "sha256": "f3361aee4752f85798d31ba51f8aa62f8e71cf98244cc1fb6cf91ef782dc1e4f",
+      "format": {
+        "durationSeconds": 106.366667,
+        "bitRate": 478671,
+        "video": {
+          "codec": "h264",
+          "width": 1920,
+          "height": 1080,
+          "avgFrameRate": "30/1"
+        },
+        "audio": {
+          "codec": "aac"
+        }
+      }
+    },
+    {
+      "path": "docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.srt",
+      "role": "caption sidecar",
+      "bytes": 883,
+      "sha256": "5e6b068ba415ffa12c80bcc5b44aca02c56cb5be0b8f75b5da247c92082a1934"
+    },
+    {
+      "path": "docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.vtt",
+      "role": "caption sidecar",
+      "bytes": 867,
+      "sha256": "0931409c998f0adddd4f35bc1281a1e7da4b8dd259827a22eefec989dbff47db"
+    },
+    {
+      "path": "scripts/capture-live-cold-open.mjs",
+      "role": "local capture helper",
+      "bytes": 7360,
+      "sha256": "3682fd0c91eca11296de43301bef499f4c85870fead7220a4d5d78f50c0dfbee"
+    }
+  ],
+  "redactionBoundary": [
+    "No .env files or secret values are part of this packet.",
+    "Caption sidecars were inspected for secret-keyword hits.",
+    "The capture helper contains environment variable names only.",
+    "Private dashboards, token state, credential identifiers, and raw provider logs remain out of scope."
+  ],
+  "excludedFromFirstSlice": [
+    "docs/evidence/video/market-bubble-live-2026-06-11/frames/",
+    "docs/evidence/video/market-bubble-live-2026-06-11/final-review-frames/",
+    "docs/evidence/video/market-bubble-live-2026-06-11/review/",
+    "docs/evidence/video/market-bubble-live-2026-06-11/cold-open-voice.caf",
+    "docs/evidence/video/market-bubble-live-2026-06-11/contact-sheet.png",
+    "docs/evidence/video/market-bubble-final-2026-06-11/dashboard-live-proof-frames/",
+    "docs/evidence/video/market-bubble-final-2026-06-11/overlay-live-frames/",
+    "docs/evidence/video/market-bubble-final-2026-06-11/streamer-mode-frames/"
+  ]
+}

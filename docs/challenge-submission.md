@@ -50,6 +50,8 @@ Deployed MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-submission-voiceo
 
 Final Market Bubble cut: `https://youtu.be/I9C0VDrWddA`. Local source: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4`, rendered at 1920 x 1080, H.264/AAC, 74.11s duration, with caption sidecars. It was captured from `https://bubblewire.xyz` during the Market Bubble stream and shows Twitch `@fazebanks`, YouTube `@notthreadguy`, X filtered-stream posts, X Live rule `1yKAPPvoZmqxb`, Streamer Mode, and OBS overlay surfaces without setup secrets.
 
+Compact live-submission packet: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4` with `.srt`, `.vtt`, and `.metadata.json` sidecars. It is a 1920 x 1080 H.264/AAC cut rendered from the June 11 live capture flow using `scripts/capture-live-cold-open.mjs`. This packet is intentionally limited to MP4/captions/metadata plus the capture helper; raw frame directories, CAF audio, contact sheets, and review frames remain local-only until a later judge approves expanding the evidence scope.
+
 ## Deployment Handoff
 
 The project is deployed on Render as `bubblewire-challenge` (`srv-d8gsprmq1p3s73cfatig`). Verify:
@@ -88,4 +90,4 @@ Initial challenge form submission was recorded by Google Forms on 2026-06-04 at 
 
 ## Lumi Hygiene
 
-Current app release commit `6d03d94` is pushed to `main`, Render deploy `dep-d8livo6k1jcs73al2acg` is live, `https://bubblewire.xyz` is verified, and the final YouTube submission is published unlisted at `https://youtu.be/I9C0VDrWddA`. Google Forms recorded the final Market Bubble submission on 2026-06-11 at 17:18 CDT. The final video assets are still local until this packet commit is pushed.
+Current app release commit `6d03d94` is pushed to `main`, Render deploy `dep-d8livo6k1jcs73al2acg` is live, `https://bubblewire.xyz` is verified, and the final YouTube submission is published unlisted at `https://youtu.be/I9C0VDrWddA`. Google Forms recorded the final Market Bubble submission on 2026-06-11 at 17:18 CDT. The compact live-submission packet remains local until this evidence-curation commit is pushed.

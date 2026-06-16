@@ -12,6 +12,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 - Fallback Render URL: `https://bubblewire-challenge.onrender.com`
 - Public demo video: `https://youtu.be/I9C0VDrWddA`
 - Final Market Bubble local video: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4`
+- Compact live-submission cut: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4`
 - Historical final-cut YouTube demo: `https://youtu.be/hLerxCevS2w`
 - Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 - Next resubmission script: `docs/submission-video-script-2026-06-10.md`
@@ -42,6 +43,7 @@ Bubblewire is a deployed, submission-ready unified chat aggregator for Twitch + 
 | `npm run proof` | Pass on 2026-06-09 against `http://127.0.0.1:3100` | `docs/evidence/logs/proof.json` |
 | `npm run proof:live` | Pass on 2026-06-09 against `https://bubblewire.xyz` with `twitch,x,kick` expected | `docs/evidence/logs/live-proof.json` |
 | `render blueprints validate render.yaml --output json` | Pass | `docs/evidence/logs/render-blueprint-validation.json` |
+| `ffmpeg -v error -i docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4 -f null -` | Pass on 2026-06-16 | Compact live-submission cut validated locally |
 
 `npm run proof` also posts a Kick `chat.message.sent`-shaped webhook payload to `/kick.webhook`, triggers a demo spike, and confirms the local status endpoint responds through `/status.json`.
 
@@ -65,6 +67,8 @@ The final-cut demo video is uploaded to YouTube as `https://youtu.be/hLerxCevS2w
 The next resubmission script is `docs/submission-video-script-2026-06-10.md`. Its local narrated-video recipe is `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.manifest.json`. The first local narrated draft rendered to `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.mp4` with caption sidecars at `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.srt` and `docs/evidence/video/bubblewire-submission-voiceover-2026-06-10.vtt`. The narrated cut was uploaded publicly to YouTube as `https://youtu.be/kwUZgMBtK48`. Google Forms recorded the refreshed public-video resubmission on 2026-06-09 at 20:37 CDT. A deployable MP4 copy lives under `public/assets/` and is reachable at `https://bubblewire.xyz/assets/bubblewire-submission-voiceover-2026-06-10.mp4`.
 
 The final Market Bubble cut is uploaded unlisted to YouTube as `https://youtu.be/I9C0VDrWddA`. The local source is `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.mp4`, rendered at 1920 x 1080, H.264/AAC, with 74.11s duration and caption sidecars. Capture artifacts live under `docs/evidence/video/market-bubble-final-2026-06-11/`, including `dashboard-live-proof.png`, `youtube-filter.png`, `streamer-mode.png`, `overlay-setup.png`, `overlay-live.png`, and review frames. The redaction boundary explicitly avoided setup drawer secrets, environment values, token state, and credential identifiers.
+
+The compact live-submission cut is curated locally at `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4` with caption sidecars `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.srt` and `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.vtt`. Metadata lives beside it at `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.metadata.json`; the capture helper is `scripts/capture-live-cold-open.mjs`. This compact packet intentionally excludes bulky raw frame directories, CAF audio, contact sheets, and review-frame trees under `docs/evidence/video/market-bubble-live-2026-06-11/` and generated frame folders under `docs/evidence/video/market-bubble-final-2026-06-11/` until a later judge approves adding them.
 
 ## 2026-06-05 Tranche Receipts
 
@@ -93,6 +97,7 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 - `.env.example` lists env var names only.
 - Browser screenshots avoid secrets and private dashboards.
 - The demo recording plan explicitly forbids showing secrets, `.env` files, tokens, or private dashboards.
+- The compact live-submission packet was curated as MP4/SRT/VTT plus metadata only; captions were inspected for secret keywords, and the capture helper contains environment variable names but no environment values.
 
 ## Lumi Hygiene
 
@@ -102,6 +107,7 @@ Official Kick source check: current Kick docs list `chat.message.sent` as an Eve
 - Deployed/live: app release commit `6d03d94` is pushed to `main`, Render deploy `dep-d8livo6k1jcs73al2acg` is live, and `https://bubblewire.xyz` health check passes
 - Entry submitted: yes, latest Google Form confirmation recorded 2026-06-11 17:18 CDT with YouTube demo `https://youtu.be/I9C0VDrWddA`
 - Local server: used for demo-mode and live-only evidence capture, then stopped
+- Compact packet boundary: MP4/SRT/VTT, metadata, and capture helper are the intended first slice; raw frames and audio capture scratch files remain local-only until separately approved
 
 ## Live Smoke
 
