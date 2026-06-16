@@ -30,6 +30,10 @@ Final local video: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-1
 
 Final local captions: `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.srt` and `docs/evidence/video/bubblewire-market-bubble-final-2026-06-11.vtt`
 
+Compact live-submission cut: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.mp4`
+
+Compact live-submission captions: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.srt` and `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.vtt`
+
 Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 
 Previous public YouTube upload: `https://youtu.be/kwUZgMBtK48`.
@@ -90,6 +94,7 @@ Kick accepts official Events API `chat.message.sent` webhooks at `/webhooks/kick
 - Hosted MP4 mirror: `https://bubblewire.xyz/assets/bubblewire-final-cut-2026-06-05.mp4`
 - Challenge form: final Market Bubble submission recorded by Google Forms on 2026-06-11 at 17:18 CDT.
 - Evidence manifest: `docs/evidence/manifest.md`
+- Compact live-submission metadata: `docs/evidence/video/bubblewire-market-bubble-live-submission-cut-2026-06-11.metadata.json`
 - Screenshots: `docs/evidence/screenshots/`
 - Demo storyboard: `docs/demo-video-storyboard.md`
 
